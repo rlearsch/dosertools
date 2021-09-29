@@ -27,3 +27,5 @@ class TestFoldernameParse:
     def test_correct_parse_fps_nok(self):
         # fails if the foldername_parse method does not return the correct entry (case for testing when fps is formatted without a k)
         assert fh.foldername_parse(self.folder_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.file_dict
+
+# next steps, produce warnings if fps, run, sampleinfo? not present 

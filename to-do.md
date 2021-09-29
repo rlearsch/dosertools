@@ -5,6 +5,7 @@
   * breaking down sample name?
   * robust to if user did not follow exact format? (ex. _exp vs _bg)
   * can we have user teach the function what kind of filename they use? (i.e. what tags to look for?)
+  * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside)
   * What parameters do we want to parse in the filename?
     * Sample name
     * Concentration
@@ -93,6 +94,7 @@
   * Plotting?
 * Prepare package for installation
 * Dependencies
+* Implement testing?
 
 ## Documentation
 * Installation instructions

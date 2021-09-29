@@ -36,6 +36,7 @@
   * read_top_border
   * nozzle_diameter
   * fps
+  * background_video
     * might want to consider bundling the current global variables into dictionary variable of some sort (parameters, etc.)?
 
 
@@ -61,13 +62,29 @@
 * plot_all
 * generate_df
   * currently filenames have to be very specific to be able to parse (hard coded splitting)
-  * global variables:
+  * currently takes sample_num and include_ratio (build into parameter dictionary)
 * convert_Li_bg_subtract
   * hard-coded filename parsing
-  * global variables:
+  * currently does not handle folder existing well
+  * global variables: (initiates destination_folder_name?) nozzle_row, crop_top, crop_bottom, crop_width_end, crop_width_start, background_video
 * find_lambda_E
 
 * unnamed function(s) that capture the portions currently outside of functions
+  * importing libraries (two major sections, second is just prior to find_lambda_E)
+  * set up folder_list
+  * parameters
+  * iterate through folder_list
+    * filename parsing hard code folder[:x]
+    * fails if file has already been partially processed
+  * creates dataframe and plots it (already separate functions, just calling them)
+  * Other kinds of plotting (ex. including ratio)
+  * setting begin_R0_tc_range, end_R0_tc_range
+  * additional portion that replicates some part of generate_df and produced df_w_tc_short_bg, same for df_w_tc
+  * attempts fits
+    * relies on run and sample being unique, which should come from better filename parsing
+    * what causes fitting to fail? How do we produce meaningful fail information?
+  * create dataframe from fits
+  * save fits to csv
 
 ## Packaging
 * Divide functions into modules

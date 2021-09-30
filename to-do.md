@@ -92,6 +92,7 @@
   * Image-processing?
   * File handling?
   * Plotting?
+  * Data processing?
 * Prepare package for installation
 * Dependencies
 * Implement testing?

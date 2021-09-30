@@ -103,3 +103,9 @@
 * Descriptions for each function
 
 ## Recently Completed
+
+## Ideas to keep in mind
+* DRY : Don't Repeat Yourself
+* Single purpose functions
+* Write tests
+* Modify main only with validated code

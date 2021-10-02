@@ -1,5 +1,6 @@
 import dataprocessing as dp
 import pandas as pd
+import pytest
 
 class TestClosestIndexForValue:
     """
@@ -28,3 +29,9 @@ class TestClosestIndexForValue:
     def test_correct_index(self):
         # fails if the closest_index_for_value does not return 2 (corresponding to 1)
         assert dp.array.closest_index_for_value(self.data,self.column,1.1) == 2
+
+    def test_column_not_float(self):
+        datatext = pd.DataFrame({self.column:["one"]})
+        with pytest.raises(TypeError):
+            dp.array.closest_index_for_value(datatext,self.column,1.1) == 1
+        # handle if column does not contain numeric values

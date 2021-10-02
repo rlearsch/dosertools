@@ -1,7 +1,7 @@
 import dataprocessing as dp
 import pandas as pd
 
-class TestClosestIndexFromValue:
+class TestClosestIndexForValue:
     """
     Tests for closest_index_for_value
 

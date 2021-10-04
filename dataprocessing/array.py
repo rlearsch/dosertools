@@ -16,9 +16,15 @@ def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float)
     value : float
         numeric value to compare entries in dataset[column] to
 
+    Returns
+    -------
+    closest_index_for_value : int
+        Closest index in dataset[column] for given value
+
     """
 
-    is_dataframe_column_numeric(dataset, column)
+    if not is_dataframe_column_numeric(dataset, column):
+        raise TypeError("dataset[column] must be numeric")
 
     # return closest_index by looking for smallest absolute distance from zero
     # after subtraction
@@ -32,23 +38,30 @@ def nonzero_runs(array : np.ndarray) -> np.ndarray:
     Returns array with shape (m, 2), where m is the number of "runs"
     of non-zeros.
     The first column is the index of the first non-zero,
-    the second is the index of the final non-zero.
+    the second is the index of the first zero following the run.
+    Follows convention of numpy where array(a,a+n) yields the values
+    of indices a through a+n-1.
 
 
     Parameters
     ----------
-    array : np.array
+    array : np.ndarray
         array to look for nonzero runs within
+        array must be numeric (integer or float)
+
+    Returns
+    -------
+    nonzero_runs : np.ndarray
+        (m, 2) array where m is the number of "runs" of non-zeros.
+        The first column is the index of the first non-zero,
+        the second is the index of the first zero following the run.
 
     """
 
-    ## Returns array with shape (m, 2), where m is the number of "runs" of non-zeros
-    ## the first column sis the index of the first non-zero, the second is the index
-    ## of the final non-zero
-    ## modified from stackexchange comment
+    if not is_array_numeric(array):
+        raise TypeError("array must be numeric")
 
-
-
+    # Create an array that is 1 where a is not zero, and pad each end with an extra 0.
     contains_one = np.concatenate(([0], (~np.equal(array, 0).view(np.int8))+2, [0]))
     absdiff = np.abs(np.diff(contains_one))
     # Runs start and end where absdiff is 1.
@@ -62,46 +75,53 @@ def zero_runs(array : np.ndarray) -> np.ndarray:
     Returns array with shape (m, 2), where m is the number of "runs"
     of zeros.
     The first column is the index of the first zero,
-    ??the second is the index of the final zero.??
+    the second is the index of the first non-zero following the run.
+    Follows convention of numpy where array(a,a+n) yields the values
+    of indices a through a+n-1.
 
 
     Parameters
     ----------
-    array : np.array
+    array : np.ndarray
         array to look for zero runs within
+        array must be numeric (integer or float)
+
+    Returns
+    -------
+    nonzero_runs : np.ndarray
+        (m, 2) array where m is the number of "runs" of zeros.
+        The first column is the index of the first zero,
+        the second is the index of the first non-zero following the run.
 
     """
 
-    # # it creates an array with shape (m, 2), where m is the number of "runs" of zeros.
-    ## The first column is the index of the first 0 in each run, and the second is the index of the first nonzero element after the run
+    if not is_array_numeric(array):
+        raise TypeError("array must be numeric")
 
     # Create an array that is 1 where a is 0, and pad each end with an extra 0.
     iszero = np.concatenate(([0], np.equal(array, 0).view(np.int8), [0]))
     absdiff = np.abs(np.diff(iszero))
     # Runs start and end where absdiff is 1.
     ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
+    return ranges
 
-def is_array_numeric(array : np.ndarray):
+def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
     """
-
-    """
-    
-
-    pass
-
-
-def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str):
-    """
-    Raise exception if column in dataset is not numeric
+    Return True if column in dataset is float or int (numeric), otherwise False
 
     Parameters
     ----------
 
     dataset : pandas.DataFrame
         the dataframe that contains at least the column "column"
-        column must be numeric
     column : str
-        name of column to look the closest value in
+        name of column to check if numeric
+
+    Returns
+    -------
+    is_dataframe_column_numeric : bool
+        True if column in dataset is float or int, otherwise False
+
     """
 
 
@@ -109,7 +129,25 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str):
     num_df = pd.DataFrame(columns=['int','float'])
     num_df['int'] = num_df['int'].astype('int')
     num_df['float'] = num_df['float'].astype('float')
-    if dataset[column].dtypes != num_df['int'].dtypes and dataset[column].dtypes != num_df['float'].dtypes:
-        raise TypeError("dataset[column] must be numeric")
+    return dataset[column].dtypes == num_df['int'].dtypes or dataset[column].dtypes == num_df['float'].dtypes
 
-    return True
+def is_array_numeric(array : np.ndarray) -> bool:
+    """
+    Return True if array is float or int (numeric), otherwise False
+
+    Parameters
+    ----------
+
+    array : np.ndarray
+        array to check if numeric
+
+    Returns
+    -------
+    is_array_numeric : bool
+        True if array is float or signed/unsigned int, otherwise False
+
+    """
+
+    numeric_kinds = {'u','i','f'}
+
+    return np.asarray(array).dtype.kind in numeric_kinds

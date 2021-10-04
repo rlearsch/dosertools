@@ -144,18 +144,18 @@ class TestIsDataFrameColumnNumeric:
         # handle if column does not contain numeric values
 
 class TestIsArrayNumeric:
-        """
-        Test is_array_numeric
+    """
+    Test is_array_numeric
 
-        Tests
-        -----
-        test_numeric_array
-            check if True if array is numeric
+    Tests
+    -----
+    test_numeric_array
+        check if True if array is numeric
 
-        test_nonnumeric_array
-            check if False if array is not numeric
+    test_nonnumeric_array
+        check if False if array is not numeric
 
-        """
+    """
 
     def test_numeric_array(self):
         arrays = [[1,2,3],[1.1,-1.2]]

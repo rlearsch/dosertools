@@ -85,6 +85,7 @@ def is_array_numeric(array : np.ndarray):
     """
 
     """
+    
 
     pass
 

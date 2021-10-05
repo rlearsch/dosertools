@@ -1,4 +1,4 @@
-import filehandling as fh
+import file_handling as fh
 
 class TestFoldernameParse:
     # sample data to test against

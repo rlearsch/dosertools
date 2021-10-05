@@ -37,7 +37,13 @@ def define_image_parameters(background_video, params_dict):
     """
     From the background video, determines the first-guess for the cropping operation. Based on the nozzle width and safety factors crop_width_coefficient, crop_height_coefficient, etc.
     """
-    first_frame = image_sequence[0]    
+
+    nozzle_row = params_dict["nozzle_row"]
+    crop_width_coefficient = params_dict["crop_width_coefficient"]
+    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
+    crop_height_coefficient = params_dict["crop_height_coefficient"]
+
+    first_frame = background_video[0]    
     thresh_otsu = threshold_otsu(first_frame)
     binary_otsu = first_frame < thresh_otsu
     binary_otsu = np.array(binary_otsu)*255
@@ -50,10 +56,7 @@ def define_image_parameters(background_video, params_dict):
     first_non_zero = non_zero_indicies[0][0]
     last_non_zero = non_zero_indicies[0][-1]
     nozzle_diameter = last_non_zero - first_non_zero #pix
-    
-    crop_width_coefficient = params_dict["crop_width_coefficient"]
-    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
-    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
+
     crop_width_start = int(first_non_zero-int(nozzle_diameter*crop_width_coefficient))
     crop_width_end = int(last_non_zero+int(nozzle_diameter*crop_width_coefficient))
     crop_bottom = int(nozzle_diameter*crop_height_coefficient)
@@ -66,15 +69,22 @@ def define_image_parameters(background_video, params_dict):
     return params_dict
                                                                   
 
-def produce_background_image(background_video):
+def produce_background_image(background_video, params_dict):
     """
     Description
     """
+    nozzle_row = params_dict["nozzle_row"]
+    crop_width_start = params_dict["crop_width_start"]
+    crop_width_end = params_dict["crop_width_end"]
+    crop_bottom = params_dict["crop_bottom"]
+    crop_top = params_dict["crop_top"]
+    
     bg_median = np.median(background_video, axis=0)
     bg_median = bg_median[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
+    
+    return bg_median
                                                                   
-def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
-:
+def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_subtract):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
@@ -86,13 +96,12 @@ def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dic
         convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
 
 
-def convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
-:                          
+def convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract):                          
     nozzle_row = params_dict["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
     crop_width_end = params_dict["crop_width_end"]
     crop_bottom = params_dict["crop_bottom"]
-    crop_top = parms_dict["crop_top"]
+    crop_top = params_dict["crop_top"]
                                  
     cropped_image = image[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
         # if intermediate_files_options = save cropped:

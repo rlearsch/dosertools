@@ -34,15 +34,19 @@ def define_image_parameters(background_video, params_dict):
     non_zero_indicies = np.nonzero(binary_otsu[nozzle_row,:])
     first_non_zero = non_zero_indicies[0][0]
     last_non_zero = non_zero_indicies[0][-1]
-    diameter = last_non_zero - first_non_zero #pix
-    nozzle_diameter = diameter #white to white distance
+    nozzle_diameter = last_non_zero - first_non_zero #pix
     
-    (crop_width_coefficient,crop_nozzle_coef,crop_nozzle_coef) = (params_dict["crop_width_coefficient"],params_dict["crop_nozzle_coef"],params_dict["crop_nozzle_coef"]
+    crop_width_coefficient = params_dict["crop_width_coefficient"]
+    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
+    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
     crop_width_start = int(first_non_zero-int(nozzle_diameter*crop_width_coefficient))
     crop_width_end = int(last_non_zero+int(nozzle_diameter*crop_width_coefficient))
     crop_bottom = int(nozzle_diameter*crop_height_coefficient)
     crop_top = int(nozzle_diameter*crop_nozzle_coef)
-    (params_dict["crop_width_start"], params_dict["crop_width_end"], params_dict["crop_bottom"], parms_dict["crop_top"]) = (crop_width_start, crop_width_end, crop_bottom, crop_top)
+    params_dict["crop_width_start"] = crop_width_start
+    params_dict["crop_width_end"] = crop_width_end
+    params_dict["crop_bottom"] = crop_bottom
+    params_dict["crop_top"] = crop_top
 
     return params_dict
                                                                   
@@ -54,16 +58,20 @@ def produce_background_image(background_video):
     bg_median = np.median(background_video, axis=0)
     bg_median = bg_median[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
                                                                   
-                                                                  def convert_tiff_to_binary(experimental_sequence, bg_median, params_dict, intermediate_files_optional):
+def convert_tiff_to_binary(experimental_sequence, bg_median, params_dict, intermediate_files_optional):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
     To do: optional arguments to save the output of the different steps
     """    
-    (nozzle_row, 
-     crop_width_start, crop_width_end, crop_bottom, crop_top) = (params_dict["nozzle_row"], 
-                                                                 params_dict["crop_width_start"], params_dict["crop_width_end"], params_dict["crop_bottom"], parms_dict["crop_top"])
+    nozzle_row = params_dict["nozzle_row"]
+    crop_width_start = params_dict["crop_width_start"]
+    crop_width_end = params_dict["crop_width_end"]
+    crop_bottom = params_dict["crop_bottom"]
+    crop_top = parms_dict["crop_top"]
 
+    # destination_folder_name = f(save_location)
+    
     for i in range(0,len(experimental_sequence)):
         image = image_sequence[i]
         cropped_image = image[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]

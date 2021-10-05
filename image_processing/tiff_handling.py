@@ -1,3 +1,10 @@
+import skimage.filters
+import skimage.io
+import skimage.morphology
+from skimage.filters import (threshold_otsu, threshold_li)
+
+import numpy as np
+
 def define_initial_parameters():
     params_dict = dict(
         nozzle_row = 1, 
@@ -7,16 +14,24 @@ def define_initial_parameters():
     )    
     return params_dict
 
-def tiff_folder_to_image_collection(folder):
+def folder_path_correction(folder):
     """
-    Takes a folder and produces a skiamge image collection containing all of the images as a single variable 
+    Ensures the folder supplied for the video location ends with '//'
     """
     if folder[-2:] != '//':
         if folder[-1] == '/':
             folder = folder+"/"
         else:
             folder=folder+"//"
-    return skimage.io.imread_collection(folder+"*", plugin='tifffile')
+    return folder
+# os.path allows you to take different pieces of the path
+
+#def tiff_folder_to_image_collection(folder):
+#    """
+#    Takes a folder and produces a skiamge image collection containing all of the images as a single variable 
+#    """
+#    folder = folder_path_correction(folder)
+#    return skimage.io.imread_collection(folder+"*", plugin='tifffile')
 
 def define_image_parameters(background_video, params_dict):
     """
@@ -58,50 +73,55 @@ def produce_background_image(background_video):
     bg_median = np.median(background_video, axis=0)
     bg_median = bg_median[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
                                                                   
-def convert_tiff_to_binary(experimental_sequence, bg_median, params_dict, intermediate_files_optional):
+def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+:
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
     To do: optional arguments to save the output of the different steps
     """    
+
+    for i in range(0,len(experimental_sequence)):
+        image = image_sequence[i]
+        convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+
+
+def convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+:                          
     nozzle_row = params_dict["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
     crop_width_end = params_dict["crop_width_end"]
     crop_bottom = params_dict["crop_bottom"]
     crop_top = parms_dict["crop_top"]
-
-    # destination_folder_name = f(save_location)
-    
-    for i in range(0,len(experimental_sequence)):
-        image = image_sequence[i]
-        cropped_image = image[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
+                                 
+    cropped_image = image[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
         # if intermediate_files_options = save cropped:
             # save cropped 
             #skimage.io.imsave(filename, bg_subtract_image)
 
-        bg_subtract_image = cropped_image - bg_median
-        bg_subtract_image = np.abs((bg_subtract_image < 0)*bg_subtract_image) #eliminates half the noise
+    bg_subtract_image = cropped_image - bg_median
+    bg_subtract_image = np.abs((bg_subtract_image < 0)*bg_subtract_image) #eliminates half the noise
             #if interemeddiate_files_optional = save cropped and bg subtract:
                 #save bg subtracted 
                 #bg_subtract_image = np.uint16(bg_subtract_image)
                 #skimage.io.imsave(filename, bg_subtract_image)
-
-        filename = f"{destination_folder_name}{i:03}.png"
-        thresh_li = threshold_li(bg_subtract_image)
-        binary_li = bg_subtract_image > thresh_li
-        binary_li = np.array(binary_li)*255
-        binary_li = np.uint8(binary_li)
-        skimage.io.imsave(filename, binary_li, check_contrast=False)
-                                                                  
-                                                                  
-def tiffs_to_binary(experimental_video_folder, background_video_folder, save_location, intermediate_files_optional):
+    
+    # reconstruct_file_names(save_location)
+    filename = f"{destination_folder_name}{i:03}.png"
+    thresh_li = threshold_li(bg_subtract_image)
+    binary_li = bg_subtract_image > thresh_li
+    binary_li = np.array(binary_li)*255
+    binary_li = np.uint8(binary_li)
+    skimage.io.imsave(filename, binary_li, check_contrast=False)  
+        
+def tiffs_to_binary(experimental_video_folder, background_video_folder, save_location, save_crop=False,save_bg_subtract=False):
     """
     Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
     """
     params_dict = define_initial_parameters()
-    experimental_video = tiff_folder_to_image_collection(experimental_video_folder)
-    background_video = tiff_folder_to_image_collection(background_video_folder)
-    #make_destination_folders()
+    experimental_video = skimage.io.imread_collection(experimental_video_folder+"*", plugin='tifffile')
+    background_video = skimage.io.imread_collection(background_video_folder+"*", plugin='tifffile')
+    #make_destination_folders(save_location, save_crop, save_bg_subtract)
     params_dict = define_image_parameters(background_video)
     bg_image = produce_background_image(background_video, params_dict)
-    convert_tiff_to_binary(experimental_video, bg_image, params_dict, intermediate_files_optional)
+    convert_tiff_to_binary(experimental_video, bg_image, params_dict, save_location, save_crop,save_bg_subtract)

@@ -50,3 +50,7 @@ def foldername_parse(foldername: str, fname_format: str, sampleinfo_format: str,
         i = i + 1
 
     return param_dict #output parameters
+
+def make_destination_folders():
+
+    pass

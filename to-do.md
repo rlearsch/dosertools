@@ -32,13 +32,13 @@
 
 ## Function Status
 * Implemented in current package
-  * foldername_parse
-    * Needs test descriptions, update to docstring
+  * folder_name_parse
 
 * Awaiting pull request
   * nonzero_runs
   * zero_runs
   * closest_index_for_value (find_closest_value)
+  * make_destination_folders
 
 * In progress
   * define_image_parameters
@@ -68,22 +68,21 @@
     * currently does not handle folder existing well
     * global variables: (initiates destination_folder_name?) nozzle_row, crop_top, crop_bottom, crop_width_end, crop_width_start, background_video
   * find_lambda_E
-
-* unnamed function(s) that capture the portions currently outside of functions
-  * importing libraries (two major sections, second is just prior to find_lambda_E)
-  * set up folder_list
-  * iterate through folder_list
-    * filename parsing hard code folder[:x]
-    * fails if file has already been partially processed
-  * creates dataframe and plots it (already separate functions, just calling them)
-  * Other kinds of plotting (ex. including ratio)
-  * setting begin_R0_tc_range, end_R0_tc_range
-  * additional portion that replicates some part of generate_df and produced df_w_tc_short_bg, same for df_w_tc
-  * attempts fits
-    * relies on run and sample being unique, which should come from better filename parsing
-    * what causes fitting to fail? How do we produce meaningful fail information?
-  * create dataframe from fits
-  * save fits to csv
+  * unnamed function(s) that capture the portions currently outside of functions
+    * importing libraries (two major sections, second is just prior to find_lambda_E)
+    * set up folder_list
+    * iterate through folder_list
+      * filename parsing hard code folder[:x]
+      * fails if file has already been partially processed
+    * creates dataframe and plots it (already separate functions, just calling them)
+    * Other kinds of plotting (ex. including ratio)
+    * setting begin_R0_tc_range, end_R0_tc_range
+    * additional portion that replicates some part of generate_df and produced df_w_tc_short_bg, same for df_w_tc
+    * attempts fits
+      * relies on run and sample being unique, which should come from better filename parsing
+      * what causes fitting to fail? How do we produce meaningful fail information?
+    * create dataframe from fits
+    * save fits to csv
 
 ## Packaging
 * Divide functions into modules
@@ -102,7 +101,7 @@
 * Descriptions for each function
 
 ## Recently Completed
-* Improved filename parsing
+* Improved filename parsing: folder_name_parse
   * breaking down sample name?
   * robust to if user did not follow exact format? (ex. _exp vs _bg)
   * can we have user teach the function what kind of filename they use? (i.e. what tags to look for?)
@@ -120,6 +119,9 @@
   * is_dataframe_column_numeric
   * nonzero_runs
   * zero_runs
+* file_handling.folder submodule
+  * make_destination_folders
+  * make_folder
 
 ## Ideas to keep in mind
 * DRY : Don't Repeat Yourself

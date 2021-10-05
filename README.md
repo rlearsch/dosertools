@@ -2,6 +2,9 @@
 
 dos-tools is a Python package for analyzing dripping-onto-substrate rheology videos.
 
+## Authors
+Rob Learsch and Red Lhota
+
 ## Installation
 
 <!--Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.

@@ -43,6 +43,7 @@ class TestMakeDestinationFolders:
 
     def test_make_bin_folder(self):
         # fails if does not make a new binary folder in the correct location
+        
         pass
 
     def test_make_crop_folder(self):

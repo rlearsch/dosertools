@@ -5,6 +5,7 @@ from skimage.filters import (threshold_otsu, threshold_li)
 
 import image_processing.tiff_handling as th
 
+
 def test_define_initial_parameters():
     "Initial coefficients for first crop iterations"
     params_dict = th.define_initial_parameters()

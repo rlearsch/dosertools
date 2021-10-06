@@ -29,6 +29,11 @@ def test_define_image_parameters():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')
     params_dict = th.define_initial_parameters()
     params_dict = th.define_image_parameters(background_video, params_dict)
+    assert params_dict["crop_width_start"] is int
+    assert params_dict["crop_width_end"] is int
+    assert params_dict["crop_bottom"] is int
+    assert params_dict["crop_top"] is int
+                       
     assert params_dict["crop_width_start"] == 86
     assert params_dict["crop_width_end"] == 415
     assert params_dict["crop_bottom"] == 634          

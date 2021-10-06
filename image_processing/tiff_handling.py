@@ -95,8 +95,8 @@ def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dic
         image = image_sequence[i]
         convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
 
-
-def convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract):                          
+def crop_single_image(image, params_dict):
+    """Crops a single image according to parameters from params_dict"""
     nozzle_row = params_dict["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
     crop_width_end = params_dict["crop_width_end"]
@@ -104,24 +104,55 @@ def convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,s
     crop_top = params_dict["crop_top"]
                                  
     cropped_image = image[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
-        # if intermediate_files_options = save cropped:
-            # save cropped 
-            #skimage.io.imsave(filename, bg_subtract_image)
+    return cropped_image
 
-    bg_subtract_image = cropped_image - bg_median
-    bg_subtract_image = np.abs((bg_subtract_image < 0)*bg_subtract_image) #eliminates half the noise
-            #if interemeddiate_files_optional = save cropped and bg subtract:
-                #save bg subtracted 
-                #bg_subtract_image = np.uint16(bg_subtract_image)
-                #skimage.io.imsave(filename, bg_subtract_image)
-    
-    # reconstruct_file_names(save_location)
-    filename = f"{destination_folder_name}{i:03}.png"
+def subtract_background_single_image(cropped_image, bg_median):
+    """Performs background subtraction from a cropped image. Assumes cropped image and bg_median are the same size
+    Returns an image."""
+    background_subtracted_image = cropped_image - bg_median
+    background_subtracted_image = np.abs((background_subtracted_image < 0)*background_subtracted_image) #eliminates half the noise
+    return background_subtracted_image
+
+def li_binarize_single_image(background_subtracted_image):
+    """Performs global binarization on an image according to the Li method 
+    https://scikit-image.org/docs/dev/auto_examples/developers/plot_threshold_li.html
+    """
     thresh_li = threshold_li(bg_subtract_image)
     binary_li = bg_subtract_image > thresh_li
     binary_li = np.array(binary_li)*255
     binary_li = np.uint8(binary_li)
-    skimage.io.imsave(filename, binary_li, check_contrast=False)  
+    return binary_li
+
+def save_image(image, image_number, save_location, save_crop=False, save_bg_subtract=False):
+    """Saves a single """
+    if save_crop:
+        filename = f"{image_number:03}.tiff"
+        full_filename = os.path.join(save_location,"crop",filename) 
+        skimage.io.imsave(full_filename, image, check_contrast=False)  
+        save_crop = False
+        return save_crop
+    if save_bg_subtract: 
+        filename = f"{image_number:03}.tiff"
+        full_filename = os.path.join(save_location,"bg_sub",filename) 
+        skimage.io.imsave(full_filename, image, check_contrast=False) 
+        save_bg_subtract = False
+        return save_bg_subtract
+    filename = f"{image_number:03}.png"
+    full_filename = os.path.join(save_location,"bin",filename) 
+    skimage.io.imsave(full_filename, image, check_contrast=False)
+    pass
+
+def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):                          
+    cropped_image = crop_single_image(image, params_dict)
+    if save_crop: 
+        save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)
+    background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
+    if save_bg_subtract:
+        save_image(background_subtracted_image, image_number, save_location, save_crop, save_bg_subtract)
+    binary_image = li_binarize_single_image(background_subtracted_image)
+    save_image(binary_image, image_number, save_location, save_crop, save_bg_subtract)
+    pass
+
         
 def tiffs_to_binary(experimental_video_folder, background_video_folder, save_location, save_crop=False,save_bg_subtract=False):
     """

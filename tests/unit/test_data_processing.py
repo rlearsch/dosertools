@@ -166,3 +166,15 @@ class TestIsArrayNumeric:
         arrays = [[object()],['string'],[None],[u'unicode']]
         for array in arrays:
             assert not dp.array.is_array_numeric(array)
+
+class TestGenerateDF:
+    """
+    Tests generate_df
+
+    Tests
+    -----
+
+    """
+
+    def test_returns_df(self):
+        assert type(dp.csv.generate_df()) is pd.DataFrame

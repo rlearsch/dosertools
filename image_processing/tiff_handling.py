@@ -84,16 +84,16 @@ def produce_background_image(background_video, params_dict):
     
     return bg_median
                                                                   
-def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_subtract):
+def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_subtract=False):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
     To do: optional arguments to save the output of the different steps
     """    
 
-    for i in range(0,len(experimental_sequence)):
-        image = image_sequence[i]
-        convert_tiff_image(image, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+    for image_number in range(0,len(experimental_sequence)):
+        image = image_sequence[image_number]
+        convert_tiff_image(image, image_number, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
 
 def crop_single_image(image, params_dict):
     """Crops a single image according to parameters from params_dict"""
@@ -145,10 +145,10 @@ def save_image(image, image_number, save_location, save_crop=False, save_bg_subt
 def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):                          
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 
-        save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_crop = save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_subtract:
-        save_image(background_subtracted_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_bg_subtract = save_image(background_subtracted_image, image_number, save_location, save_crop, save_bg_subtract)
     binary_image = li_binarize_single_image(background_subtracted_image)
     save_image(binary_image, image_number, save_location, save_crop, save_bg_subtract)
     pass

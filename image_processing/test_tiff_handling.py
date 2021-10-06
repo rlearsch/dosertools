@@ -37,8 +37,21 @@ def test_define_image_parameters():
     assert params_dict["crop_width_start"] == 86
     assert params_dict["crop_width_end"] == 415
     assert params_dict["crop_bottom"] == 634          
-    assert params_dict["crop_top"] == 47              
-
+    assert params_dict["crop_top"] == 47
+    
+def test_save_image_saves_intermediate_files():
+    save_crop = True
+    save_bg_subtract = True
+    assert save_image(image, image_number, save_location, save_crop, save_bg_subtract) is False
+    assert save_crop == False
+    #assert saved file exists? 
+    assert save_image(image, image_number, save_location, save_crop, save_bg_subtract) is False
+    assert save_bg_subtract == False
+    #assert saved file exists? 
+def test_save_image_binary_files():
+    save_image(image, 50, save_location)
+    #assert 50.png exists 
+    
 def test_produce_background_image():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')
     params_dict = th.define_initial_parameters()
@@ -48,9 +61,13 @@ def test_produce_background_image():
     assert np.all(target_bg_median_array == bg_median_test)
 
 def test_convert_tiff_image():
+    """this is an integrating function with crop_single_image, subtract_background_single_image, li_binarize_single_image, and save_image 
+    """
     pass
 
 def test_convert_tiff_sequence_to_binary():
+    """This loops through an image sequence and performs convert_tiff_image on each image in the video
+    """
     pass
 
 

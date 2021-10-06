@@ -1,6 +1,16 @@
 import pandas as pd
+import glob
+import typing
+import os
 
-def generate_df() -> pd.DataFrame:
+def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]):
+    csvs = glob.glob(os.path.join(csv_location,"*.csv"))
+    return csvs
+
+
+
+def generate_df(csv_location : typing.Union[str, bytes, os.PathLike]) -> pd.DataFrame:
+
     df = pd.DataFrame()
     return df
 

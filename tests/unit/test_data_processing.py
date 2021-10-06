@@ -185,19 +185,63 @@ class TestAddStrainRate:
 
     Tests
     -----
-
+    test_returns_df:
+        checks if add_strain_rate returns a pandas.DataFrame
+    test_correct_strain_rate:
+        checks if add_strain_rate returns correct strain rates for interior
+        points
+    test_remove_infinity:
+        checks if add_strain_rate correctly removes infinities and NaN from
+        dataset when produced by calculating strain rate
+    test_error_if_missing_columns:
+        checks if add_strain_rate throws KeyError if missing R/R0 or time(s)
     """
 
+    # sample data to test against
     data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1],"time(s)":[0,0.1,0.2,0.3,0.4,0.5]}
-    strain_rate = []
-
     dataset = pd.DataFrame(data)
+    # construct strain rate from data
+    sr = [0,0,0,0,0,0]
+    for i in range(0,len(data["R/R0"])):
+        if i == 0:
+            sr[i] = 2 # from output of add_strain_rate since boundary
+        elif i == 5:
+            sr[i] = 20 # from output of add_strain_rate since boundary
+        else:
+            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time(s)"][i+1]-data["time(s)"][i]))/data["R/R0"][i]
+    strain_rate = pd.DataFrame(sr,columns=["Strain Rate"])
+
     def test_returns_df(self):
-        assert type(dp.csv.add_strain_rate(self.dataset)) is pd.DataFrame
+        # fails if add_strain_rate does not return a DataFrame
+        assert type(dp.extension.add_strain_rate(self.dataset)) is pd.DataFrame
 
     def test_correct_strain_rate(self):
-        assert np.array_equal(dp.csv.add_strain_rate(self.dataset)["Strain Rate"],self.strain_rate)
-    # test if strain rate correct
-    # test if handle infinity correctly
-    # test if throw useful errors if R/R0 and time(s) not present
-    #
+        # fails if add_strain_rate does not output strain rates expected
+        output = dp.extension.add_strain_rate(self.dataset)["Strain Rate"]
+        str_rate = self.strain_rate["Strain Rate"]
+        # needs round in order to account for floating point math errors
+        assert pd.Series.eq(round(output,1),round(self.strain_rate["Strain Rate"],1)).all()
+
+    def test_remove_infinity(self):
+        # fails if add_strain_rate does not remove -infinity, infinity, NaN
+        data = {"R/R0":[1,1,1,0,0,0,1,1],"time(s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        dataset = pd.DataFrame(data)
+        data_drop = {"R/R0":[1,1,1,1,1], "time(s)":[0,0.1,0.2,0.6,0.7], "Strain Rate":[0.0,0.0,10.0,-10.0,0.0]}
+        dataset_drop = pd.DataFrame(data_drop)
+        output = dp.extension.add_strain_rate(dataset)
+        # needs round in order to account for floating point math errors
+        assert pd.DataFrame.equals(round(output,1),round(dataset_drop,1))
+
+    def test_error_if_missing_columns(self):
+        # fails if add_strain_rate does not raise KeyError if "R/R0"
+        # or "time(s)" are missing
+
+        # test if "R/R0" missing
+        data = {"time(s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        dataset = pd.DataFrame(data)
+        with pytest.raises(KeyError,match="R/R0"):
+            dp.extension.add_strain_rate(dataset)
+        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1]}
+        dataset = pd.DataFrame(data)
+        with pytest.raises(KeyError,match="time"):
+            dp.extension.add_strain_rate(dataset)

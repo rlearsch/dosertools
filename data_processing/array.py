@@ -31,14 +31,14 @@ def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float)
     closest_index = np.abs(dataset[column]-value).idxmin(axis=0)
     return closest_index
 
-def nonzero_runs(array : np.ndarray) -> np.ndarray:
+def continuous_nonzero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating runs of nonzero in given array
+    Return array with index pairs indicating blocks of nonzero in given array
 
-    Returns array with shape (m, 2), where m is the number of "runs"
+    Returns array with shape (m, 2), where m is the number of "blocks"
     of non-zeros.
     The first column is the index of the first non-zero,
-    the second is the index of the first zero following the run.
+    the second is the index of the first zero following the blocks.
     Follows convention of numpy where array(a,a+n) yields the values
     of indices a through a+n-1.
 
@@ -46,15 +46,15 @@ def nonzero_runs(array : np.ndarray) -> np.ndarray:
     Parameters
     ----------
     array : np.ndarray
-        array to look for nonzero runs within
+        array to look for nonzero blocks within
         array must be numeric (integer or float)
 
     Returns
     -------
-    nonzero_runs : np.ndarray
-        (m, 2) array where m is the number of "runs" of non-zeros.
+    continuous_nonzero : np.ndarray
+        (m, 2) array where m is the number of "blocks" of non-zeros.
         The first column is the index of the first non-zero,
-        the second is the index of the first zero following the run.
+        the second is the index of the first zero following the block.
 
     """
 
@@ -64,18 +64,18 @@ def nonzero_runs(array : np.ndarray) -> np.ndarray:
     # Create an array that is 1 where a is not zero, and pad each end with an extra 0.
     contains_one = np.concatenate(([0], (~np.equal(array, 0).view(np.int8))+2, [0]))
     absdiff = np.abs(np.diff(contains_one))
-    # Runs start and end where absdiff is 1.
+    # Blocks start and end where absdiff is 1.
     ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
     return ranges
 
-def zero_runs(array : np.ndarray) -> np.ndarray:
+def continuous_zero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating runs of zero in given array
+    Return array with index pairs indicating blocks of zero in given array
 
-    Returns array with shape (m, 2), where m is the number of "runs"
+    Returns array with shape (m, 2), where m is the number of "blocks"
     of zeros.
     The first column is the index of the first zero,
-    the second is the index of the first non-zero following the run.
+    the second is the index of the first non-zero following the block.
     Follows convention of numpy where array(a,a+n) yields the values
     of indices a through a+n-1.
 
@@ -89,9 +89,9 @@ def zero_runs(array : np.ndarray) -> np.ndarray:
     Returns
     -------
     nonzero_runs : np.ndarray
-        (m, 2) array where m is the number of "runs" of zeros.
+        (m, 2) array where m is the number of "blocks" of zeros.
         The first column is the index of the first zero,
-        the second is the index of the first non-zero following the run.
+        the second is the index of the first non-zero following the block.
 
     """
 
@@ -101,7 +101,7 @@ def zero_runs(array : np.ndarray) -> np.ndarray:
     # Create an array that is 1 where a is 0, and pad each end with an extra 0.
     iszero = np.concatenate(([0], np.equal(array, 0).view(np.int8), [0]))
     absdiff = np.abs(np.diff(iszero))
-    # Runs start and end where absdiff is 1.
+    # Blocks start and end where absdiff is 1.
     ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
     return ranges
 

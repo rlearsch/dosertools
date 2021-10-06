@@ -40,21 +40,21 @@ class TestClosestIndexForValue:
             dp.array.closest_index_for_value(datatext,self.column,1.1)
         # handle if column does not contain numeric values
 
-class TestNonzeroRuns:
+class TestContinuousNonzero:
     """
-    Test nonzero_runs
+    Test continuous_nonzero
 
     Tests
     -----
     test_returns_array:
-        checks that nonzero_runs returns an array
+        checks that continuous_nonzero returns an array
 
-    test_correct_nonzero_runs:
-        checks that nonzero_runs returns the correct shape and elements given
+    test_correct_continuous_nonzero:
+        checks that continuous_nonzero returns the correct shape and elements given
         a test array
 
     test_string_array:
-        checks that nonzero_runs raises a TypeError if a non-numeric array
+        checks that continuous_nonzero raises a TypeError if a non-numeric array
         is used
     """
 
@@ -62,36 +62,36 @@ class TestNonzeroRuns:
     array = [0, .1, .2, .1, 1, 2, 0, 0, 0, 0, 1, 2, 1, 0, 0, 1]
 
     def test_returns_array(self):
-        # fails if the nonzero_runs method does not return an array
-        assert type(dp.array.nonzero_runs(self.array)) is np.ndarray
+        # fails if the continuous_nonzero method does not return an array
+        assert type(dp.array.continuous_nonzero(self.array)) is np.ndarray
 
-    def test_correct_nonzero_runs(self):
-        # fails if the nonzero_runs method does not produce the correct indices
-        # for the given array's nonzero runs
-        assert np.array_equal(dp.array.nonzero_runs(self.array), [[1,6],[10,13],[15,16]])
+    def test_correct_continuous_nonzero(self):
+        # fails if the continuous_nonzero method does not produce the correct
+        # indices for the given array's nonzero runs
+        assert np.array_equal(dp.array.continuous_nonzero(self.array), [[1,6],[10,13],[15,16]])
 
     def test_string_array(self):
-        # fails if the nonzero_runs method does not produce the correct indices
-        # for the given array's nonzero runs
+        # fails if the continuous_nonzero method does not raise an error for an
+        # array of strings
         arraytext = ["one","two"]
         with pytest.raises(TypeError):
-            dp.array.nonzero_runs(arraytext)
+            dp.array.continuous_nonzero(arraytext)
 
-class TestZeroRuns:
+class TestContinuousZero:
     """
-    Test zero_runs
+    Test continuous_zero
 
     Tests
     -----
     test_returns_array:
-        checks that zero_runs returns an array
+        checks that continuous_zero returns an array
 
-    test_correct_zero_runs:
-        checks that zero_runs returns the correct shape and elements given
+    test_correct_continuous_zero:
+        checks that continuous_zero returns the correct shape and elements given
         a test array
 
     test_string_array:
-        checks that zero_runs raises a TypeError if a non-numeric array
+        checks that continuous_zero raises a TypeError if a non-numeric array
         is used
     """
 
@@ -99,20 +99,20 @@ class TestZeroRuns:
     array = [0, .1, .2, .1, 1, 2, 0, 0, 0, 0, 1, 2, 1, 0, 0, 1]
 
     def test_returns_array(self):
-        # fails if the nonzero_runs method does not return an array
-        assert type(dp.array.zero_runs(self.array)) is np.ndarray
+        # fails if the continuous_zero method does not return an array
+        assert type(dp.array.continuous_zero(self.array)) is np.ndarray
 
-    def test_correct_zero_runs(self):
-        # fails if the nonzero_runs method does not produce the correct indices
+    def test_correct_continuous_zero(self):
+        # fails if the continuous_zero method does not produce the correct indices
         # for the given array's nonzero runs
-        assert np.array_equal(dp.array.zero_runs(self.array), [[0,1],[6,10],[13,15]])
+        assert np.array_equal(dp.array.continuous_zero(self.array), [[0,1],[6,10],[13,15]])
 
     def test_string_array(self):
-        # fails if the nonzero_runs method does not produce the correct indices
-        # for the given array's nonzero runs
+        # fails if the continuous_zero method does not raise an error for an
+        # array of strings
         arraytext = ["one","two"]
         with pytest.raises(TypeError):
-            dp.array.zero_runs(arraytext)
+            dp.array.continuous_zero(arraytext)
 
 
 class TestIsDataFrameColumnNumeric:
@@ -178,3 +178,26 @@ class TestGenerateDF:
 
     def test_returns_df(self):
         assert type(dp.csv.generate_df()) is pd.DataFrame
+
+class TestAddStrainRate:
+    """
+    Tests add_strain_rate
+
+    Tests
+    -----
+
+    """
+
+    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1],"time(s)":[0,0.1,0.2,0.3,0.4,0.5]}
+    strain_rate = []
+
+    dataset = pd.DataFrame(data)
+    def test_returns_df(self):
+        assert type(dp.csv.add_strain_rate(self.dataset)) is pd.DataFrame
+
+    def test_correct_strain_rate(self):
+        assert np.array_equal(dp.csv.add_strain_rate(self.dataset)["Strain Rate"],self.strain_rate)
+    # test if strain rate correct
+    # test if handle infinity correctly
+    # test if throw useful errors if R/R0 and time(s) not present
+    #

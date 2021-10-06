@@ -1,0 +1,4 @@
+{
+  "test_tiff_handling.py::test_produce_background_image": true,
+  "test_tiff_handling.py::test_tiff_folder_to_image_collection": true
+}

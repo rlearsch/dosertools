@@ -167,6 +167,22 @@ class TestIsArrayNumeric:
         for array in arrays:
             assert not dp.array.is_array_numeric(array)
 
+class TestGetCSVs:
+    """
+    Tests get_csvs
+
+    Tests
+    -----
+
+    """
+
+    def test_returns_list(self,tmp_path):
+        # fails if get_csvs does not return a list
+        assert type(dp.csv.get_csvs(tmp_path)) is list
+
+    def test_returns_csvs(self,tmp_path):
+        csv1 = 
+
 class TestGenerateDF:
     """
     Tests generate_df
@@ -176,8 +192,8 @@ class TestGenerateDF:
 
     """
 
-    def test_returns_df(self):
-        assert type(dp.csv.generate_df()) is pd.DataFrame
+    def test_returns_df(self,tmp_path):
+        assert type(dp.csv.generate_df(tmp_path)) is pd.DataFrame
 
 class TestAddStrainRate:
     """

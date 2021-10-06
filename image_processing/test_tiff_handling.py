@@ -1,17 +1,10 @@
-<<<<<<< HEAD
 import numpy as np
 import skimage.io
 import skimage.filters
 from skimage.filters import (threshold_otsu, threshold_li)
 
 import image_processing.tiff_handling as th
-=======
-import image_processing.tiff_handling as th
-import skimage.io
-import skimage.filters
-from skimage.filters import (threshold_otsu, threshold_li)
-import numpy as np
->>>>>>> 08290cc4d265478e889e41279362f6a6f2a3a8dd
+
 
 def test_define_initial_parameters():
     "Initial coefficients for first crop iterations"
@@ -49,20 +42,12 @@ def test_produce_background_image():
     target_bg_median_array = np.load("image_processing//bg_median_array.npy")
     assert np.all(target_bg_median_array == bg_median_test)
 
-<<<<<<< HEAD
 def test_convert_tiff_image():
     pass
 
 def test_convert_tiff_sequence_to_binary():
     pass
 
-=======
-def test_convert_tiff_sequence_to_binary():
-    pass
-
-def test_convert_tiff_image():
-    pass
->>>>>>> 08290cc4d265478e889e41279362f6a6f2a3a8dd
 
 def test_tiffs_to_binary():
     #integration test

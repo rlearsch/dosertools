@@ -1,4 +1,6 @@
 import numpy as np
+import os
+
 import skimage.io
 import skimage.filters
 from skimage.filters import (threshold_otsu, threshold_li)
@@ -30,19 +32,34 @@ def test_define_image_parameters():
     assert params_dict["crop_bottom"] == 634          
     assert params_dict["crop_top"] == 47
     
-def test_save_image_saves_intermediate_files():
+def test_convert_tiff_image_converts_and_saves_intermediate_files():
+    ### should I rewrite these file locations in a more neutral way, eg, os.path.join(...) ? ###
+    
+    if os.path.exists("image_processing//test_processed_images//crop//420.tiff"):
+        os.remove("image_processing//test_processed_images//crop//420.tiff")
+    if os.path.exists("image_processing//test_processed_images//bg_sub//420.tiff"):
+        os.remove("image_processing//test_processed_images//bg_sub//420.tiff")
+    if os.path.exists("image_processing//test_processed_images//bin//420.png"):
+        os.remove("image_processing//test_processed_images//bin//420.png")
+     
+    background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')
+    params_dict = th.define_initial_parameters()
+    params_dict = th.define_image_parameters(background_video, params_dict)
+    bg_median = th.produce_background_image(background_video, params_dict)
+    
+    image = skimage.io.imread("image_processing//example_experimental_video//2021-09-16_RWL-I-158-1_2.6MDa-TPAM-1.0wtpct-0.0x-NiCl_22G_shutter-50k_fps-25k_DOS-Al_4_exp_2109_1723000100.tif")
+    image_number = 100
+    save_location = "image_processing//test_processed_images"
     save_crop = True
     save_bg_subtract = True
-    save_crop = save_image(image, image_number, save_location, save_crop, save_bg_subtract)
-    assert save_crop == False
-    #assert saved file exists and matches? 
-    save_bg_subtract = save_image(image, image_number, save_location, save_crop, save_bg_subtract)
-    assert save_bg_subtract == False
-    #assert saved file exists and matches ? 
-    
-def test_save_image_binary_files():
-    save_image(image, 50, save_location)
-    #assert 50.png exists and matches 
+    th.convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
+    assert os.path.exists("image_processing//test_processed_images//crop//100.tiff")
+    #assert saved file matches 
+
+    assert os.path.exists("image_processing//test_processed_images//bg_sub//100.tiff")
+    #assert saved file matches
+    assert os.path.exists("image_processing//test_processed_images//bin//100.png")
+    #assert binary file matches  
     
 def test_produce_background_image():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')

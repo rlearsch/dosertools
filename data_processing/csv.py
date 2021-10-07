@@ -3,7 +3,23 @@ import glob
 import typing
 import os
 
-def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]):
+def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
+    """
+    Returns list of csvs in csv_location
+
+    Parameters
+    ----------
+    csv_location : path-like
+        path to a location containing desired csvs
+
+    Returns
+    -------
+    get_csvs : list
+        list of csvs in csv_location as path strings
+
+    """
+
+
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return csvs
 

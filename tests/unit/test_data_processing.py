@@ -173,6 +173,12 @@ class TestGetCSVs:
 
     Tests
     -----
+    test_returns_list:
+        checks if get_csvs returns a list
+    test_returns_csvs:
+        checks if get_csvs returns csvs
+    test_returns_no_noncsvs:
+        checks if get_csvs will not return a non-csv
 
     """
 
@@ -181,7 +187,28 @@ class TestGetCSVs:
         assert type(dp.csv.get_csvs(tmp_path)) is list
 
     def test_returns_csvs(self,tmp_path):
-        csv1 = 
+        # fails if get_csvs does not return correct csv paths
+
+        # set up paths for 2 csv files
+        csv1 = tmp_path / "test1.csv"
+        csv2 = tmp_path / "test2.csv"
+        # create empty files at those paths
+        csv1.touch()
+        csv2.touch()
+        csvs = [str(csv1),str(csv2)]
+        assert sorted(dp.csv.get_csvs(tmp_path)) == sorted(csvs)
+
+    def test_returns_no_noncsvs(self,tmp_path):
+        # fails if get_csvs returns a non-csv
+
+        # set up paths for 2 files
+        csv1 = tmp_path / "test1.csv" #csv
+        f2 = tmp_path / "test2.txt" #non-csv
+        # create empty files at those paths
+        csv1.touch()
+        f2.touch()
+        csvs = [str(csv1)]
+        assert sorted(dp.csv.get_csvs(tmp_path)) == sorted(csvs)
 
 class TestGenerateDF:
     """

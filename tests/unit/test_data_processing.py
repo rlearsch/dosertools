@@ -14,7 +14,8 @@ class TestClosestIndexForValue:
         checks that closest_index_for_value returns an integer
 
     test_correct_index:
-        checks that closest_index_for_value returns the correct index
+        checks that closest_index_for_value returns the correct index for two
+        test values
 
     test_column_not_float:
         checks that closest_index_for_value raises a TypeError if the specified
@@ -33,6 +34,9 @@ class TestClosestIndexForValue:
     def test_correct_index(self):
         # fails if the closest_index_for_value does not return 2 (corresponding to 1)
         assert dp.array.closest_index_for_value(self.data,self.column,1.1) == 2
+
+        # fails if the closest_index_for_value does not return 3 (corresponding to 2)
+        assert dp.array.closest_index_for_value(self.data,self.column,1.8) == 3
 
     def test_column_not_numeric(self):
         datatext = pd.DataFrame({self.column:["one"]})
@@ -241,7 +245,7 @@ class TestAddStrainRate:
     """
 
     # sample data to test against
-    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1],"time(s)":[0,0.1,0.2,0.3,0.4,0.5]}
+    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5]}
     dataset = pd.DataFrame(data)
     # construct strain rate from data
     sr = [0,0,0,0,0,0]
@@ -251,8 +255,8 @@ class TestAddStrainRate:
         elif i == 5:
             sr[i] = 20 # from output of add_strain_rate since boundary
         else:
-            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time(s)"][i+1]-data["time(s)"][i]))/data["R/R0"][i]
-    strain_rate = pd.DataFrame(sr,columns=["Strain Rate"])
+            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
+    strain_rate = pd.DataFrame(sr,columns=["Strain Rate (1/s)"])
 
     def test_returns_df(self):
         # fails if add_strain_rate does not return a DataFrame
@@ -260,16 +264,16 @@ class TestAddStrainRate:
 
     def test_correct_strain_rate(self):
         # fails if add_strain_rate does not output strain rates expected
-        output = dp.extension.add_strain_rate(self.dataset)["Strain Rate"]
-        str_rate = self.strain_rate["Strain Rate"]
+        output = dp.extension.add_strain_rate(self.dataset)["Strain Rate (1/s)"]
+        str_rate = self.strain_rate["Strain Rate (1/s)"]
         # needs round in order to account for floating point math errors
-        assert pd.Series.eq(round(output,1),round(self.strain_rate["Strain Rate"],1)).all()
+        assert pd.Series.eq(round(output,1),round(self.strain_rate["Strain Rate (1/s)"],1)).all()
 
     def test_remove_infinity(self):
         # fails if add_strain_rate does not remove -infinity, infinity, NaN
-        data = {"R/R0":[1,1,1,0,0,0,1,1],"time(s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        data = {"R/R0":[1,1,1,0,0,0,1,1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
-        data_drop = {"R/R0":[1,1,1,1,1], "time(s)":[0,0.1,0.2,0.6,0.7], "Strain Rate":[0.0,0.0,10.0,-10.0,0.0]}
+        data_drop = {"R/R0":[1,1,1,1,1], "time (s)":[0,0.1,0.2,0.6,0.7], "Strain Rate (1/s)":[0.0,0.0,10.0,-10.0,0.0]}
         dataset_drop = pd.DataFrame(data_drop)
         output = dp.extension.add_strain_rate(dataset)
         # needs round in order to account for floating point math errors
@@ -280,7 +284,7 @@ class TestAddStrainRate:
         # or "time(s)" are missing
 
         # test if "R/R0" missing
-        data = {"time(s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="R/R0"):
             dp.extension.add_strain_rate(dataset)
@@ -288,3 +292,32 @@ class TestAddStrainRate:
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="time"):
             dp.extension.add_strain_rate(dataset)
+
+class TestAddCriticalTime:
+    """
+    Tests add_critical_time
+
+    Tests
+    -----
+
+    """
+
+    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
+    dataset = pd.DataFrame(data)
+    sr = [0,0,0,0,0,0,0]
+    for i in range(0,len(data["R/R0"])):
+        if i == 0:
+            sr[i] = 2 # from output of add_strain_rate since boundary
+        elif i == 6:
+            sr[i] = 180 # from output of add_strain_rate since boundary
+        else:
+            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
+    dataset["Strain Rate (1/s)"] = sr
+
+    tc_bounds = [0.3,0.07]
+
+    def test_returns_df(self):
+        # fails if add_critical_time does not return a DataFrame
+        assert type(dp.extension.add_critical_time(self.dataset,self.tc_bounds)) is pd.DataFrame
+        #print(dp.extension.add_strain_rate(self.dataset))
+        #assert 0

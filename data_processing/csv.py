@@ -53,7 +53,7 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     dataset = add_strain_rate(dataset)
 
     # find tc by locating the maximum strain rate within the bounds
-    dataset = add_critical_time(dataset)
+    dataset = add_critical_time(dataset, tc_bounds)
 
     return dataset
 

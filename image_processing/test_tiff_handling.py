@@ -2,6 +2,7 @@ import numpy as np
 import skimage.io
 import skimage.filters
 from skimage.filters import (threshold_otsu, threshold_li)
+from skimage import exposure
 
 import image_processing.tiff_handling as th
 
@@ -19,10 +20,10 @@ def test_define_image_parameters():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')
     params_dict = th.define_initial_parameters()
     params_dict = th.define_image_parameters(background_video, params_dict)
-    assert params_dict["crop_width_start"] is int
-    assert params_dict["crop_width_end"] is int
-    assert params_dict["crop_bottom"] is int
-    assert params_dict["crop_top"] is int
+    assert type(params_dict["crop_width_start"]) is int
+    assert type(params_dict["crop_width_end"]) is int
+    assert type(params_dict["crop_bottom"]) is int
+    assert type(params_dict["crop_top"]) is int
                        
     assert params_dict["crop_width_start"] == 86
     assert params_dict["crop_width_end"] == 415
@@ -32,15 +33,16 @@ def test_define_image_parameters():
 def test_save_image_saves_intermediate_files():
     save_crop = True
     save_bg_subtract = True
-    assert save_image(image, image_number, save_location, save_crop, save_bg_subtract) is False
+    save_crop = save_image(image, image_number, save_location, save_crop, save_bg_subtract)
     assert save_crop == False
-    #assert saved file exists? 
-    assert save_image(image, image_number, save_location, save_crop, save_bg_subtract) is False
+    #assert saved file exists and matches? 
+    save_bg_subtract = save_image(image, image_number, save_location, save_crop, save_bg_subtract)
     assert save_bg_subtract == False
-    #assert saved file exists? 
+    #assert saved file exists and matches ? 
+    
 def test_save_image_binary_files():
     save_image(image, 50, save_location)
-    #assert 50.png exists 
+    #assert 50.png exists and matches 
     
 def test_produce_background_image():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')

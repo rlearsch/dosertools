@@ -36,3 +36,9 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
     dataset = dataset.dropna() # drop NaNs
     dataset = dataset.reset_index(drop=True) # reset index for dropped NaNs
     return dataset
+
+def add_critical_time(dataset : pd.DataFrame) -> pd.DataFrame:
+    """
+
+    """
+    pass

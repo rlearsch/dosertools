@@ -2,7 +2,7 @@ import skimage.filters
 import skimage.io
 import skimage.morphology
 from skimage.filters import (threshold_otsu, threshold_li)
-
+from skimage import exposure
 import numpy as np
 
 def define_initial_parameters():
@@ -80,6 +80,8 @@ def produce_background_image(background_video, params_dict):
     crop_top = params_dict["crop_top"]
     
     bg_median = np.median(background_video, axis=0)
+    bg_median = exposure.rescale_intensity(bg_median, in_range="uint12")
+    bg_median = skimage.img_as_int(bg_median)
     bg_median = bg_median[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
     
     return bg_median
@@ -90,10 +92,10 @@ def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dic
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
     To do: optional arguments to save the output of the different steps
     """    
-
     for image_number in range(0,len(experimental_sequence)):
         image = image_sequence[image_number]
         convert_tiff_image(image, image_number, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+    pass 
 
 def crop_single_image(image, params_dict):
     """Crops a single image according to parameters from params_dict"""
@@ -142,7 +144,8 @@ def save_image(image, image_number, save_location, save_crop=False, save_bg_subt
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):                          
+def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):   
+    image = exposure.rescale_intensity(image, in_range='uint12')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 
         save_crop = save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)

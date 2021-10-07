@@ -3,7 +3,8 @@ import glob
 import typing
 import os
 from pathlib import Path
-import filehandling as fh
+import file_handling as fh
+import numpy as np
 
 def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     """
@@ -25,18 +26,38 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return sorted(csvs)
 
+def truncate_data(dataset : pd.DataFrame) -> pd.DataFrame:
+    blocks = continuous_zero(np.array(dataset["R/R0"]))
+    block_length = np.transpose(blocks)[:][1] - np.transpose(blocks)[:][0]
+    longest_block = np.argmax(block_length)
+    end_data = blocks[longest_block][0]
+    dataset = dataset[0:end_data]
+    return dataset
 
-def csv_to_dataframe(csv : string,folder_name_format : str) -> pd.DataFrame:
+def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sampleinfo_format : str,fname_split="_", sample_split='-') -> pd.DataFrame:
     """
     """
 
-    df = pd.read_csv(csv)
+    # read in data from csv
+    dataset = pd.read_csv(csv)
+
+    # read in parameters from file name and add to dataframe
     f_name = Path(csv).name
-    params = fh.folder.folder_name_parse(f_name,)
+    params = fh.folder.folder_name_parse(f_name,fname_format,sampleinfo_format,fname_split,sample_split)
+    for key, value in params:
+        dataset[key] = value
 
-    pass
+    # truncate the data before the longest block of zeros
+    dataset = truncate_data(dataset)
+    # add the strain rate to the dataset
+    dataset = add_strain_rate(dataset)
 
-def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_format : str, sample_info_format : str, tc_range : array) -> pd.DataFrame:
+    # find tc by locating the maximum strain rate within the bounds
+    dataset = add_critical_time(dataset)
+
+    return dataset
+
+def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds : np.array, fname_format : str, sampleinfo_format : str, fname_split="_", sample_split='-') -> pd.DataFrame:
     """
 
     """

@@ -82,15 +82,24 @@ def test_produce_background_image():
     target_bg_median_array = np.load("image_processing//bg_median_array.npy")
     assert np.all(target_bg_median_array == bg_median_test)
 
-def test_convert_tiff_image():
-    """this is an integrating function with crop_single_image, subtract_background_single_image, li_binarize_single_image, and save_image 
-    """
-    pass
 
 def test_convert_tiff_sequence_to_binary():
     """This loops through an image sequence and performs convert_tiff_image on each image in the video
     """
-    pass
+    bg_median = np.load(os.path.join("image_processing","bg_median_array.npy"))
+    with open(os.path.join("image_processing","params.json")) as f:
+        params_dict = json.load(f)
+    experimental_sequence = skimage.io.imread_collection(os.path.join("image_processing","example_experimental_video","*"), plugin="tifffile")
+    #take one in every 50 images to increase speed
+    experimental_sequence = experimental_sequence[::50]
+    
+    save_location = os.path.join("image_processing","tmp_path")
+    th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location)
+    target_converted_sequence = skimage.io.imread_collection(os.path.join("image_processing","test_sequence","bin","*"))
+    produced_converted_sequence = skimage.io.imread_collection(os.path.join("image_processing","tmp_path", "bin",'*'))
+    for i in range(0,len(target_converted_sequence)):
+        assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
+    
 
 
 def test_tiffs_to_binary():

@@ -40,7 +40,16 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
 
 def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFrame:
     """
-    Finds critical time from maximum in strain rate and creates t - tc
+    Find critical time from maximum in strain rate, add relevant columns
+
+    Find the critical time from the maximum in the strain rate within the bounds
+    in radius specified by tc_bounds. Add the columns "tc (s)" (critical time),
+    "t-tc (s)" (time past critical time), and "Rtc/R0" (radius at critical time
+    divided by initial radius) to the dataset.
+
+    Parameters
+    ----------
+    
 
     """
 

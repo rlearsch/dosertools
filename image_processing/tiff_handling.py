@@ -4,6 +4,7 @@ import skimage.morphology
 from skimage.filters import (threshold_otsu, threshold_li)
 from skimage import exposure
 import numpy as np
+import os
 
 def define_initial_parameters():
     params_dict = dict(
@@ -14,24 +15,6 @@ def define_initial_parameters():
     )    
     return params_dict
 
-def folder_path_correction(folder):
-    """
-    Ensures the folder supplied for the video location ends with '//'
-    """
-    if folder[-2:] != '//':
-        if folder[-1] == '/':
-            folder = folder+"/"
-        else:
-            folder=folder+"//"
-    return folder
-# os.path allows you to take different pieces of the path
-
-#def tiff_folder_to_image_collection(folder):
-#    """
-#    Takes a folder and produces a skiamge image collection containing all of the images as a single variable 
-#    """
-#    folder = folder_path_correction(folder)
-#    return skimage.io.imread_collection(folder+"*", plugin='tifffile')
 
 def define_image_parameters(background_video, params_dict):
     """
@@ -80,10 +63,9 @@ def produce_background_image(background_video, params_dict):
     crop_top = params_dict["crop_top"]
     
     bg_median = np.median(background_video, axis=0)
-    bg_median = exposure.rescale_intensity(bg_median, in_range="uint12")
+    bg_median = exposure.rescale_intensity(bg_median, in_range='uint12')
     bg_median = skimage.img_as_int(bg_median)
     bg_median = bg_median[nozzle_row+crop_top:crop_bottom+crop_top, crop_width_start:crop_width_end]
-    
     return bg_median
                                                                   
 def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_subtract=False):
@@ -109,18 +91,20 @@ def crop_single_image(image, params_dict):
     return cropped_image
 
 def subtract_background_single_image(cropped_image, bg_median):
-    """Performs background subtraction from a cropped image. Assumes cropped image and bg_median are the same size
+    """Performs background subtraction from a cropped image. Assumes cropped_image and bg_median are the same size
     Returns an image."""
     background_subtracted_image = cropped_image - bg_median
-    background_subtracted_image = np.abs((background_subtracted_image < 0)*background_subtracted_image) #eliminates half the noise
+    background_subtracted_image = np.abs((background_subtracted_image < 0)*background_subtracted_image) 
+    #eliminates half the noise
+    background_subtracted_image = np.uint16(background_subtracted_image)
     return background_subtracted_image
 
 def li_binarize_single_image(background_subtracted_image):
     """Performs global binarization on an image according to the Li method 
     https://scikit-image.org/docs/dev/auto_examples/developers/plot_threshold_li.html
     """
-    thresh_li = threshold_li(bg_subtract_image)
-    binary_li = bg_subtract_image > thresh_li
+    thresh_li = threshold_li(background_subtracted_image)
+    binary_li = background_subtracted_image > thresh_li
     binary_li = np.array(binary_li)*255
     binary_li = np.uint8(binary_li)
     return binary_li
@@ -131,27 +115,29 @@ def save_image(image, image_number, save_location, save_crop=False, save_bg_subt
         filename = f"{image_number:03}.tiff"
         full_filename = os.path.join(save_location,"crop",filename) 
         skimage.io.imsave(full_filename, image, check_contrast=False)  
-        save_crop = False
-        return save_crop
+        #save_crop = False
+        return False
     if save_bg_subtract: 
         filename = f"{image_number:03}.tiff"
         full_filename = os.path.join(save_location,"bg_sub",filename) 
         skimage.io.imsave(full_filename, image, check_contrast=False) 
-        save_bg_subtract = False
-        return save_bg_subtract
+        #save_bg_subtract = False
+        return False
     filename = f"{image_number:03}.png"
     full_filename = os.path.join(save_location,"bin",filename) 
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):   
+def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):                          
     image = exposure.rescale_intensity(image, in_range='uint12')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 
-        save_crop = save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_image(cropped_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_crop = False
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_subtract:
-        save_bg_subtract = save_image(background_subtracted_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_image(background_subtracted_image, image_number, save_location, save_crop, save_bg_subtract)
+        save_bg_subtract=False
     binary_image = li_binarize_single_image(background_subtracted_image)
     save_image(binary_image, image_number, save_location, save_crop, save_bg_subtract)
     pass

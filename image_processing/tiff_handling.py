@@ -78,9 +78,10 @@ def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dic
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
     To do: optional arguments to save the output of the different steps
     """    
+    ### Make folder will be it's own function ### 
     for image_number in range(0,len(experimental_sequence)):
-        image = image_sequence[image_number]
-        convert_tiff_image(image, image_number, bg_median, params_dict, save_location, save_crop,save_bg_subtract)
+        image = experimental_sequence[image_number]
+        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
     pass 
 
 def crop_single_image(image, params_dict):
@@ -114,9 +115,9 @@ def otsu_binarize_single_image(background_subtracted_image):
     binary_otsu = np.uint8(binary_otsu)
     return binary_otsu
 
-def save_image(image, image_number, save_location):
+def save_image(image, image_number, save_location, extension):
     """Saves a single """
-    filename = f"{image_number:03}.tiff"
+    filename = f"{image_number:03}."+extension
     full_filename = os.path.join(save_location,filename) 
     skimage.io.imsave(full_filename, image, check_contrast=False)  
     pass
@@ -125,14 +126,14 @@ def convert_tiff_image(image, bg_median, params_dict, image_number, save_locatio
     image = exposure.rescale_intensity(image, in_range='uint12')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 
-        save_image(cropped_image, image_number, os.path.join(save_location,"crop"))
+        save_image(cropped_image, image_number, os.path.join(save_location,"crop"),"tiff")
         save_crop = False
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_subtract:
-        save_image(cropped_image, image_number, os.path.join(save_location,"bg_sub"))
+        save_image(cropped_image, image_number, os.path.join(save_location,"bg_sub"), "tiff")
         save_bg_subtract=False
     binary_image = otsu_binarize_single_image(background_subtracted_image)
-    save_image(binary_image, image_number, os.path.join(save_location,"bin"))
+    save_image(binary_image, image_number, os.path.join(save_location,"bin"),"png")
     pass
 
         

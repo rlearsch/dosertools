@@ -44,8 +44,8 @@ def test_convert_tiff_image_saves_intermediate_files():
         os.remove(os.path.join("image_processing","test_processed_images","crop","420.tiff"))
     if os.path.exists(os.path.join("image_processing","test_processed_images","bg_sub","420.tiff")):
         os.remove(os.path.join("image_processing","test_processed_images","bg_sub","420.tiff"))
-    if os.path.exists(os.path.join("image_processing","test_processed_images","bin","420.tiff")):
-        os.remove(os.path.join("image_processing","test_processed_images","bin","420.tiff"))
+    if os.path.exists(os.path.join("image_processing","test_processed_images","bin","420.png")):
+        os.remove(os.path.join("image_processing","test_processed_images","bin","420.png"))
      
     bg_median = np.load("image_processing//bg_median_array.npy")
     with open(os.path.join("image_processing","params.json")) as f:
@@ -60,14 +60,14 @@ def test_convert_tiff_image_saves_intermediate_files():
     th.convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
     assert os.path.exists(os.path.join("image_processing","test_processed_images","crop","420.tiff"))
     assert os.path.exists(os.path.join("image_processing","test_processed_images","bg_sub","420.tiff"))
-    assert os.path.exists(os.path.join("image_processing","test_processed_images","bin","420.tiff"))
+    assert os.path.exists(os.path.join("image_processing","test_processed_images","bin","420.png"))
     
 def test_convert_tiff_image_converts_intermediate_files():
     #assert saved file matches 
-    target_bin = skimage.io.imread(os.path.join("image_processing","test_processed_images","targets","bin.tiff"))
+    target_bin = skimage.io.imread(os.path.join("image_processing","test_processed_images","targets","bin.png"))
     target_crop = skimage.io.imread(os.path.join("image_processing","test_processed_images","targets","crop.tiff"))
     target_bg_sub = skimage.io.imread(os.path.join("image_processing","test_processed_images","targets","bg_sub.tiff"))
-    produced_bin = skimage.io.imread(os.path.join("image_processing","test_processed_images","bin","420.tiff"))
+    produced_bin = skimage.io.imread(os.path.join("image_processing","test_processed_images","bin","420.png"))
     produced_crop = skimage.io.imread(os.path.join("image_processing","test_processed_images","crop","420.tiff"))
     produced_bg_sub = skimage.io.imread(os.path.join("image_processing","test_processed_images","bg_sub","420.tiff"))
     assert np.all(target_bin == produced_bin)

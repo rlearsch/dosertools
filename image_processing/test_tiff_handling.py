@@ -32,7 +32,7 @@ def test_define_image_parameters():
     assert params_dict["crop_bottom"] == 634          
     assert params_dict["crop_top"] == 47
     
-def test_convert_tiff_image_converts_and_saves_intermediate_files():
+def test_convert_tiff_image_saves_intermediate_files():
     ### should I rewrite these file locations in a more neutral way, eg, os.path.join(...) ? ###
     
     if os.path.exists("image_processing//test_processed_images//crop//420.tiff"):
@@ -54,13 +54,21 @@ def test_convert_tiff_image_converts_and_saves_intermediate_files():
     save_bg_subtract = True
     th.convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
     assert os.path.exists("image_processing//test_processed_images//crop//100.tiff")
-    #assert saved file matches 
-
     assert os.path.exists("image_processing//test_processed_images//bg_sub//100.tiff")
-    #assert saved file matches
     assert os.path.exists("image_processing//test_processed_images//bin//100.png")
-    #assert binary file matches  
     
+def test_convert_tiff_image_converts_intermediate_files():
+    #assert saved file matches 
+    target_bin = skimage.io.imread("image_processing//test_processed_images//targets//bin.png")
+    target_crop = skimage.io.imread("image_processing//test_processed_images//targets//crop.tiff")
+    target_bg_sub = skimage.io.imread("image_processing//test_processed_images//targets//bg_sub.tiff")
+    produced_bin = skimage.io.imread("image_processing//test_processed_images//bin//100.png")
+    produced_crop = skimage.io.imread("image_processing//test_processed_images//crop//100.tiff")
+    produced_bg_sub = skimage.io.imread("image_processing//test_processed_images//bg_sub//100.tiff")
+    assert np.all(target_bin == produced_bin)
+    assert np.all(target_crop == produced_crop)
+    assert np.all(target_bg_sub == produced_bg_sub)
+
 def test_produce_background_image():
     background_video = skimage.io.imread_collection("image_processing//example_background_video//*", plugin='tifffile')
     params_dict = th.define_initial_parameters()

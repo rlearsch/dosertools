@@ -8,6 +8,8 @@ import skimage.morphology
 from skimage.filters import (threshold_otsu, threshold_li)
 from skimage import exposure
 
+import file_handling.folder as folder
+
 
 def define_initial_parameters():
     params_dict = dict(
@@ -72,7 +74,7 @@ def produce_background_image(background_video, params_dict):
     
     return bg_median
                                                                   
-def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_subtract=False):
+def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
     Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
@@ -81,7 +83,7 @@ def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dic
     ### Make folder will be it's own function ### 
     for image_number in range(0,len(experimental_sequence)):
         image = experimental_sequence[image_number]
-        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
+        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_sub)
     pass 
 
 def crop_single_image(image, params_dict):
@@ -122,29 +124,29 @@ def save_image(image, image_number, save_location, extension):
     skimage.io.imsave(full_filename, image, check_contrast=False)  
     pass
 
-def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_subtract=False):                          
+def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_sub=False):                          
     image = exposure.rescale_intensity(image, in_range='uint12')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 
         save_image(cropped_image, image_number, os.path.join(save_location,"crop"),"tiff")
         save_crop = False
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
-    if save_bg_subtract:
+    if save_bg_sub:
         save_image(cropped_image, image_number, os.path.join(save_location,"bg_sub"), "tiff")
-        save_bg_subtract=False
+        save_bg_sub=False
     binary_image = otsu_binarize_single_image(background_subtracted_image)
     save_image(binary_image, image_number, os.path.join(save_location,"bin"),"png")
     pass
 
         
-def tiffs_to_binary(experimental_video_folder, background_video_folder, save_location, save_crop=False,save_bg_subtract=False):
+def tiffs_to_binary(experimental_video_folder, background_video_folder, save_location, save_crop=False,save_bg_sub=False):
     """
     Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
     """
-    params_dict = define_initial_parameters()
-    experimental_video = skimage.io.imread_collection(experimental_video_folder+"*", plugin='tifffile')
-    background_video = skimage.io.imread_collection(background_video_folder+"*", plugin='tifffile')
-    #make_destination_folders(save_location, save_crop, save_bg_subtract)
-    params_dict = define_image_parameters(background_video)
-    bg_image = produce_background_image(background_video, params_dict)
-    convert_tiff_to_binary(experimental_video, bg_image, params_dict, save_location, save_crop,save_bg_subtract)
+    params_dict = th.define_initial_parameters()
+    experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*"), plugin='tifffile')
+    background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*"), plugin='tifffile')
+    folder.make_destination_folders(save_location, save_crop, save_bg_sub)
+    params_dict = th.define_image_parameters(background_video)
+    bg_median = th.produce_background_image(background_video, params_dict)
+    th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False)

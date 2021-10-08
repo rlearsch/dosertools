@@ -15,8 +15,8 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
     Parameters
     ----------
     dataset : pandas.DataFrame
-        dataset to which to add the Strain Rate (1/s) column
-        must contain "R/R0" and "time (s)"" columns
+        dataset to which to add the "Strain Rate (1/s)" column
+        must contain "R/R0" and "time (s)" columns
 
     Returns
     -------
@@ -49,7 +49,17 @@ def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFr
 
     Parameters
     ----------
-    
+    dataset : pandas.DataFrame
+        dataset to which to add the "tc (s)", "t-tc (s)", and "Rtc/R0" columns
+        must contain "R/R0", "time (s)", and "Strain Rate (1/s)" columns
+    tc_bounds : np.array
+        two value array containing the upper and lower bounds in "R/R0" where
+        tc will be found in between
+
+    Returns
+    -------
+    add_critical_time : pd.DataFrame
+        dataset with "tc", "t - tc (s)", and "Rtc/R0" columns added
 
     """
 

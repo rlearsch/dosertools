@@ -2,9 +2,10 @@ import pandas as pd
 import glob
 import typing
 import os
+import numpy as np
 from pathlib import Path
 import file_handling as fh
-import numpy as np
+import data_processing as dp
 
 def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     """
@@ -27,8 +28,17 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     return sorted(csvs)
 
 def truncate_data(dataset : pd.DataFrame) -> pd.DataFrame:
-    blocks = continuous_zero(np.array(dataset["R/R0"]))
+    """
+    """
+
+    if not "R/R0" in dataset.columns:
+        raise KeyError("column R/R0 must be present in dataset")
+
+    # find blocks where zeros are continuous
+    blocks = dp.array.continuous_zero(np.array(dataset["R/R0"]))
+    # find the length of those blocks
     block_length = np.transpose(blocks)[:][1] - np.transpose(blocks)[:][0]
+    # define the end of the dataset as beginning of the longest block of zeroes
     longest_block = np.argmax(block_length)
     end_data = blocks[longest_block][0]
     dataset = dataset[0:end_data]
@@ -50,10 +60,10 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     # truncate the data before the longest block of zeros
     dataset = truncate_data(dataset)
     # add the strain rate to the dataset
-    dataset = add_strain_rate(dataset)
+    dataset = dp.extension.add_strain_rate(dataset)
 
     # find tc by locating the maximum strain rate within the bounds
-    dataset = add_critical_time(dataset, tc_bounds)
+    dataset = dp.extension.add_critical_time(dataset, tc_bounds)
 
     return dataset
 

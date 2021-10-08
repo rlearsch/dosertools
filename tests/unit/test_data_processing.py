@@ -214,6 +214,44 @@ class TestGetCSVs:
         csvs = [str(csv1)]
         assert sorted(dp.csv.get_csvs(tmp_path)) == sorted(csvs)
 
+class TestTruncateData:
+    """
+    Tests truncate_data
+
+    Tests
+    -----
+    test_returns_df:
+        checks if truncate_data returns a dataframe
+    test_correctly_truncates:
+        checks if truncate_data correctly truncates the dataset
+    test_error_if_missing_columns:
+        checks if truncate_data throws "KeyError" if "R/R0" missing
+    """
+
+    # sample data to test against
+    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    dataset = pd.DataFrame(data)
+    truncated = pd.DataFrame({"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]})
+
+    def test_returns_df(self):
+        # fails if truncate_data does not return a dataframe
+        assert type(dp.csv.truncate_data(self.dataset)) is pd.DataFrame
+
+    def test_correctly_truncates(self):
+        # fails if truncate_data does not truncate at expected location
+        result = dp.csv.truncate_data(self.dataset)
+        # check R/R0
+        assert pd.Series.eq(result["R/R0"],self.truncated["R/R0"]).all()
+        # check time (s)
+        assert pd.Series.eq(result["time (s)"],self.truncated["time (s)"]).all()
+
+    def test_error_if_missing_columns(self):
+        # fails if truncate_data does not throw KeyError if missing "R/R0"
+        data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        dataset = pd.DataFrame(data)
+        with pytest.raises(KeyError,match="column R/R0"):
+            dp.csv.truncate_data(dataset)
+
 class TestGenerateDF:
     """
     Tests generate_df
@@ -234,6 +272,8 @@ class TestAddStrainRate:
     -----
     test_returns_df:
         checks if add_strain_rate returns a pandas.DataFrame
+    test_correct_columns:
+        checks if add_strain_time returns the correct columns
     test_correct_strain_rate:
         checks if add_strain_rate returns correct strain rates for interior
         points
@@ -262,6 +302,13 @@ class TestAddStrainRate:
         # fails if add_strain_rate does not return a DataFrame
         assert type(dp.extension.add_strain_rate(self.dataset)) is pd.DataFrame
 
+    def test_correct_columns(self):
+        # fails if output does not contain correct columns
+        columns = dp.extension.add_strain_rate(self.dataset).columns
+        assert "time (s)" in columns
+        assert "R/R0" in columns
+        assert "Strain Rate (1/s)" in columns
+
     def test_correct_strain_rate(self):
         # fails if add_strain_rate does not output strain rates expected
         output = dp.extension.add_strain_rate(self.dataset)["Strain Rate (1/s)"]
@@ -286,11 +333,12 @@ class TestAddStrainRate:
         # test if "R/R0" missing
         data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
-        with pytest.raises(KeyError,match="R/R0"):
+        with pytest.raises(KeyError,match="column R/R0"):
             dp.extension.add_strain_rate(dataset)
+        # test if "time (s)" missing
         data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1]}
         dataset = pd.DataFrame(data)
-        with pytest.raises(KeyError,match="time"):
+        with pytest.raises(KeyError,match="column time"):
             dp.extension.add_strain_rate(dataset)
 
 class TestAddCriticalTime:
@@ -299,7 +347,15 @@ class TestAddCriticalTime:
 
     Tests
     -----
-
+    test_returns_df:
+        checks if add_critical_time returns a pandas DataFrame
+    test_correct_columns:
+        checks if add_critical_time returns the correct columns
+    test_correct_values:
+        checks if add_critical_time returns the correct values
+    test_error_if_missing_columns:
+        checks if add_critical_time throws KeyError if missing "R/R0",
+        "time (s)", or "Strain Rate (1/s)"
     """
 
     data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
@@ -316,8 +372,54 @@ class TestAddCriticalTime:
 
     tc_bounds = [0.3,0.07]
 
+    tc = 0.4
+    Rtc = 0.2
+
     def test_returns_df(self):
         # fails if add_critical_time does not return a DataFrame
         assert type(dp.extension.add_critical_time(self.dataset,self.tc_bounds)) is pd.DataFrame
-        #print(dp.extension.add_strain_rate(self.dataset))
-        #assert 0
+
+    def test_correct_columns(self):
+        # fails if output does not contain correct columns
+        columns = dp.extension.add_critical_time(self.dataset,self.tc_bounds).columns
+        assert "time (s)" in columns
+        assert "R/R0" in columns
+        assert "Strain Rate (1/s)" in columns
+        assert "tc (s)" in columns
+        assert "Rtc/R0" in columns
+        assert "t - tc (s)" in columns
+
+    def test_correct_values(self):
+        # fails if tc, Rtc, or t-tc are wrong
+        result = dp.extension.add_critical_time(self.dataset,self.tc_bounds)
+
+        # check tc
+        assert result["tc (s)"][0] == self.tc
+
+        # check Rtc
+        assert result["Rtc/R0"][0] == self.Rtc
+
+        # check t - tc (s)
+        assert pd.Series.eq(result["t - tc (s)"],(self.dataset["time (s)"] -  self.tc)).all()
+
+    def test_error_if_missing_columns(self):
+        # fails if add_critical_time does not raise KeyError if "R/R0",
+        # "time(s)", or "Strain Rate (1/s)" are missing
+
+        # test if "R/R0" missing
+        data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
+        dataset = pd.DataFrame(data)
+        dataset["Strain Rate (1/s)"] = self.sr
+        with pytest.raises(KeyError,match="column R/R0"):
+            dp.extension.add_critical_time(dataset,self.tc_bounds)
+        # test if "time (s)" missing
+        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01]}
+        dataset = pd.DataFrame(data)
+        dataset["Strain Rate (1/s)"] = self.sr
+        with pytest.raises(KeyError,match="column time"):
+            dp.extension.add_critical_time(dataset,self.tc_bounds)
+        # test if "Strain Rate (1/s)" missing
+        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
+        dataset = pd.DataFrame(data)
+        with pytest.raises(KeyError,match="column Strain"):
+            dp.extension.add_critical_time(dataset,self.tc_bounds)

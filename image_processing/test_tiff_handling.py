@@ -104,4 +104,7 @@ def test_convert_tiff_sequence_to_binary():
 
 def test_tiffs_to_binary():
     #integration test
-    pass
+    
+    #assert save_location exists
+    #assert produced video matches test_Sequence 
+    

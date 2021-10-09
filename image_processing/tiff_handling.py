@@ -76,9 +76,8 @@ def produce_background_image(background_video, params_dict):
 def convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract. 
-    Performs, sequentially, cropping, background subtraction, and binarization by the Li method, and saves the binary images. 
-    To do: optional arguments to save the output of the different steps
-    """    
+    Performs, sequentially, cropping, background subtraction, and binarization by the Mean method, and saves the binary images. 
+     """    
     ### Make folder will be it's own function ### 
     for image_number in range(0,len(experimental_sequence)):
         image = experimental_sequence[image_number]
@@ -108,8 +107,7 @@ def subtract_background_single_image(cropped_image, bg_median):
     return background_subtracted_image
 
 def mean_binarize_single_image(background_subtracted_image):
-    """Performs global binarization on an image according to the Li method 
-    https://scikit-image.org/docs/dev/auto_examples/developers/plot_threshold_li.html
+    """Performs global binarization on an image according to the Mean method 
     """
     thresh_mean = threshold_mean(background_subtracted_image)
     binary_mean = background_subtracted_image < thresh_mean
@@ -124,7 +122,8 @@ def save_image(image, image_number, save_location, extension):
     skimage.io.imsave(full_filename, image, check_contrast=False)  
     pass
 
-def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_sub=False):                          
+def convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop=False,save_bg_sub=False): 
+    """Fully converts a raw tiff to binary png image. Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps"""
     image = exposure.rescale_intensity(image, in_range='uint12', out_range='uint16')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop: 

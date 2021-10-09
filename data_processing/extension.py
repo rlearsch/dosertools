@@ -25,6 +25,7 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
         removed
     """
 
+    # checks for missing necessary columns and raise KeyError if missing
     if not "R/R0" in dataset.columns:
         raise KeyError("column R/R0 must be present in dataset")
     if not "time (s)" in dataset.columns:
@@ -63,6 +64,7 @@ def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFr
 
     """
 
+    # checks for missing necessary columns and raise KeyError if missing
     if not "R/R0" in dataset.columns:
         raise KeyError("column R/R0 must be present in dataset")
     if not "time (s)" in dataset.columns:
@@ -70,7 +72,7 @@ def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFr
     if not "Strain Rate (1/s)" in dataset.columns:
         raise KeyError("column Strain Rate (1/s) must be present in dataset")
 
-
+    # find indices for tc bounds
     begin_tc_index = dp.array.closest_index_for_value(dataset, "R/R0", tc_bounds[0])
     end_tc_index = dp.array.closest_index_for_value(dataset,  "R/R0", tc_bounds[1])
 

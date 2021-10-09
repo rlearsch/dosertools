@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+# TODO: implement error handling if column does not exist in continuous_zero and continuous_nonzero, is_dataframe_column_numeric
+
 def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float) -> int:
     """
     Find the closest value for a given value in a column and returns its index

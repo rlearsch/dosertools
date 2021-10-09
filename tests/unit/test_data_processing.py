@@ -2,25 +2,23 @@ import data_processing as dp
 import pandas as pd
 import pytest
 import numpy as np
+from datetime import datetime
+import os
 
 class TestClosestIndexForValue:
     """
     Test closest_index_for_value
 
-
     Tests
     -----
     test_returns_int:
         checks that closest_index_for_value returns an integer
-
     test_correct_index:
         checks that closest_index_for_value returns the correct index for two
         test values
-
     test_column_not_float:
         checks that closest_index_for_value raises a TypeError if the specified
         column does not contain numbers (for pandas.DataFrame, int64 or float)
-
     """
 
     # sample data to test against
@@ -52,11 +50,9 @@ class TestContinuousNonzero:
     -----
     test_returns_array:
         checks that continuous_nonzero returns an array
-
     test_correct_continuous_nonzero:
         checks that continuous_nonzero returns the correct shape and elements given
         a test array
-
     test_string_array:
         checks that continuous_nonzero raises a TypeError if a non-numeric array
         is used
@@ -89,11 +85,9 @@ class TestContinuousZero:
     -----
     test_returns_array:
         checks that continuous_zero returns an array
-
     test_correct_continuous_zero:
         checks that continuous_zero returns the correct shape and elements given
         a test array
-
     test_string_array:
         checks that continuous_zero raises a TypeError if a non-numeric array
         is used
@@ -127,10 +121,8 @@ class TestIsDataFrameColumnNumeric:
     -----
     test_numeric_column
         check if True if dataframe column is numeric
-
     test_nonnumeric_column
         check if False if dataframe column is not numeric
-
     """
 
     # sample data to test against
@@ -155,10 +147,8 @@ class TestIsArrayNumeric:
     -----
     test_numeric_array
         check if True if array is numeric
-
     test_nonnumeric_array
         check if False if array is not numeric
-
     """
 
     def test_numeric_array(self):
@@ -252,17 +242,145 @@ class TestTruncateData:
         with pytest.raises(KeyError,match="column R/R0"):
             dp.csv.truncate_data(dataset)
 
+class TestCSVToDataFrame:
+    """
+    Tests csv_to_dataframe
+
+    Tests
+    -----
+    test_returns_df:
+        checks if csv_to_dataframe returns pandas dataframe
+    test_correct_columns:
+        checks if csv_to_dataframe returns correct columns
+    test_correct_values:
+        checks if csv_to_dataframe returns correct values based on previously
+        validated results
+    """
+
+    # sample data to test against
+    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    dataset = pd.DataFrame(data)
+    tc_bounds = [0.3,0.07]
+    fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
+    fname_format = "date_sampleinfo_fps_run"
+    sampleinfo_format = "molecular weight-backbone-concentration"
+    tc = 0.5
+    check_time = [0,0,0,0,0,0,0]
+    time = [0.0,0.1,0.3,0.4,0.5,0.6,0.7]
+    for i in range(len(check_time)):
+        check_time[i] = time[i] - tc
+
+    def test_returns_df(self,tmp_path):
+        # fails if csv_to_dataframe does not return a dataframe
+
+        # construct sample file
+        csv_name = self.fname + ".csv"
+        path = tmp_path / csv_name
+        self.dataset.to_csv(path,index=False)
+        csv = str(path)
+
+        # check type of output
+        assert type(dp.csv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+
+    def test_correct_columns(self,tmp_path):
+        # fails if csv_to_dataframe does not return correct columns
+
+        # construct sample file
+        csv_name = self.fname + ".csv"
+        path = tmp_path / csv_name
+        self.dataset.to_csv(path,index=False)
+        csv = str(path)
+
+        # check columns of output
+        columns = dp.csv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format).columns
+
+        # standard columns for every dataset
+        assert "time (s)" in columns
+        assert "R/R0" in columns
+        assert "Strain Rate (1/s)" in columns
+        assert "tc (s)" in columns
+        assert "Rtc/R0" in columns
+        assert "t - tc (s)" in columns
+
+        # columns from filename
+        assert "date" in columns
+        assert "molecular weight" in columns
+        assert "backbone" in columns
+        assert "concentration" in columns
+        assert "fps" in columns
+        assert "run" in columns
+
+    def test_correct_values(self,tmp_path):
+        # fails if csv_to_dataframe does not return correct values
+
+        # construct sample file
+        csv_name = self.fname + ".csv"
+        path = tmp_path / csv_name
+        self.dataset.to_csv(path,index=False)
+        csv = str(path)
+
+        # get results from csv_to_dataframe
+        results = dp.csv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+
+        # import csv
+        correct = pd.read_csv(os.path.join("tests","fixtures","fixture_csv_to_dataframe.csv"))
+        for column in results.columns:
+            if dp.array.is_dataframe_column_numeric(results,column):
+                assert pd.Series.eq(round(results[column],2),round(correct[column],2)).all()
+            else:
+                assert results[column][0]==str(correct[column][0])
+
+
 class TestGenerateDF:
     """
     Tests generate_df
 
     Tests
     -----
-
+    test_returns_df:
+        checks if generate_df returns a pandas DataFrame
+    test_correct_values:
+        checks if generate_df returns correct values based on previously
+        validated results
     """
 
+    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    dataset = pd.DataFrame(data)
+    tc_bounds = [0.3,0.07]
+    fname_base = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k"
+    fname_format = "date_sampleinfo_fps_run"
+    sampleinfo_format = "mw-backbone-conc"
+
     def test_returns_df(self,tmp_path):
-        assert type(dp.csv.generate_df(tmp_path)) is pd.DataFrame
+        # fails if generate_df does not return a DataFrame
+
+        # construct sample files
+        for i in range(0,5):
+            csv_name = self.fname_base + "_" + str(i) + ".csv"
+            path = tmp_path / csv_name
+            self.dataset.to_csv(path,index=False)
+
+        # check type
+        assert type(dp.csv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+
+    def test_correct_values(self,tmp_path):
+        # fails if generate_df does not return correct_values
+
+        # construct sample files
+        for i in range(0,5):
+            csv_name = self.fname_base + "_" + str(i) + ".csv"
+            path = tmp_path / csv_name
+            self.dataset.to_csv(path,index=False)
+
+        # check results
+        results = dp.csv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+        correct = pd.read_csv(os.path.join("tests","fixtures","fixture_generate_df.csv"))
+        for column in results.columns:
+            if dp.array.is_dataframe_column_numeric(results,column):
+                assert pd.Series.eq(round(results[column],2),round(correct[column],2)).all()
+            else:
+                assert results[column][0]==str(correct[column][0])
+
 
 class TestAddStrainRate:
     """

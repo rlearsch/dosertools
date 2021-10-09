@@ -119,25 +119,38 @@ class TestIsDataFrameColumnNumeric:
 
     Tests
     -----
-    test_numeric_column
-        check if True if dataframe column is numeric
-    test_nonnumeric_column
-        check if False if dataframe column is not numeric
+    test_returns_bool:
+        checks if is_dataframe_column_numeric returns a bool
+    test_numeric_column:
+        checks if is_dataframe_column_numeric returns True if dataframe
+        column is numeric
+    test_nonnumeric_column:
+        checks if is_dataframe_column_numeric returns False if dataframe
+        column is not numeric
     """
 
     # sample data to test against
     column = 'value'
     data = pd.DataFrame({column:[-1,0,1,2]})
 
+    def test_returns_bool(self):
+        # fails if is_dataframe_column_numeric does not return a bool
+        assert type(dp.array.is_dataframe_column_numeric(self.data,self.column)) is bool
+
     def test_numeric_column(self):
-        # fails if function raises error on numeric column
+        # fails if is_dataframe_column_numeric returns False for numeric
         assert dp.array.is_dataframe_column_numeric(self.data,self.column)
 
     def test_nonnumeric_column(self):
-        # if non-numeric DataFrame column passed to function, raise TypeError
+        # fails if is_dataframe_column_numeric returns True for nonnumeric
         datatext = pd.DataFrame({self.column:["one"]})
         assert not dp.array.is_dataframe_column_numeric(datatext,self.column)
         # handle if column does not contain numeric values
+
+    def test_error_if_missing_column(self):
+        # fails if is_dataframe_column_numeric does not raise error if column missing
+        with pytest.raises(KeyError,match="column"):
+            dp.array.is_dataframe_column_numeric(self.data,"missing")
 
 class TestIsArrayNumeric:
     """
@@ -145,18 +158,24 @@ class TestIsArrayNumeric:
 
     Tests
     -----
-    test_numeric_array
-        check if True if array is numeric
-    test_nonnumeric_array
-        check if False if array is not numeric
+    test_numeric_array:
+        checks if is_array_numeric returns True if array is numeric
+    test_nonnumeric_array:
+        checks if is_array_numeric returns False if array is not numeric
     """
 
+    def test_returns_bool(self):
+        # fails if is_array_numeric does not return a bool
+        assert type(dp.array.is_array_numeric([1,2])) is bool
+
     def test_numeric_array(self):
+        # fails if is_array_numeric does not return True for numeric arrays
         arrays = [[1,2,3],[1.1,-1.2]]
         for array in arrays:
             assert dp.array.is_array_numeric(array)
 
     def test_nonnumeric_array(self):
+        # fails if is_array_numeric does not return False for nonnumeric arrays
         arrays = [[object()],['string'],[None],[u'unicode']]
         for array in arrays:
             assert not dp.array.is_array_numeric(array)

@@ -126,6 +126,9 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
 
     """
 
+    # checks for missing column and raise KeyError if missing
+    if not column in dataset.columns:
+        raise KeyError("column must be present in dataset")
 
     # check if column is numeric
     num_df = pd.DataFrame(columns=['int','float'])

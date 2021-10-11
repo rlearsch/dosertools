@@ -18,7 +18,7 @@ def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: st
         the format of the sampleinfo section of the folder_name
         separated by the deliminator specified by sample_split
     fname_split : str, optional
-        the deliminator for splitting the folder name (default is "_")
+        the deliminator for splitting the folder_name (default is "_")
     sample_split : str, optional
         the deliminator for splitting the sampleinfo section
         of the folder_name (default is "-")

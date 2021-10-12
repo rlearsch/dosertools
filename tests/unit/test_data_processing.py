@@ -323,6 +323,7 @@ class TestCSVToDataFrame:
 
         # columns from filename
         assert "date" in columns
+        assert "sample" in columns
         assert "molecular weight" in columns
         assert "backbone" in columns
         assert "concentration" in columns
@@ -347,7 +348,10 @@ class TestCSVToDataFrame:
             if dp.array.is_dataframe_column_numeric(results,column):
                 assert pd.Series.eq(round(results[column],2),round(correct[column],2)).all()
             else:
-                assert results[column][0]==str(correct[column][0])
+                if column != "date":
+                    assert results[column][0]==str(correct[column][0])
+                else:
+                    assert results[column][0] == datetime.today().strftime('%Y%m%d')
 
 
 class TestGenerateDF:
@@ -398,7 +402,10 @@ class TestGenerateDF:
             if dp.array.is_dataframe_column_numeric(results,column):
                 assert pd.Series.eq(round(results[column],2),round(correct[column],2)).all()
             else:
-                assert results[column][0]==str(correct[column][0])
+                if column != "date":
+                    assert results[column][0] == str(correct[column][0])
+                else:
+                    assert results[column][0] == datetime.today().strftime('%Y%m%d')
 
 
 class TestAddStrainRate:

@@ -47,6 +47,7 @@ def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: st
         elif "run" in tag.lower(): # look for run number spec
             param_dict["run"] = int(''.join(i for i in value if i.isdigit())) # take numeric part of run only and set in parameter
         elif "sampleinfo" in tag.lower():
+            param_dict["sample"] = value # full sampleinfo in Sample column
             sampleinfo_split = value.split(sample_split) # split sampleinfo using the sample_split deliminator
             sample_tag_split = sampleinfo_format.split(sample_split) # split sampleinfo_format into sample tags using sample_split deliminator
             j = 0 # index in the sampleinfo

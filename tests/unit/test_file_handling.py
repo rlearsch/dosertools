@@ -28,6 +28,7 @@ class TestFolderNameParse:
     sample_split = "-"
     param_dict = {
         "date" : "20210929",
+        "sample" : "6M-PEO",
         "mw" : "6M",
         "backbone" : "PEO",
         "fps" : 25000,

@@ -1,89 +1,48 @@
 import numpy as np
 import skimage
-import data_processing as dp
-import file_handling as fh
 import typing
 import os
+import data_processing as dp
+import file_handling as fh
 
-def bottom_border(image : np.ndarray, white=True) -> int:
+def bottom_border(image : np.ndarray) -> int:
     """
+    Find bottom border of supplied image
 
+    Find bottom border of supplied image for analysis by finding the row with
+    the maximum number of white pixels below the half the height of the image
+    (the bottom half). Return the index of the row with the first maximum number
+    of white pixels.
 
     Parameters
     ----------
-
+    image : np.ndarray (scikit.io.imread)
+        image from scikit.io.imread import to find the bottom border of the
+        section to analyze
 
     Returns
-
-
+    -------
+    bottom_border : int
+        index of last row to include in analysis
+        chosen as row with the most white pixels in the binary below the bottom
+        half of the image
     """
 
+    # pixel values across the rows (will max out at 255*width of image)
     sum_rows = np.sum(image, axis = 1)
+    # image shape
     (height,width) = np.shape(image)
-    if white:
-        # fully white rows are 0, all others are larger
-        zero_rows = 255*width - sum_rows
-    else:
-        # fully black rows are already 0
-        zero_rows = sum_rows
-    if (zero_rows == 0).any(0):
-        # if there are any full rows of 0s, choose the start of the last block
-        # of 0 rows
-        # 0 is full white if white is True/default, full black if white=False
-        bottom_c = dp.array.continuous_zero(zero_rows)[-1][0]
-        # different from previous case for bottom_border_white
-        # bottom_c = np.argmax(sum_rows)
-        # where it picks the first all white row
-    else:
-        # by default, if there are no full rows, the bottom row will be the
-        # last row
-        bottom_c = len(sum_rows)
-        # check for other cropping scenarios
-        if white:
-            white_blocks = dp.array.continuous_nonzero(sum_rows)
-            if len(white_blocks) == 1:
-                # if there is only one long block of white (i.e. unbroken
-                # liquid bridge), but there are no full white rows, then
-                # try to correct for drop on substrate moving up from where
-                # it is located for background substration, and causing false
-                # minima
-                bottom_c = white_blocks[0][1] - 10
-                # TODO: revise 10 to make less arbitrary
-                # idea: look for local maximum, set local maximum as bottom row
-            elif len(white_blocks) > 1:
-                # if there are multiple blocks of white, pick the first row of
-                # the last one from the top
-                # from the top
-                bottom_c = white_blocks[-1][0]
-    return bottom_c
 
-    # if white:
-    #     # find_bottom_border_white
-    #
-    #     full_white_max = 255*width
-    #     max_rows = list(sum_rows == full_white_max)
-    #     if True in max_rows:
-    #         bottom_c = np.argmax(sum_rows) # returns first maximum
-    #
-    #     else:
-    #         white_runs = dp.array.continuous_nonzero(sum_rows)
-    #         if len(white_runs) == 1:
-    #
-    #         elif len(white_runs) > 1:
-    #             bottom_c = white_runs[-1][0]
-    #         else:
-    #             # len(white_runs) == 0
-    #             bottom_c = len(sum_rows)
-    # else:
-    #     # find_bottom_border_black
-    #     if (sum_rows == 0).any(0):
-    #         bottom_c = dp.array.continuous_zero(sum_rows)[-1][0]
-    #     else:
-    #         bottom_c = len(sum_rows)
-    # return bottom_c
+    # bottom for the crop should be below the halfway mark for the image
+    half = int(round(height/2,0))
+    rows = sum_rows[half:]
 
-    # need to understand each portion
-    # need test images that hit each condition
+    # put bottom at maximum value of sum_rows (i.e. most white row)
+    # in the bottom half of the image
+    # in the case of multiple maximums, pick the highest one (i.e. if there
+    # are multiple full rows of white, pick the first full row)
+    bottom = np.argmax(rows) # this is number of rows below half
+    return bottom+half # return index from top of image
 
 def min_diameter(image : np.ndarray, window : np.array) -> int:
     """

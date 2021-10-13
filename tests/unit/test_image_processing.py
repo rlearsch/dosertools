@@ -120,7 +120,9 @@ class TestBottomBorder:
 
     """
 
-    sample_image = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","102.png"))
+    sample_image1 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","102.png"))
+    sample_image2 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","287.png"))
+    sample_image3 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","707.png"))
     black = np.zeros((10,10),dtype=np.uint8)
     #skimage.io.imsave(os.path.join(fixtures_folder,"fixture_binary","black.png"),black, check_contrast=False)
     white = np.ones((10,10),dtype=np.uint8)*255
@@ -129,22 +131,18 @@ class TestBottomBorder:
 
     def test_returns_int(self):
         # fails if bottom_border does not return an integer
-        assert type(ip.binary.bottom_border(self.sample_image).item()) is int
+        assert type(ip.binary.bottom_border(self.sample_image1).item()) is int
 
     def test_returns_correct_values(self):
         # fails if bottom_border does not return correct values
 
-        # check "white" version
-        assert ip.binary.bottom_border(self.black) == 10
-        assert ip.binary.bottom_border(self.white) == 0
-        assert ip.binary.bottom_border(self.sample_image) == 520
+        assert ip.binary.bottom_border(self.black) == 5
+        assert ip.binary.bottom_border(self.white) == 5
+        assert ip.binary.bottom_border(self.sample_image1) == 520
+        assert ip.binary.bottom_border(self.sample_image2) == 439
+        assert ip.binary.bottom_border(self.sample_image3) == 630
 
-        # check "black" version
-        assert ip.binary.bottom_border(self.black, False) == 0
-        assert ip.binary.bottom_border(self.white, False) == 10
-        assert ip.binary.bottom_border(self.sample_image, False) == 586
 
 class TestMinDiameter:
     """
     """
-    

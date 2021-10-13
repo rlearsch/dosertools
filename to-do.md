@@ -11,6 +11,7 @@
 * Handling if folders/files already exists
 * Processing all videos in folder regardless of date
   * eliminate _bg and binaries from folder_list
+* check for file sorting issues when images exceed 999
 
 ## Existing Code
 * Look for usages of global variables, change to variable in the function call if possible

@@ -5,6 +5,10 @@ import os
 import data_processing as dp
 import file_handling as fh
 
+def top_border(image: np.ndarray) -> int:
+
+    pass
+
 def bottom_border(image : np.ndarray) -> int:
     """
     Find bottom border of supplied image
@@ -44,21 +48,52 @@ def bottom_border(image : np.ndarray) -> int:
     bottom = np.argmax(rows) # this is number of rows below half
     return bottom+half # return index from top of image
 
-def min_diameter(image : np.ndarray, window : np.array) -> int:
+def calculate_min_diameter(image: np.ndarray, window: np.array) -> float:
     """
+    Find the minimum diameter of the liquid bridge for a given image
+
+    Find the minimum diameter in the window for a given image.
+    Calculates a diameter profile that is the number of pixels from the first
+    white pixel to the last white pixel. Return 0 if there are any rows that
+    are fully black within the window (bottom is calculated on a per-image
+    basis using bottom_border). Return the average of any values that are
+    within 2 pixels of the minimum measured diameter if there are no fully
+    black rows. Averaging attempting to reduce stepping due to the finite size
+    of pixels relative to the thin liquid bridge.
+
+    Parameters
+    ----------
+    image : np.ndarray (scikit.io.imread)
+        image of which to find the minimum diameter of the liquid bridge
+    window : np.array
+        array of the boundaries of the image to analyze in the format
+        [left, top, right, bottom]
+        bottom will be replaced with the result of bottom_border(image)
+
+    Returns
+    -------
+    min_diameter : float
+        minimum diameter measured for the image in the window
     """
 
-    x = window[0]
-    y = window[1]
-    width = window[2]
-    height = bottom_border(image)
+    # extract image analysis boundaries from window and bottom_border
+    left = window[0]
+    top = window[1]
+    right = window[2]
+    bottom = bottom_border(image)
+
+    # initialize diameter_profile variable
     diameter_profile = []
 
-    for i in range(y,height):
-        if np.all(image[i,x:width - 1] == 0):
+    for i in range(top,bottom):
+        if np.all(image[i,left:right] == 0):
+            # if the row is all black, the diameter at that height is 0
             diameter_profile.append(0)
-        else:
-            non_zero_indicies = np.nonzero(image[i,x:width])
+        else: # if the row is not all black
+            # find indices of all white pixels
+            non_zero_indicies = np.nonzero(image[i,left:right])
+            # the width of the liquid bridge is the first white pixel minus
+            # the last white pixel
             first_non_zero = non_zero_indicies[0][0]
             last_non_zero = non_zero_indicies[0][-1]
             diameter = last_non_zero - first_non_zero
@@ -71,12 +106,19 @@ def min_diameter(image : np.ndarray, window : np.array) -> int:
         # include all values within 2 pixels of minimum in average
         # avoids effects due to arbitrary stepping from the discrete nature of
         # pixels
-        min_diameter_avg = np.mean([value \
-            for i, value in enumerate(diameter_profile) \
-            if value <= (min(diameter_profile)+2)])
+
+        # collect all values within 2 pixels of minimum
+        min_diameters = []
+        for i, value in enumerate(diameter_profile):
+            if value <= (min(diameter_profile)+2):
+                min_diameters.append(value)
+        # min_diameter_avg = np.mean([value \
+        #     for i, value in enumerate(diameter_profile) \
+        #     if value <= (min(diameter_profile)+2)])
+        min_diameter_avg = np.mean(min_diameters)
     return min_diameter_avg
 
-def time_diameter_data(binary_location : typing.Union[str, bytes, os.PathLike], window : np.array, fps : int, nozzle_row=1):
+def binary_to_time_diameter(binary_location: typing.Union[str, bytes, os.PathLike], window: np.array, fps: int, nozzle_row=1):
     image_list = skimage.io.imread_collection(os.path.join(binary_location,"*"))
     time_data = []
     diameter_data = []
@@ -92,7 +134,7 @@ def time_diameter_data(binary_location : typing.Union[str, bytes, os.PathLike], 
     df = pd.DataFrame(data)
     return df
 
-def binary_to_csv(binary_location : typing.Union[str, bytes, os.PathLike], csv_location : typing.Union[str, bytes, os.PathLike]):
+def binaries_to_csv(binary_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike]):
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape

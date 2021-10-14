@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import json
+import pandas as pd
 
 import skimage.io
 import skimage.filters
@@ -11,7 +12,7 @@ import image_processing.tiff_handling as th
 import image_processing as ip
 
 fixtures_folder = os.path.join("tests","fixtures")
-
+fixtures_binary = os.path.join(fixtures_folder,"fixture_binary")
 
 def test_define_initial_parameters():
     "Initial coefficients for first crop iterations"
@@ -114,27 +115,85 @@ def test_tiffs_to_binary():
     #assert produced video matches test_Sequence
     pass
 
-class TestBottomBorder:
+class TestTopBorder:
+    """
+    Test top_border
+
+    Tests
+    -----
+    test_returns_int:
+        checks if top_border returns an integer
+    test_returns_correct_value:
+        checks if top_border returns the correct value for a test background
     """
 
-
-    """
-
-    sample_image1 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","102.png"))
-    sample_image2 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","287.png"))
-    sample_image3 = skimage.io.imread(os.path.join(fixtures_folder,"fixture_binary","707.png"))
-    black = np.zeros((10,10),dtype=np.uint8)
-    #skimage.io.imsave(os.path.join(fixtures_folder,"fixture_binary","black.png"),black, check_contrast=False)
-    white = np.ones((10,10),dtype=np.uint8)*255
-    #skimage.io.imsave(os.path.join(fixtures_folder,"fixture_binary","white.png"),white, check_contrast=False)
-
+    # Import example background image previously stored as an array.
+    example_background = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
     def test_returns_int(self):
-        # fails if bottom_border does not return an integer
+        # Fails if top_border does not return an integer.
+        assert type(ip.tiff_handling.top_border(self.example_background).item()) is int
+
+    def test_returns_correct_value(self):
+        # Fails if top_border does not return correct value for test background.
+        assert ip.tiff_handling.top_border(self.example_background) == 100
+
+class TestExportParams:
+    """
+    Test export_params
+
+    Tests
+    -----
+    test_saves_correct_csv:
+        checks if export_params saves a csv and then if it saves the csv with
+        the correct values
+    """
+
+    params_dict = {"analysis_top": 100, "nozzle_diameter": 40}
+
+    def test_saves_correct_csv(self,tmp_path):
+        # Fails if export_params does not save the file or saves the wrong
+        # values to the file.
+        save_location = tmp_path / "sample_file"
+        os.mkdir(save_location)
+        ip.tiff_handling.export_params(save_location,self.params_dict)
+        path = os.path.join(save_location,"sample_file_params.csv")
+
+        # Check if csv exists.
+        assert os.path.exists(path)
+
+        # Check if keys and values saved correctly.
+        test_params = pd.read_csv(path)
+        for key in self.params_dict:
+            value = test_params[test_params["Keys"] == str(key)]["Values"].iloc[0]
+            assert str(self.params_dict[key]) == str(value)
+
+class TestBottomBorder:
+    """
+    Test bottom_border
+
+    Tests
+    -----
+    test_returns_int:
+        checks if bottom_border returns an integer
+    test_returns_correct_values:
+        checks if bottom_border returns the correct values for a series of test
+        images
+    """
+
+    sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
+    sample_image2 = skimage.io.imread(os.path.join(fixtures_binary,"287.png"))
+    sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
+    black = np.zeros((10,10),dtype=np.uint8)
+    white = np.ones((10,10),dtype=np.uint8)*255
+
+    def test_returns_int(self):
+        # Fails if bottom_border does not return an integer.
         assert type(ip.binary.bottom_border(self.sample_image1).item()) is int
 
     def test_returns_correct_values(self):
-        # fails if bottom_border does not return correct values
+        # Fails if bottom_border does not return correct values for series
+        # of test images.
 
         assert ip.binary.bottom_border(self.black) == 5
         assert ip.binary.bottom_border(self.white) == 5
@@ -143,6 +202,26 @@ class TestBottomBorder:
         assert ip.binary.bottom_border(self.sample_image3) == 630
 
 
-class TestMinDiameter:
+class TestCalculateMinDiameter:
     """
+    Test calculate_min_diameter
+
+    Tests
+    -----
+    test_returns_float:
+        checks if calculate_min_diameter returns a float
     """
+
+    sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
+    sample_image2 = skimage.io.imread(os.path.join(fixtures_binary,"287.png"))
+    sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
+    black = np.zeros((10,10),dtype=np.uint8)
+    white = np.ones((10,10),dtype=np.uint8)*255
+
+    def test_returns_float(self):
+        # Fails if calculate_min_diameter does not return a float.
+        (height,width) = np.shape(self.sample_image1)
+        window = [0,0,width,height]
+        assert type(ip.binary.calculate_min_diameter(self.sample_image1,window).item()) is float
+
+    

@@ -145,6 +145,6 @@ def tiffs_to_binary(experimental_video_folder, background_video_folder, save_loc
     experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*"), plugin='tifffile')
     background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*"), plugin='tifffile')
     folder.make_destination_folders(save_location, save_crop, save_bg_sub)
-    params_dict = th.define_image_parameters(background_video)
+    params_dict = th.define_image_parameters(background_video, params_dict)
     bg_median = th.produce_background_image(background_video, params_dict)
     th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False)

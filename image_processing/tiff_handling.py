@@ -58,6 +58,7 @@ def define_image_parameters(background_video, params_dict):
     params_dict["crop_width_end"] = crop_width_end
     params_dict["crop_bottom"] = crop_bottom
     params_dict["crop_top"] = crop_top
+    params_dict["nozzle_diameter"] = nozzle_diameter
 
     return params_dict
 

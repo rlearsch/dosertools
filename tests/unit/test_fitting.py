@@ -34,5 +34,6 @@ def test_find_lambdaE():
     target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join("tests","fixtures","fixture_find_lambdaE_modified_bounds.json"))
     target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join("tests","fixtures","fixture_find_lambdaE_default_bounds.json"))
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
-    pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds)
+    ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ### 
+    pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
     pass

@@ -83,10 +83,10 @@ def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):
         sample_dataset = df[(df["sample"] == sample)]
         run_values = sample_dataset['run'].unique()
         for run in run_values:
-            run_dataset = sample_dataset[(sample_dataset['run'] == str(run))]
+            run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
-            fitting_results_temp =  [sample, *find_EC_slope(data_c, start, end), run]
+            fitting_results_temp =  [sample, *find_EC_slope(run_dataset, start, end), run]
             fitting_results_list.append(fitting_results_temp)
     #### Clean up the dataframe column names ### 
-    lambdaE_df = annotate_lambdaE_df(fitting_results_list, original_df)
+    lambdaE_df = annotate_lambdaE_df(fitting_results_list)
     return lambdaE_df

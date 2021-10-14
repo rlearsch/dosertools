@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+import pandas._testing
 import os
+import json
 
 from scipy.optimize import curve_fit
 from scipy.optimize import fsolve
@@ -19,6 +21,13 @@ def test_find_EC_slope():
     assert np.isclose(r_value,-0.9996926885633579)
     
 def test_annotate_lambdaE_df():
-    fitting_results_list = [["test sample", -347, 0.28, -0.999, '1']]
+    fitting_results_list = [["test sample", -347, 0.28, -0.999, 1]]
+    target_lambdaE_df = pd.io.json.read_json(os.path.join("tests","fixtures","target_lambdaE_df.json"))
     lambdaE_df = fitting.annotate_lambdaE_df(fitting_results_list, _)
+    pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False) 
+    pass
+
 def test_find_lambdaE():
+    
+    
+    pass

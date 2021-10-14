@@ -5,6 +5,7 @@ import numpy as np
 from datetime import datetime
 import os
 
+
 class TestClosestIndexForValue:
     """
     Test closest_index_for_value

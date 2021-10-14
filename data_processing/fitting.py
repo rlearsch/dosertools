@@ -33,7 +33,7 @@ def find_EC_slope(run_dataset, start, end):
     slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_radius)
     return slope, intercept, r_value
 
-def annotate_lambdaE_df(fitting_results_list, original_df):
+def annotate_lambdaE_df(fitting_results_list):
     """
     Do we want to bring other columns with us like ion, polymer identity, etc? How to code that?
     
@@ -51,7 +51,7 @@ def annotate_lambdaE_df(fitting_results_list, original_df):
         dataframe containing lambdaE relaxation time for each run from the input df
     """
     lambdaE_df = pd.DataFrame(fitting_results_list)
-    lambdaE_df = lambdaE_df.rename(columns={0:"Sample", 1:"-b", 2:"Intercept", 3:"R",4:"Run #", 5:"Ratio"})
+    lambdaE_df = lambdaE_df.rename(columns={0:"sample", 1:"-b", 2:"Intercept", 3:"R",4:"run"})
     lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
     lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
     lambdaE_df['R^2'] = (lambdaE_df['R'])**2
@@ -78,12 +78,13 @@ def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):
     start = fitting_bounds[0]
     end = fitting_bounds[1]
     fitting_results_list = []
-    samples = df["Sample"].unique()
+    samples = df["sample"].unique()
     for sample in samples:
-        sample_dataset = df[(df["Sample"] == sample)]
-        run_values = sample_dataset['Run #'].unique()
+        sample_dataset = df[(df["sample"] == sample)]
+        run_values = sample_dataset['run'].unique()
         for run in run_values:
-            run_dataset = sample_dataset[(sample_dataset['Run #'] == str(run))]
+            run_dataset = sample_dataset[(sample_dataset['run'] == str(run))]
+            run_dataset = run_dataset.reset_index(drop=True)
             fitting_results_temp =  [sample, *find_EC_slope(data_c, start, end), run]
             fitting_results_list.append(fitting_results_temp)
     #### Clean up the dataframe column names ### 

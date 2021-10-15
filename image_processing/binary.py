@@ -2,12 +2,39 @@ import numpy as np
 import skimage
 import typing
 import os
+import pandas as pd
+from pathlib import Path
+
 import data_processing as dp
 import file_handling as fh
 
-def top_border(image: np.ndarray) -> int:
+def add_saved_params_to_dict(save_location: typing.Union[str, bytes, os.PathLike],params_dict: dict):
+    """
+    Add parameters saved with binaries from tiffs to parameters from file name
 
-    pass
+    Parameters
+    ----------
+    save_location: path-like
+        folder where file containing parameters was saved
+    params_dict: dict
+        existing parameters dictionary
+
+    Returns
+    -------
+    add_saved_params_to_dict: dict
+        dictionary containing parameters from csv and from existing dictionary
+    """
+
+    # Read in parameters from csv.
+    folder_name = os.path.basename(save_location)
+    path = os.path.join(save_location,folder_name + "_params.csv")
+    saved_params = pd.read_csv(path)
+
+    # Add parameters to existing params_dict
+    for key in saved_params["Keys"].unique():
+        value = saved_params[saved_params["Keys"] == str(key)]["Values"].iloc[0]
+        params_dict[key] = value
+    return params_dict
 
 def bottom_border(image : np.ndarray) -> int:
     """
@@ -76,71 +103,137 @@ def calculate_min_diameter(image: np.ndarray, window: np.array) -> float:
         minimum diameter measured for the image in the window
     """
 
-    # extract image analysis boundaries from window and bottom_border
+    # Extract image analysis boundaries from window and bottom_border.
     left = window[0]
     top = window[1]
     right = window[2]
     bottom = bottom_border(image)
 
-    # initialize diameter_profile variable
+    # Initialize diameter_profile variable.
     diameter_profile = []
 
     for i in range(top,bottom):
         if np.all(image[i,left:right] == 0):
-            # if the row is all black, the diameter at that height is 0
+            # If the row is all black, the diameter at that height is 0.
             diameter_profile.append(0)
-        else: # if the row is not all black
-            # find indices of all white pixels
+        else: # If the row is not all black, calculate diameter.
+            # Find indices of all white pixels.
             non_zero_indicies = np.nonzero(image[i,left:right])
-            # the width of the liquid bridge is the first white pixel minus
-            # the last white pixel
+            # The width of the liquid bridge is the first white pixel minus
+            # the last white pixel plus one (count first pixel).
             first_non_zero = non_zero_indicies[0][0]
             last_non_zero = non_zero_indicies[0][-1]
-            diameter = last_non_zero - first_non_zero
+            diameter = last_non_zero - first_non_zero + 1
             diameter_profile.append(diameter)
     if diameter_profile.count(0) > 0:
-        # if liquid bridge is broken at any point,
-        # minimum diameter is 0
+        # If liquid bridge is broken at any point,
+        # minimum diameter is 0.
         min_diameter_avg = 0
     else:
-        # include all values within 2 pixels of minimum in average
+        # Include all values within 2 pixels of minimum in average
         # avoids effects due to arbitrary stepping from the discrete nature of
-        # pixels
+        # pixels.
 
-        # collect all values within 2 pixels of minimum
+        # Collect and average all values within 2 pixels of minimum.
         min_diameters = []
         for i, value in enumerate(diameter_profile):
             if value <= (min(diameter_profile)+2):
                 min_diameters.append(value)
-        # min_diameter_avg = np.mean([value \
-        #     for i, value in enumerate(diameter_profile) \
-        #     if value <= (min(diameter_profile)+2)])
         min_diameter_avg = np.mean(min_diameters)
     return min_diameter_avg
 
-def binary_to_time_diameter(binary_location: typing.Union[str, bytes, os.PathLike], window: np.array, fps: int, nozzle_row=1):
+def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLike], window: np.array, params_dict: dict) -> pd.DataFrame:
+    """
+    Convert binary image series into normalized radius vs. time data
+
+    Parameters
+    ----------
+    binary_location: path-like
+        folder where binary images are located
+    window : np.array
+        array of the boundaries of the image to analyze in the format
+        [left, top, right, bottom]
+    params_dict:
+        dictionary of parameters from file name and metadate saved with
+        binary images
+        requires parameters nozzle_diameter and fps
+
+    Returns
+    -------
+    binary_to_radius_time: pd.DataFrame
+        dataframe of time and R/R0 from the binary images
+    """
+
     image_list = skimage.io.imread_collection(os.path.join(binary_location,"*"))
     time_data = []
     diameter_data = []
 
+    # Collect needed parameters from params_dict.
+    try:
+        nozzle_row = int(params_dict["nozzle_row"])
+    except KeyError:
+        nozzle_row = 1
+    nozzle_diameter = int(params_dict["nozzle_diameter"])
+    fps = int(params_dict["fps"])
+
+    # Iterature through images and find minimum diameter for each image.
     for count, image in enumerate(image_list):
-        diameter = min_diameter(image,window)
+        diameter = calculate_min_diameter(image,window)
         normalized_diameter = diameter/nozzle_diameter
         frame_time = count/fps
         diameter_data.append(normalized_diameter)
         time_data.append(frame_time)
 
+    # Construct DataFrame
+    # Note that normalized diameter and normalized radius are equivalent.
     data = {"time (s)" : time_data, "R/R0" : diameter_data}
     df = pd.DataFrame(data)
     return df
 
-def binaries_to_csv(binary_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike]):
+    ## TODO: errors if missing parameters
+
+def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, fname_split: str = '_', sample_split: str = '-'):
+    """
+    Convert from binary images to csv of normalized radius versus time
+
+    Parameters
+    ----------
+    save_location: path-like
+        The path to the folder that contains "bin" folder of binary images and
+        csv of parameter metadata, should be named with relavant experimental
+        information split by the deliminator specified by fname_split.
+        At minimum, should contain "sampleinfo", "fps", and "run".
+        ex. folder of "20210929_6M-PEO-0p01wtpt_fps25k_1"
+    csv_location: path-like
+        The path to the folder in which csv should be saved.
+    fname_format: str
+        The format of the save location folder name with parameter names separated
+        by the deliminator specified by fname_split
+        ex. "date_sampleinfo_fps_run"
+    fname_split : str, optional
+        The deliminator for splitting the folder_name (default is "_")
+    sample_split : str, optional
+        The deliminator for splitting the sampleinfo section
+        of the folder_name (default is "-")
+    """
+
+    binary_location = os.path.join(save_location,"bin")
+
+    # Construct params_dict from filename and saved metadata.
+    folder_name = os.path.basename(save_location)
+    params_dict = fh.folder.folder_name_parse(folder_name,fname_format,sampleinfo_format,fname_split,sample_split)
+    params_dict = add_saved_params_to_dict(save_location,params_dict)
+
+    # Construct window based on first image.
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
     ### window: [left, top, right, bottom]
-    window = [0,read_top_border,width,height]
-    folder_name = Path(binary_location).name()
-    params_dict = fh.folder.folder_name_parse(folder_name)
-    df = time_diameter_data(binary_location,window,params_dict["fps"])
+    window = [0,0,width,height] ## TODO: Confirm based on changes to cropping
+
+
+    # Convert binaries to DataFrame to csv.
+    df = binaries_to_radius_time(binary_location,window,params_dict)
     df.to_csv(os.path.join(csv_location,folder_name + ".csv"))
+
+    # TODO: handle error if csv already exists

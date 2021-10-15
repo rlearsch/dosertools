@@ -153,8 +153,8 @@ def tiffs_to_binary(experimental_video_folder, background_video_folder, save_loc
     folder.make_destination_folders(save_location, save_crop, save_bg_sub)
     params_dict = th.define_image_parameters(background_video)
     bg_median = th.produce_background_image(background_video, params_dict)
-    params_dict["analysis_top"] = top_border(bg_median)
     th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False)
+    params_dict["crop_top"] = top_border(bg_median)
     export_params(save_location, params_dict)
     pass
 

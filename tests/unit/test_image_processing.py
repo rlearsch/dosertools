@@ -112,7 +112,7 @@ def test_tiffs_to_binary():
     #integration test
 
     #assert save_location exists
-    #assert produced video matches test_Sequence
+    #assert produced video matches test_sequence
     pass
 
 class TestTopBorder:
@@ -149,7 +149,7 @@ class TestExportParams:
         the correct values
     """
 
-    params_dict = {"analysis_top": 100, "nozzle_diameter": 40}
+    params_dict = {"crop_top": 100, "nozzle_diameter": 40}
 
     def test_saves_correct_csv(self,tmp_path):
         # Fails if export_params does not save the file or saves the wrong
@@ -194,7 +194,6 @@ class TestBottomBorder:
     def test_returns_correct_values(self):
         # Fails if bottom_border does not return correct values for series
         # of test images.
-
         assert ip.binary.bottom_border(self.black) == 5
         assert ip.binary.bottom_border(self.white) == 5
         assert ip.binary.bottom_border(self.sample_image1) == 520
@@ -210,6 +209,9 @@ class TestCalculateMinDiameter:
     -----
     test_returns_float:
         checks if calculate_min_diameter returns a float
+    test_returns_correct_values:
+        checks if calculate_min_diameter returns correct values for a series of
+        test images
     """
 
     sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
@@ -217,6 +219,9 @@ class TestCalculateMinDiameter:
     sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
     black = np.zeros((10,10),dtype=np.uint8)
     white = np.ones((10,10),dtype=np.uint8)*255
+    images = [sample_image1,sample_image2,sample_image3,black,white]
+    diameters = np.loadtxt(os.path.join(fixtures_binary,"fixture_diameters.csv"), delimiter=',')
+    top_borders = [165,167,240,0,0]
 
     def test_returns_float(self):
         # Fails if calculate_min_diameter does not return a float.
@@ -224,4 +229,62 @@ class TestCalculateMinDiameter:
         window = [0,0,width,height]
         assert type(ip.binary.calculate_min_diameter(self.sample_image1,window).item()) is float
 
-    
+    def test_returns_correct_values(self):
+        # Fails if calculate_min_diameter does not return correct values for
+        # a series of test images.
+        i = 0
+        for image in self.images:
+            (height,width) = np.shape(image)
+            window = [0,self.top_borders[i],width,height]
+            diameter = ip.binary.calculate_min_diameter(image,window)
+            assert round(diameter,4) == self.diameters[i]
+            i = i + 1
+
+class TestBinariesToRadiusTime:
+    """
+    Test binaries_to_radius_time
+
+    Tests
+    -----
+    test_returns_df:
+        checks if binaries_to_radius_time returns a dataframe
+    """
+
+    binary_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1","bin")
+    first_image = os.path.join(binary_location,"000.png")
+    image = skimage.io.imread(first_image)
+    (height, width) = image.shape
+    window = [0,0,width,height] # window: [left, top, right, bottom]
+    params_dict = {"fps": 25000, "nozzle_diameter": 317}
+
+    def test_returns_df(self):
+        # Fails if binaries_to_radius_time does not return a dataframe.
+        assert type(ip.binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)) is pd.DataFrame
+
+    ## TODO: test returns correct values
+
+class TestBinariesToCSV:
+    """
+    Test binaries_to_csv
+
+    Tests
+    -----
+    test_saves_correct_csv:
+        checks if saves csv and if that csv contains the expected data for
+        a given test sequence
+    """
+
+    save_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1")
+
+    def test_saves_correct_csv(self,tmp_path):
+        # Fails if binaries_to_csv does not save a csv or does not save the
+        # correct values
+        csv_path = tmp_path / "csv"
+        os.mkdir(csv_path)
+        ip.binary.binaries_to_csv(self.save_location,csv_path,"sampleinfo_fps_run","name")
+        #ip.binary.binaries_to_csv(self.save_location,os.path.join(fixtures_folder,"test_sequence","csv"),"sampleinfo_fps_run","name")
+        assert os.path.exists(os.path.join(csv_path,"test_fps25000_1.csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_fps25000_1.csv"))
+        results = pd.read_csv(os.path.join(csv_path,"test_fps25000_1.csv"))
+        for column in test_data.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

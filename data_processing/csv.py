@@ -93,7 +93,6 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
         strain rate and critical time calculated
     """
 
-    # read in data from csv
     dataset = pd.read_csv(csv)
 
     # truncate the data before the longest block of zeros

@@ -4,6 +4,7 @@ import typing
 import os
 import numpy as np
 from pathlib import Path
+
 import file_handling as fh
 import data_processing as dp
 
@@ -92,7 +93,6 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
         strain rate and critical time calculated
     """
 
-    # read in data from csv
     dataset = pd.read_csv(csv)
 
     # truncate the data before the longest block of zeros

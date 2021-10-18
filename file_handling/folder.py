@@ -2,7 +2,7 @@ import os
 import typing
 import warnings
 
-def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: str, fname_split="_", sample_split='-') -> dict:
+def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
     """Parses folder names into a dictonary of parameters using supplied format
 
     Parameters
@@ -61,7 +61,7 @@ def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: st
 
     return param_dict #output parameters
 
-def make_destination_folders(save_location : typing.Union[str, bytes, os.PathLike], save_crop=False,save_bg_sub=False):
+def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
     """
     Create destination folders for binary files (crop and bg_sub optional)
 
@@ -71,12 +71,12 @@ def make_destination_folders(save_location : typing.Union[str, bytes, os.PathLik
 
     Parameters
     ----------
-    save_location : path-like
+    save_location: path-like
         path to folder in which to save the sub folders
         if does not exist, function will create
-    save_crop : bool
+    save_crop: bool
         True if user wants to save intermediate cropped images (default: False)
-    save_bg_sub : bool
+    save_bg_sub: bool
         True if user wants to save intermediate background-subtracted images
         (default: False)
     """
@@ -101,7 +101,7 @@ def make_destination_folders(save_location : typing.Union[str, bytes, os.PathLik
 
     pass # no return value
 
-def make_folder(save_location : typing.Union[str, bytes, os.PathLike],folder_tag : str) -> bool:
+def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag: str) -> bool:
     """
     Create directory in save_location, returns False if already exists
 
@@ -117,7 +117,6 @@ def make_folder(save_location : typing.Union[str, bytes, os.PathLike],folder_tag
     -------
     make_folder : bool
         returns True if makes directory, False if it already exists
-
     """
 
     destination = os.path.join(save_location,folder_tag)

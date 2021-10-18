@@ -1,5 +1,15 @@
 # Current Status, Suggestions for improvement, Outstanding questions
 
+## Next Steps
+* Finish tests for binary related functions
+* New sample data set
+* Clean up fixtures folder
+* Integration tests
+* Variable, function, module naming cleanup pass
+* Docstrings, type hinting
+* Comment cleanup
+
+
 ## General Features
 * Improved filename parsing
   * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside)
@@ -11,6 +21,9 @@
 * Handling if folders/files already exists
 * Processing all videos in folder regardless of date
   * eliminate _bg and binaries from folder_list
+* check for file sorting issues when images exceed 999
+* fix naming of parameters for window for cropping
+* crop to the tip of the nozzle in initial background subtraction
 
 ## Existing Code
 * Look for usages of global variables, change to variable in the function call if possible
@@ -31,7 +44,8 @@
 
 
 ## Function Status
-* Implemented in current package
+* To be updated
+<!-- * Implemented in current package
   * folder_name_parse
 
 * Awaiting pull request
@@ -82,7 +96,7 @@
       * relies on run and sample being unique, which should come from better filename parsing
       * what causes fitting to fail? How do we produce meaningful fail information?
     * create dataframe from fits
-    * save fits to csv
+    * save fits to csv -->
 
 ## Packaging
 * Divide functions into modules
@@ -99,29 +113,10 @@
 * Usage instructions
 * License
 * Descriptions for each function
+* Type hinting
 
 ## Recently Completed
-* Improved filename parsing: folder_name_parse
-  * breaking down sample name?
-  * robust to if user did not follow exact format? (ex. _exp vs _bg)
-  * can we have user teach the function what kind of filename they use? (i.e. what tags to look for?)
-  * What parameters do we want to parse in the filename?
-    * Sample name
-    * Concentration
-    * fps
-    * shutter speed?
-    * date?
-    * run #
-    * Other tags: pass, sample number, ion ratio
-* data_processing.array submodule
-  * closest_index_for_value
-  * is_array_numeric
-  * is_dataframe_column_numeric
-  * nonzero_runs
-  * zero_runs
-* file_handling.folder submodule
-  * make_destination_folders
-  * make_folder
+
 
 ## Ideas to keep in mind
 * DRY : Don't Repeat Yourself

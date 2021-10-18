@@ -221,7 +221,7 @@ def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_lo
 
     # Construct params_dict from filename and saved metadata.
     folder_name = os.path.basename(save_location)
-    params_dict = fh.folder.folder_name_parse(folder_name,fname_format,sampleinfo_format,fname_split,sample_split)
+    params_dict = fh.folder.parse_filename(folder_name,fname_format,sampleinfo_format,fname_split,sample_split)
     params_dict = add_saved_params_to_dict(save_location,params_dict)
 
     # Construct window based on first image.

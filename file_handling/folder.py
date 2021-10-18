@@ -2,7 +2,7 @@ import os
 import typing
 import warnings
 
-def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
+def parse_filename(folder_name: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
     """Parses folder names into a dictonary of parameters using supplied format
 
     Parameters
@@ -25,7 +25,7 @@ def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: st
 
     Returns
     -------
-    folder_name_parse : dict
+    parse_filename : dict
         dictionary of parameters from folder_name
     """
 

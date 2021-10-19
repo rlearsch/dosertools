@@ -1,9 +1,11 @@
-# dos-tools
+# dostools
 
-dos-tools is a Python package for analyzing dripping-onto-substrate rheology videos.
+dostools is a Python package for analyzing dripping-onto-substrate rheology videos.
 
 ## Authors
 Rob Learsch and Red Lhota
+Contact: 
+rlearsch (at) caltech (dot) edu 
 
 ## Installation
 

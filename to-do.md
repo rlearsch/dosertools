@@ -46,7 +46,7 @@
 ## Function Status
 * To be updated
 <!-- * Implemented in current package
-  * folder_name_parse
+  * parse_filename
 
 * Awaiting pull request
   * nonzero_runs

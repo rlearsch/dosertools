@@ -2,41 +2,43 @@ import os
 import typing
 import warnings
 
-def folder_name_parse(folder_name: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
-    """Parses folder names into a dictonary of parameters using supplied format
+def parse_filename(filename: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
+    """
+    Parses filenames into a dictonary of parameters using supplied format
 
     Parameters
     ----------
-    folder_name : str
+    filename : str
         the name of the folder
         ex. "20210929_6M-PEO_fps-25k_1"
     fname_format : str
-        the format of the folder_name with parameter names separated
+        the format of the filename with parameter names separated
         by the deliminator specified by fname_split
         ex. "date_sampleinfo_fps_run"
     sampleinfo_format : str
-        the format of the sampleinfo section of the folder_name
+        the format of the sampleinfo section of the filename
         separated by the deliminator specified by sample_split
     fname_split : str, optional
-        the deliminator for splitting the folder_name (default is "_")
+        the deliminator for splitting the filename (default is "_")
     sample_split : str, optional
         the deliminator for splitting the sampleinfo section
-        of the folder_name (default is "-")
+        of the filename (default is "-")
 
     Returns
     -------
-    folder_name_parse : dict
-        dictionary of parameters from folder_name
+    parse_filename : dict
+        dictionary of parameters from filename
     """
 
-    folder_split = folder_name.split(fname_split) # split folder_name using fname_split deliminator
-    tag_split = fname_format.split(fname_split) # split fname_format into tags using fname_split deliminator
+    # Split filename and format into components.
+    name_split = filename.split(fname_split)
+    tag_split = fname_format.split(fname_split)
 
-    param_dict = {} # initialize dictionary for outputting parameters from the folder_name
+    param_dict = {} # initialize dictionary for outputting parameters from the filename
 
     i = 0 # index in the folder name
     for tag in tag_split:
-        value = folder_split[i] # entry in the folder name corresponding to the tag from the fname_format
+        value = name_split[i] # entry in the folder name corresponding to the tag from the fname_format
 
         if "fps" in tag.lower():
             if "k" in value: # check if fps is formated with k to represent 1000

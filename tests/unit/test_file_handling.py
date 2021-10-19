@@ -3,7 +3,7 @@ import os
 import pytest
 import warnings
 
-class TestFolderNameParse:
+class TestParseFilename:
     """
     Tests parse_filename
 
@@ -20,8 +20,8 @@ class TestFolderNameParse:
     """
 
     # sample data to test against
-    folder  = "20210929_6M-PEO_fps-25k_1"
-    folder_nok  = "20210929_6M-PEO_fps25000_1"
+    filename  = "20210929_6M-PEO_fps-25k_1"
+    filename_nok  = "20210929_6M-PEO_fps25000_1"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "mw-backbone"
     fname_split = "_"
@@ -37,17 +37,17 @@ class TestFolderNameParse:
 
     def test_returns_dict(self):
         # fails if the parse_filename method does not return a dictionary
-        assert type(fh.folder.parse_filename(self.folder,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split)) is dict
+        assert type(fh.folder.parse_filename(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split)) is dict
 
     def test_correct_parse_fps_k(self):
         # fails if the parse_filename method does not return the correct entry
         # (case for testing when fps is formatted with a k)
-        assert fh.folder.parse_filename(self.folder,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert fh.folder.parse_filename(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
 
     def test_correct_parse_fps_nok(self):
         # fails if the parse_filename method does not return the correct entry
         # (case for testing when fps is formatted without a k)
-        assert fh.folder.parse_filename(self.folder_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert fh.folder.parse_filename(self.filename_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
 
 # next steps, produce warnings if fps, run, sampleinfo? not present
 

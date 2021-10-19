@@ -89,5 +89,6 @@ def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):
             fitting_results_temp =  [sample, *find_EC_slope(run_dataset, start, end), run]
             fitting_results_list.append(fitting_results_temp)
     #### Clean up the dataframe column names ### 
-    lambdaE_df = annotate_lambdaE_df(fitting_results_list)
+    lambdaE_df = annotate_lambdaE_df(fitting_results_list
+                                     ### Save the df as a csv later in integration ? ### 
     return lambdaE_df

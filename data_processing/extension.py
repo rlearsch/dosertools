@@ -1,6 +1,40 @@
 import pandas as pd
 import numpy as np
-import data_processing as dp
+import data_processing.array as dparray
+
+def truncate_data(dataset : pd.DataFrame) -> pd.DataFrame:
+    """
+    Truncate a dataset before the longest block of continuous zeroes
+
+    Given a dataset, truncates the dataset before the longest block of
+    continuous zeroes in the "R/R0" column. The longest block of zeroes should
+    occur after the liquid bridge breaks and the readout is no longer accurate.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        dataframe containing data to truncate
+        must contain "R/R0" column
+
+    Returns
+    -------
+    truncate_data : pd.DataFrame
+        dataframe with truncated data
+    """
+
+    # Raise error if dataset does not have an "R/R0" column
+    if not "R/R0" in dataset.columns:
+        raise KeyError("column R/R0 must be present in dataset")
+
+    # find blocks where zeros are continuous
+    blocks = dparray.continuous_zero(np.array(dataset["R/R0"]))
+    # find the length of those blocks
+    block_length = np.transpose(blocks)[:][1] - np.transpose(blocks)[:][0]
+    # define the end of the dataset as beginning of the longest block of zeroes
+    longest_block = np.argmax(block_length)
+    end_data = blocks[longest_block][0]
+    dataset = dataset[0:end_data]
+    return dataset
 
 def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
     """
@@ -73,8 +107,8 @@ def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFr
         raise KeyError("column Strain Rate (1/s) must be present in dataset")
 
     # find indices for tc bounds
-    begin_tc_index = dp.array.closest_index_for_value(dataset, "R/R0", tc_bounds[0])
-    end_tc_index = dp.array.closest_index_for_value(dataset,  "R/R0", tc_bounds[1])
+    begin_tc_index = dparray.closest_index_for_value(dataset, "R/R0", tc_bounds[0])
+    end_tc_index = dparray.closest_index_for_value(dataset,  "R/R0", tc_bounds[1])
 
     subset = dataset.iloc[begin_tc_index:end_tc_index]
     # index of critical time definied as maximum in strain rate

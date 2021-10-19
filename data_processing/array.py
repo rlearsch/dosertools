@@ -130,11 +130,18 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
     if not column in dataset.columns:
         raise KeyError("column must be present in dataset")
 
-    # check if column is numeric
-    num_df = pd.DataFrame(columns=['int','float'])
-    num_df['int'] = num_df['int'].astype('int')
-    num_df['float'] = num_df['float'].astype('float')
-    return dataset[column].dtypes == num_df['int'].dtypes or dataset[column].dtypes == num_df['float'].dtypes
+    # Check if column is numeric by looking at column type.
+    # Addressing int32 vs. int64 typing issues by creating DataFrame types two
+    # ways.
+    num_df1 = pd.DataFrame(columns=['int','float'])
+    num_df1['int'] = num_df1['int'].astype('int')
+    num_df1['float'] = num_df1['float'].astype('float')
+    num_df2 = pd.DataFrame({'int':[1,2],'float':[1.1,2.1]})
+    is_int1 = dataset[column].dtypes == num_df1['int'].dtypes
+    is_int2 = dataset[column].dtypes == num_df2['int'].dtypes
+    is_float1 = dataset[column].dtypes == num_df1['float'].dtypes
+    is_float2 = dataset[column].dtypes == num_df2['float'].dtypes
+    return is_int1 or is_int2 or is_float1 or is_float2
 
 def is_array_numeric(array : np.ndarray) -> bool:
     """

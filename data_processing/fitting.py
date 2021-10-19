@@ -55,6 +55,7 @@ def annotate_lambdaE_df(fitting_results_list):
     lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
     lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
     lambdaE_df['R^2'] = (lambdaE_df['R'])**2
+    lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df 
 
 def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):

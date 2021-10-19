@@ -51,7 +51,7 @@ def annotate_lambdaE_df(fitting_results_list):
         dataframe containing lambdaE relaxation time for each run from the input df
     """
     lambdaE_df = pd.DataFrame(fitting_results_list)
-    lambdaE_df = lambdaE_df.rename(columns={0:"sample", 1:"-b", 2:"Intercept", 3:"R",4:"run"})
+    lambdaE_df = lambdaE_df.rename(columns={0:"sample", 1:"-b", 2:"Intercept", 3:"R",4:"run",5:"Rtc/R0"})
     lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
     lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
     lambdaE_df['R^2'] = (lambdaE_df['R'])**2
@@ -86,9 +86,10 @@ def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):
         for run in run_values:
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
-            fitting_results_temp =  [sample, *find_EC_slope(run_dataset, start, end), run]
+            R_tc_R0 = run_dataset.loc[0, "Rtc/R0"]
+            fitting_results_temp =  [sample, *find_EC_slope(run_dataset, start, end),run, R_tc_R0]
             fitting_results_list.append(fitting_results_temp)
     #### Clean up the dataframe column names ### 
-    lambdaE_df = annotate_lambdaE_df(fitting_results_list
+    lambdaE_df = annotate_lambdaE_df(fitting_results_list)
                                      ### Save the df as a csv later in integration ? ### 
     return lambdaE_df

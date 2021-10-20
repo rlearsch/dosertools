@@ -3,7 +3,7 @@ import numpy as np
 
 def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float) -> int:
     """
-    Find the closest value for a given value in a column and returns its index.
+    Finds the closest value for a given value in a column and returns its index.
 
     Parameters
     ----------
@@ -29,18 +29,18 @@ def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float)
     closest_index_for_value(df,'b',1.1) --> TypeError
     """
 
-    # Raise a TypeError for non-int or float (numeric) columns.
+    # Raises a TypeError for non-int or float (numeric) columns.
     if not is_dataframe_column_numeric(dataset, column):
         raise TypeError("dataset[column] must be numeric")
 
-    # Return closest_index by looking for smallest absolute distance from zero
+    # Returns closest_index by looking for smallest absolute distance from zero
     # after subtraction.
     closest_index = np.abs(dataset[column]-value).idxmin(axis=0)
     return closest_index
 
 def continuous_nonzero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating blocks of nonzero in given array.
+    Returns array with index pairs indicating blocks of nonzero in given array.
 
     Returns array with shape (m, 2), where m is the number of "blocks"
     of non-zeros.
@@ -74,7 +74,7 @@ def continuous_nonzero(array : np.ndarray) -> np.ndarray:
     if not is_array_numeric(array):
         raise TypeError("array must be numeric")
 
-    # Create an array that is 1 where a is not zero, and pad each end with an extra 0.
+    # Creates an array that is 1 where a is not zero, and pad each end with an extra 0.
     contains_one = np.concatenate(([0], (~np.equal(array, 0).view(np.int8))+2, [0]))
     absdiff = np.abs(np.diff(contains_one))
     # Blocks start and end where absdiff is 1.
@@ -83,7 +83,7 @@ def continuous_nonzero(array : np.ndarray) -> np.ndarray:
 
 def continuous_zero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating blocks of zero in given array.
+    Returns array with index pairs indicating blocks of zero in given array.
 
     Returns array with shape (m, 2), where m is the number of "blocks"
     of zeros.
@@ -117,7 +117,7 @@ def continuous_zero(array : np.ndarray) -> np.ndarray:
     if not is_array_numeric(array):
         raise TypeError("array must be numeric")
 
-    # Create an array that is 1 where a is 0, and pad each end with an extra 0.
+    # Creates an array that is 1 where a is 0, and pad each end with an extra 0.
     iszero = np.concatenate(([0], np.equal(array, 0).view(np.int8), [0]))
     absdiff = np.abs(np.diff(iszero))
     # Blocks start and end where absdiff is 1.
@@ -153,8 +153,8 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
     if not column in dataset.columns:
         raise KeyError("column must be present in dataset")
 
-    # Check if column is numeric by looking at column type.
-    # Addressing int32 vs. int64 typing issues by creating DataFrame types two
+    # Checks if column is numeric by looking at column type,
+    # addressing int32 vs. int64 typing issues by creating DataFrame types two
     # ways.
     num_df1 = pd.DataFrame(columns=['int','float'])
     num_df1['int'] = num_df1['int'].astype('int')
@@ -188,7 +188,7 @@ def is_array_numeric(array : np.ndarray) -> bool:
     is_array_numeric([True,False,False]) = False
     """
 
-    # List of types that will be considered numeric (unsigned integer,
+    # Creates list of types that will be considered numeric (unsigned integer,
     # signed integer, and float).
     numeric_kinds = {'u','i','f'}
 

@@ -1,18 +1,15 @@
 import pandas as pd
 import numpy as np
 
-# TODO: implement error handling if column does not exist in continuous_zero and continuous_nonzero, is_dataframe_column_numeric
-
 def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float) -> int:
     """
-    Find the closest value for a given value in a column and returns its index
+    Find the closest value for a given value in a column and returns its index.
 
     Parameters
     ----------
-
     dataset : pandas.DataFrame
         the dataframe that contains at least the column "column"
-        column must be numeric
+        column must be numeric (int or float)
     column : str
         name of column to look the closest value in
     value : float
@@ -23,27 +20,36 @@ def closest_index_for_value(dataset : pd.DataFrame, column : str, value : float)
     closest_index_for_value : int
         Closest index in dataset[column] for given value
 
+    Examples
+    --------
+    Given dataframe 'df' with column 'a' with values [-1,0,1,2] and 'b' with
+    values ['c',1,1,1.2], the following would result from use of the function.
+    closest_index_for_value(df,'a',1.1) = 2
+    closest_index_for_value(df,'a',1.9) = 3
+    closest_index_for_value(df,'b',1.1) --> TypeError
     """
 
+    # Raise a TypeError for non-int or float (numeric) columns.
     if not is_dataframe_column_numeric(dataset, column):
         raise TypeError("dataset[column] must be numeric")
 
-    # return closest_index by looking for smallest absolute distance from zero
-    # after subtraction
+    # Return closest_index by looking for smallest absolute distance from zero
+    # after subtraction.
     closest_index = np.abs(dataset[column]-value).idxmin(axis=0)
     return closest_index
 
 def continuous_nonzero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating blocks of nonzero in given array
+    Return array with index pairs indicating blocks of nonzero in given array.
 
     Returns array with shape (m, 2), where m is the number of "blocks"
     of non-zeros.
     The first column is the index of the first non-zero,
     the second is the index of the first zero following the blocks.
+    If the block reaches the end of the array, the second index will be
+    the size of the array + 1.
     Follows convention of numpy where array(a,a+n) yields the values
     of indices a through a+n-1.
-
 
     Parameters
     ----------
@@ -58,6 +64,11 @@ def continuous_nonzero(array : np.ndarray) -> np.ndarray:
         The first column is the index of the first non-zero,
         the second is the index of the first zero following the block.
 
+    Examples
+    --------
+    array                   continuous_nonzero(array)
+    [1,1,1,1,0,0,1,1,0]     [[0,4],[6,8]]
+    [0,0,-1,1,-1,1]         [[2,6]]
     """
 
     if not is_array_numeric(array):
@@ -72,15 +83,16 @@ def continuous_nonzero(array : np.ndarray) -> np.ndarray:
 
 def continuous_zero(array : np.ndarray) -> np.ndarray:
     """
-    Return array with index pairs indicating blocks of zero in given array
+    Return array with index pairs indicating blocks of zero in given array.
 
     Returns array with shape (m, 2), where m is the number of "blocks"
     of zeros.
     The first column is the index of the first zero,
     the second is the index of the first non-zero following the block.
+    If the block reaches the end of the array, the second index will be
+    the size of the array + 1.
     Follows convention of numpy where array(a,a+n) yields the values
     of indices a through a+n-1.
-
 
     Parameters
     ----------
@@ -95,6 +107,11 @@ def continuous_zero(array : np.ndarray) -> np.ndarray:
         The first column is the index of the first zero,
         the second is the index of the first non-zero following the block.
 
+    Examples
+    --------
+    array                   continuous_zero(array)
+    [1,1,1,1,0,0,1,1,0]     [[4,6],[8,9]]
+    [0,0,-1,1,-1,1]         [[0,2]]
     """
 
     if not is_array_numeric(array):
@@ -113,7 +130,6 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
 
     Parameters
     ----------
-
     dataset : pandas.DataFrame
         the dataframe that contains at least the column "column"
     column : str
@@ -124,9 +140,16 @@ def is_dataframe_column_numeric(dataset : pd.DataFrame, column : str) -> bool:
     is_dataframe_column_numeric : bool
         True if column in dataset is float or int, otherwise False
 
+    Examples
+    --------
+    Given dataframe 'df' with column 'a' with values [-1,0,1,2] and 'b' with
+    values ['c',1,1,1.2], the following would result from use of the function.
+    is_dataframe_column_numeric(df,'a') = True
+    is_dataframe_column_numeric(df,'b') = False
+    is_dataframe_column_numeric(df,'c') --> KeyError
     """
 
-    # checks for missing column and raise KeyError if missing
+    # Checks for missing column and raise KeyError if missing.
     if not column in dataset.columns:
         raise KeyError("column must be present in dataset")
 
@@ -149,7 +172,6 @@ def is_array_numeric(array : np.ndarray) -> bool:
 
     Parameters
     ----------
-
     array : np.ndarray
         array to check if numeric
 
@@ -158,8 +180,16 @@ def is_array_numeric(array : np.ndarray) -> bool:
     is_array_numeric : bool
         True if array is float or signed/unsigned int, otherwise False
 
+    Examples
+    --------
+    is_array_numeric([0,1,2,3]) = True
+    is_array_numeric([1.1,1.2,1.5]) = True
+    is_array_numeric(['a','b','c']) = False
+    is_array_numeric([True,False,False]) = False
     """
 
+    # List of types that will be considered numeric (unsigned integer,
+    # signed integer, and float).
     numeric_kinds = {'u','i','f'}
 
     return np.asarray(array).dtype.kind in numeric_kinds

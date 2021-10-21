@@ -8,11 +8,11 @@ import pandas as pd
 import skimage.filters
 import skimage.io
 import skimage.morphology
-from skimage.filters import (threshold_otsu, threshold_mean)
+from skimage.filters import (threshold_otsu, threshold_mean, threshold_li)
 from skimage import exposure
 
 import data_processing as dp
-
+import file_handling.folder as folder
 #import file_handling.folder as folder
 
 
@@ -104,7 +104,7 @@ def crop_single_image(image, params_dict):
 def subtract_background_single_image(cropped_image, bg_median):
     """Performs background subtraction from a cropped image. Assumes cropped_image and bg_median are the same size
     Returns an image."""
-    background_subtracted_image = cropped_image - bg_median
+    background_subtracted_image = np.int32(cropped_image) - np.int32(bg_median)
     background_subtracted_image = np.abs((background_subtracted_image < 0)*background_subtracted_image)
     background_subtracted_image = background_subtracted_image/np.max(background_subtracted_image)
     #eliminates half the noise
@@ -115,11 +115,12 @@ def subtract_background_single_image(cropped_image, bg_median):
 def mean_binarize_single_image(background_subtracted_image):
     """Performs global binarization on an image according to the Mean method
     """
-    thresh_mean = threshold_mean(background_subtracted_image)
-    binary_mean = background_subtracted_image < thresh_mean
-    binary_mean = np.array(binary_mean)*255
-    binary_mean = np.uint8(binary_mean)
-    return binary_mean
+    #thresh_mean = threshold_mean(background_subtracted_image)
+    thresh_otsu = threshold_otsu(background_subtracted_image)
+    binary_otsu = background_subtracted_image < thresh_otsu
+    binary_otsu = np.array(binary_otsu)*255
+    binary_otsu = np.uint8(binary_otsu)
+    return binary_otsu
 
 def save_image(image, image_number, save_location, extension):
     """Saves a single """
@@ -134,11 +135,11 @@ def convert_tiff_image(image, bg_median, params_dict, image_number, save_locatio
     cropped_image = crop_single_image(image, params_dict)
     if save_crop:
         save_image(cropped_image, image_number, os.path.join(save_location,"crop"),"tiff")
-        save_crop = False
+        #save_crop = False
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_sub:
         save_image(background_subtracted_image, image_number, os.path.join(save_location,"bg_sub"), "tiff")
-        save_bg_sub=False
+        #save_bg_sub=False
     binary_image = mean_binarize_single_image(background_subtracted_image)
     save_image(binary_image, image_number, os.path.join(save_location,"bin"),"png")
     pass
@@ -147,14 +148,14 @@ def tiffs_to_binary(experimental_video_folder, background_video_folder, save_loc
     """
     Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
     """
-    params_dict = th.define_initial_parameters()
+    params_dict = define_initial_parameters()
     experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*"), plugin='tifffile')
     background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*"), plugin='tifffile')
     folder.make_destination_folders(save_location, save_crop, save_bg_sub)
-    params_dict = th.define_image_parameters(background_video, params_dict)
-    bg_median = th.produce_background_image(background_video, params_dict)
-    th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop=False,save_bg_sub=False)
-    params_dict["crop_top"] = top_border(bg_median)
+    params_dict = define_image_parameters(background_video, params_dict)
+    bg_median = produce_background_image(background_video, params_dict)
+    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_sub)
+    params_dict["window_top"] = top_border(bg_median)
     export_params(save_location, params_dict)
     pass
 

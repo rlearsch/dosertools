@@ -75,6 +75,7 @@ def bottom_border(image : np.ndarray) -> int:
     bottom = np.argmax(rows) # this is number of rows below half
     return bottom+half # return index from top of image
 
+
 def calculate_min_diameter(image: np.ndarray, window: np.array) -> float:
     """
     Find the minimum diameter of the liquid bridge for a given image
@@ -229,7 +230,8 @@ def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_lo
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
     ### window: [left, top, right, bottom]
-    window = [0,0,width,height] ## TODO: Confirm based on changes to cropping
+    window_top = params_dict["window_top"]
+    window = [0,window_top,width,height] ## TODO: Confirm based on changes to cropping
 
 
     # Convert binaries to DataFrame to csv.

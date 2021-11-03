@@ -128,3 +128,82 @@ def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag:
         os.mkdir(destination)
         success = True
     return success
+
+def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format, fname_split='_', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False) -> typing.Tuple[list,list]:
+    """
+
+    """
+
+    fnames = []
+    exp_video_folders = []
+    bg_video_folders = []
+
+    subfolders = [ f.name for f in os.scandir(parent_folder) if f.is_dir()]
+    fname_tag_count = fname_format.count(fname_split)
+
+    if experiment_tag == '':
+        # If there's no experimental tag, then the fname format has all tags.
+        tag_count_expected = fname_tag_count
+    else:
+        # Add 1 to account for the experimental tag.
+        tag_count_expected = fname_tag_count + 1
+
+    for subfolder in subfolders:
+        print(subfolder)
+        if subfolder.count(fname_split) == tag_count_expected:
+            # Only look at subfolders that have the expected number of tags
+            # based on user provided filename format.
+            if experiment_tag == '':
+                # If there's no tag for experimental videos, then every folder
+                # is assumed to be an experimental video at first.
+                experiment_video = True
+                fname = subfolder
+            else:
+                # If there is a tag for experimental videos, then:
+                # 1. Check to see if folder has experimental tag
+                # 2. If it does, remove it from fname
+                tag_with_split = fname_split + experiment_tag
+                tag_len = len(tag_with_split)
+                if subfolder[-tag_len:] == tag_with_split:
+                    # Truncates fname before the experimental tag
+                    fname = subfolder[:-tag_len]
+                    experiment_video = True
+                else:
+                    # If doesn't have the tag, likely a background video.
+                    experiment_video = False
+                    matched_bg = False
+            if experiment_video:
+                if one_background:
+                    # Constructs the expected background folder name if there
+                    # is only one background for a series of runs
+                    tag_split = fname_format.split(fname_split)
+                    tag_lower = [t.lower() for t in tag_split]
+                    if "run" in tag_lower:
+                        index = tag_lower.index("run")
+                        name_split = fname.split(fname_split)
+                        name_split.pop(index)
+                        new_name = fname_split.join(name_split)
+                        bg_folder = new_name + fname_split + background_tag
+                    else:
+                        # If "run" is not a tag, then warn that one_background
+                        # ????? #TODO: WARNING
+                        bg_folder = fname + fname_split + background_tag
+
+
+                else:
+                    # Construct the expected background folder name
+                    bg_folder = fname + fname_split + background_tag
+                # If it is in the subfolders, then we have a matched background
+                if bg_folder in subfolders:
+                    matched_bg = True
+                else:
+                    matched_bg = False
+
+            # If we identify an experimental video and a matched background,
+            # add the entries to the output.
+            if experiment_video & matched_bg:
+                fnames.append(fname)
+                exp_video_folders.append(os.path.join(parent_folder,subfolder))
+                bg_video_folders.append(os.path.join(parent_folder,bg_folder))
+
+    return fnames, exp_video_folders, bg_video_folders

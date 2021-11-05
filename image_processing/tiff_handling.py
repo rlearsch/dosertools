@@ -104,12 +104,19 @@ def crop_single_image(image, params_dict):
 def subtract_background_single_image(cropped_image, bg_median):
     """Performs background subtraction from a cropped image. Assumes cropped_image and bg_median are the same size
     Returns an image."""
-    background_subtracted_image = np.int32(cropped_image) - np.int32(bg_median)
-    background_subtracted_image = np.abs((background_subtracted_image < 0)*background_subtracted_image)
-    background_subtracted_image = background_subtracted_image/np.max(background_subtracted_image)
-    #eliminates half the noise
-    background_subtracted_image = skimage.util.invert(background_subtracted_image)
-    background_subtracted_image = skimage.img_as_uint(background_subtracted_image)
+    background_subtracted_image_org = np.int32(cropped_image) - np.int32(bg_median)
+    if np.any(background_subtracted_image_org < 0):
+        #this means image is darker than background
+        background_subtracted_image = np.abs((background_subtracted_image_org < 0)*background_subtracted_image_org)
+        background_subtracted_image = background_subtracted_image/np.max(background_subtracted_image)
+        #eliminates half the noise
+        background_subtracted_image = skimage.util.invert(background_subtracted_image)
+        background_subtracted_image = skimage.img_as_uint(background_subtracted_image)
+    if np.all(background_subtracted_image_org > 0):
+        # this means that background is darker than image:
+        background_subtracted_image = np.abs((background_subtracted_image_org > 0)*background_subtracted_image_org)
+        background_subtracted_image = background_subtracted_image/np.max(background_subtracted_image)
+        background_subtracted_image = skimage.img_as_uint(background_subtracted_image)
     return background_subtracted_image
 
 def mean_binarize_single_image(background_subtracted_image):

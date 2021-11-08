@@ -106,7 +106,44 @@ def test_convert_tiff_sequence_to_binary():
     for i in range(0,len(target_converted_sequence)):
         assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
 
-
+class TestBackgroundSubtraction:
+    """
+    Tests substract_background_single_image
+    
+    Tests
+    -----
+    test_brighter_backround
+        This is the more common case, but we want to produce a uniformly bright image 
+    
+    test_darker_background
+    
+    test_mixed_background
+            This is the most common case, we want to produce a background subtracted image with some 0s, and some non-zeros        
+    """
+    def test_brighter_image(self):
+        test_brighter_than_bg = np.zeros([4,4]) + 1100
+        test_bg_image = np.zeros([4,4]) + 1000
+        brighter_image_subtract = th.subtract_background_single_image(test_brighter_than_bg, test_bg_image)
+        assert np.all(brighter_image_subtract != 0) 
+        assert np.all(brighter_image_subtract == 65535)
+    def test_darker_image(self):
+        test_darker_than_bg = np.zeros([4,4]) + 900
+        test_bg_image = np.zeros([4,4]) + 1000
+        darker_image_subtract = th.subtract_background_single_image(test_darker_than_bg, test_bg_image)
+        assert np.all(darker_image_subtract == 0) 
+        #assert np.all(darker_bg_subtract != 65535)
+    def test_mixed_background(self):
+        test_mixed = [
+            [1027.,  994., 1036., 1020.],
+           [ 959., 1048., 1026., 1029.],
+           [ 963.,  995.,  987., 1043.],
+           [1014., 1032.,  994.,  973.]
+        ]
+        test_bg_image = np.zeros([4,4]) + 1000
+        mixed_bg_subtraction = th.subtract_background_single_image(test_mixed,test_bg_image)
+        assert np.any(mixed_bg_subtraction == 0)
+        assert np.any(mixed_bg_subtraction != 0)
+    
 
 def test_tiffs_to_binary():
     #integration test

@@ -129,7 +129,7 @@ def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag:
         success = True
     return success
 
-def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format, fname_split='_', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False) -> typing.Tuple[list,list]:
+def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format, fname_split='_', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False) -> typing.Tuple[list,list,list]:
     """
 
     """
@@ -143,14 +143,14 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
 
     if experiment_tag == '':
         # If there's no experimental tag, then the fname format has all tags.
-        tag_count_expected = fname_tag_count
+        tag_count_expected = fname_tag_count + 1
     else:
         # Add 1 to account for the experimental tag.
-        tag_count_expected = fname_tag_count + 1
+        tag_count_expected = fname_tag_count + 2
 
     for subfolder in subfolders:
         print(subfolder)
-        if subfolder.count(fname_split) == tag_count_expected:
+        if (subfolder.count(fname_split) +1) == tag_count_expected:
             # Only look at subfolders that have the expected number of tags
             # based on user provided filename format.
             if experiment_tag == '':

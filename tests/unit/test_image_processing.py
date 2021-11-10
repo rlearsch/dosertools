@@ -11,7 +11,6 @@ from skimage import exposure
 
 import image_processing.tiff_handling as th
 import image_processing.binary as binary
-
 import file_handling as fh
 
 fixtures_folder = os.path.join("tests","fixtures")

@@ -5,8 +5,7 @@ import os
 import pandas as pd
 from pathlib import Path
 
-import data_processing as dp
-import file_handling as fh
+import file_handling.folder as folder
 
 def add_saved_params_to_dict(save_location: typing.Union[str, bytes, os.PathLike],params_dict: dict):
     """
@@ -193,7 +192,7 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
 
     ## TODO: errors if missing parameters
 
-def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, fname_split: str = '_', sample_split: str = '-'):
+def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float):
     """
     Convert from binary images to csv of normalized radius versus time
 
@@ -201,28 +200,20 @@ def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_lo
     ----------
     save_location: path-like
         The path to the folder that contains "bin" folder of binary images and
-        csv of parameter metadata, should be named with relavant experimental
-        information split by the deliminator specified by fname_split.
-        At minimum, should contain "sampleinfo", "fps", and "run".
+        csv of parameter metadata, should be named with relevent experimental
+        information. Save location used in tiff_handling functions.
         ex. folder of "20210929_6M-PEO-0p01wtpt_fps25k_1"
     csv_location: path-like
         The path to the folder in which csv should be saved.
-    fname_format: str
-        The format of the save location folder name with parameter names separated
-        by the deliminator specified by fname_split
-        ex. "date_sampleinfo_fps_run"
-    fname_split : str, optional
-        The deliminator for splitting the folder_name (default is "_")
-    sample_split : str, optional
-        The deliminator for splitting the sampleinfo section
-        of the folder_name (default is "-")
+    fps: float
+        Frames per second for the video (likely parsed from file name)
     """
 
     binary_location = os.path.join(save_location,"bin")
 
     # Construct params_dict from filename and saved metadata.
     folder_name = os.path.basename(save_location)
-    params_dict = fh.folder.parse_filename(folder_name,fname_format,sampleinfo_format,fname_split,sample_split)
+    params_dict = {"fps": fps}
     params_dict = add_saved_params_to_dict(save_location,params_dict)
 
     # Construct window based on first image.

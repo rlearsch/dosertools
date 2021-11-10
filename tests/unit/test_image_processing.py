@@ -278,7 +278,7 @@ class TestBinariesToCSV:
 
     def test_saves_correct_csv(self,tmp_path):
         # Fails if binaries_to_csv does not save a csv or does not save the
-        # correct values
+        # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
         ip.binary.binaries_to_csv(self.save_location,csv_path,"sampleinfo_fps_run","name")

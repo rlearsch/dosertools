@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import pytest
 import json
 import pandas as pd
 
@@ -10,6 +11,8 @@ from skimage import exposure
 
 import image_processing.tiff_handling as th
 import image_processing as ip
+
+import file_handling as fh
 
 fixtures_folder = os.path.join("tests","fixtures")
 fixtures_binary = os.path.join(fixtures_folder,"fixture_binary")
@@ -42,15 +45,10 @@ def test_define_image_parameters():
     #assert params_dict["crop_bottom"] == 634
     #assert params_dict["crop_top"] == 47
 
-def test_convert_tiff_image_saves_intermediate_files():
+class TestTiffConversions:
 
-    if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff")):
-        os.remove(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff"))
-    if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff")):
-        os.remove(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff"))
-    if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bin","261.png")):
-        os.remove(os.path.join(fixtures_folder,"test_processed_images","bin","261.png"))
-
+    #for subfolder in ['bin','bg_sub','crop']:
+        
     bg_median = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
     with open(os.path.join(fixtures_folder,"params.json")) as f:
         params_dict = json.load(f)
@@ -58,25 +56,60 @@ def test_convert_tiff_image_saves_intermediate_files():
     image_location = os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534000261.tif")
     image = skimage.io.imread(image_location)
     image_number = 261
-    save_location = os.path.join(fixtures_folder,"test_processed_images")
+    #save_location = os.path.join(fixtures_folder,"test_processed_images")
     save_crop = True
     save_bg_subtract = True
-    th.convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_subtract)
-    assert os.path.exists(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff"))
-    assert os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff"))
-    assert os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bin","261.png"))
+        
+    def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
+        save_location = tmp_path
+        fh.folder.make_destination_folders(save_location, True, True)
+       #if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff")):
+       #    os.remove(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff"))
+       #if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff")):
+       #    os.remove(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff"))
+       #if os.path.exists(os.path.join(fixtures_folder,"test_processed_images","bin","261.png")):
+       #    os.remove(os.path.join(fixtures_folder,"test_processed_images","bin","261.png"))
+        th.convert_tiff_image(self.image, self.bg_median, self.params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
+        assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
+        assert os.path.exists(os.path.join(save_location,"bin","261.png"))
 
-def test_convert_tiff_image_converts_intermediate_files():
-    #assert saved file matches
-    target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
-    target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
-    target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))
-    produced_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","bin","261.png"))
-    produced_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","crop","261.tiff"))
-    produced_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","bg_sub","261.tiff"))
-    assert np.all(target_bin == produced_bin)
-    assert np.all(target_crop == produced_crop)
-    assert np.all(target_bg_sub == produced_bg_sub)
+    def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
+        #assert saved file matches
+        save_location = tmp_path
+        fh.folder.make_destination_folders(save_location, True, True)
+        
+        th.convert_tiff_image(self.image, self.bg_median, self.params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
+        target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
+        target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))
+        produced_bin = skimage.io.imread(os.path.join(save_location,"bin","261.png"))
+        produced_crop = skimage.io.imread(os.path.join(save_location,"crop","261.tiff"))
+        produced_bg_sub = skimage.io.imread(os.path.join(save_location,"bg_sub","261.tiff"))
+        assert np.all(target_bin == produced_bin)
+        assert np.all(target_crop == produced_crop)
+        assert np.all(target_bg_sub == produced_bg_sub)
+        
+    def test_convert_tiff_sequence_to_binary(self, tmp_path):
+        """This loops through an image sequence and performs convert_tiff_image on each image in the video
+        """
+        save_location = tmp_path
+        fh.folder.make_destination_folders(save_location)
+
+        experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
+        #save_location = os.path.join(fixtures_folder,"tmp_path")
+        target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence","bin","*"))
+        #for i in range(0,len(target_converted_sequence)):
+        #    if os.path.exists(os.path.join(fixtures_folder,"tmp_path","bin",f"{i:03}.png")):
+        #        os.remove((os.path.join(fixtures_folder,"tmp_path","bin",f"{i:03}.png")))
+
+        th.convert_tiff_sequence_to_binary(experimental_sequence, self.bg_median, self.params_dict, save_location)
+        produced_converted_sequence_path = save_location / "bin" / '*'
+        #convert to string for skimage.io.imread_collection
+        produced_converted_sequence = skimage.io.imread_collection(str(produced_converted_sequence_path))
+        for i in range(0,len(target_converted_sequence)):
+            assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
+
 
 def test_produce_background_image():
     background_video = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_bg_2109_1534","*"), plugin='tifffile')
@@ -87,24 +120,6 @@ def test_produce_background_image():
     assert np.all(target_bg_median_array.astype(int) == bg_median_test.astype(int))
 
 
-def test_convert_tiff_sequence_to_binary():
-    """This loops through an image sequence and performs convert_tiff_image on each image in the video
-    """
-    bg_median = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
-    with open(os.path.join(fixtures_folder,"params.json")) as f:
-        params_dict = json.load(f)
-    experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
-    save_location = os.path.join(fixtures_folder,"tmp_path")
-    target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence","bin","*"))
-    for i in range(0,len(target_converted_sequence)):
-        if os.path.exists(os.path.join(fixtures_folder,"tmp_path","bin",f"{i:03}.png")):
-            os.remove((os.path.join(fixtures_folder,"tmp_path","bin",f"{i:03}.png")))
-
-    th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location)
-
-    produced_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"tmp_path", "bin",'*'))
-    for i in range(0,len(target_converted_sequence)):
-        assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
 
 class TestBackgroundSubtraction:
     """

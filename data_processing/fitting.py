@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import typing
 
 from scipy.optimize import curve_fit
 from scipy.optimize import fsolve
@@ -8,7 +9,7 @@ from scipy import stats
 import data_processing.array as dparray
 import data_processing.csv as process
 
-def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> list[float, float, float]:
+def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
     """
     Finds the exponential decay of the EC region for a single dataset. Also returns the intercept and r value of the fit
 
@@ -57,7 +58,7 @@ def annotate_lambdaE_df(fitting_results_list: list) -> pd.DataFrame:
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df
 
-def find_lambdaE(df: pd.DataFrame, fitting_bounds: list[float, float] = [0.1, 0.045]) -> pd.DataFrame:
+def find_lambdaE(df: pd.DataFrame, fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
     """
     Condenses a DOS run into an extensional relaxation time by fitting the EC region (t > tc) to a decaying exponential
 

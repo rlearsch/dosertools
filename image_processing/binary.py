@@ -104,10 +104,10 @@ def calculate_min_diameter(image: np.ndarray, window: np.array) -> float:
     """
 
     # Extract image analysis boundaries from window and bottom_border.
-    left = window[0]
-    top = window[1]
-    right = window[2]
-    bottom = bottom_border(image)
+    left = int(window[0])
+    top = int(window[1])
+    right = int(window[2])
+    bottom = int(bottom_border(image))
 
     # Initialize diameter_profile variable.
     diameter_profile = []
@@ -174,7 +174,7 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
     except KeyError:
         nozzle_row = 1
     nozzle_diameter = int(params_dict["nozzle_diameter"])
-    fps = int(params_dict["fps"])
+    fps = params_dict["fps"]
 
     # Iterature through images and find minimum diameter for each image.
     for count, image in enumerate(image_list):
@@ -221,8 +221,8 @@ def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_lo
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
     ### window: [left, top, right, bottom]
-    window_top = params_dict["window_top"]
-    window = [0,window_top,width,height] ## TODO: Confirm based on changes to cropping
+    window_top = int(params_dict["window_top"])
+    window = [0,window_top,width,height]
 
 
     # Convert binaries to DataFrame to csv.

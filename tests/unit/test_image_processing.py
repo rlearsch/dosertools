@@ -159,7 +159,7 @@ class TestTopBorder:
 
     def test_returns_correct_value(self):
         # Fails if top_border does not return correct value for test background.
-        assert th.top_border(self.example_background) == 100
+        assert th.top_border(self.example_background) == 120
 
 class TestExportParams:
     """
@@ -273,7 +273,7 @@ class TestBinariesToRadiusTime:
         checks if binaries_to_radius_time returns a dataframe
     """
 
-    binary_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1","bin")
+    binary_location = os.path.join(fixtures_folder,"test_sequence","bin")
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
@@ -297,7 +297,7 @@ class TestBinariesToCSV:
         a given test sequence
     """
 
-    save_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1")
+    save_location = os.path.join(fixtures_folder,"test_sequence")
     fps = 25000
 
     def test_saves_csv(self,tmp_path):
@@ -306,7 +306,7 @@ class TestBinariesToCSV:
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
         binary.binaries_to_csv(self.save_location,csv_path,self.fps)
-        assert os.path.exists(os.path.join(csv_path,"test_fps25000_1.csv"))
+        assert os.path.exists(os.path.join(csv_path,"test_sequence.csv"))
 
     def test_saves_correct_csv(self,tmp_path):
         # Fails if binaries_to_csv does not save a csv or does not save the
@@ -314,7 +314,7 @@ class TestBinariesToCSV:
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
         binary.binaries_to_csv(self.save_location,csv_path,self.fps)
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_fps25000_1.csv"))
-        results = pd.read_csv(os.path.join(csv_path,"test_fps25000_1.csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        results = pd.read_csv(os.path.join(csv_path,"test_sequence.csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

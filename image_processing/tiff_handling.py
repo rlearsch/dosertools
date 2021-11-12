@@ -121,7 +121,7 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
 
     return bg_median
 
-def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], save_crop=False: bool,save_bg_sub=False: bool):
+def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
     """
     Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract.
     
@@ -265,7 +265,7 @@ def save_image(image: np.ndarray, image_number: int, save_location: typing.Union
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, save_location: typing.Union[str, bytes, os.PathLike], save_crop=False: bool ,save_bg_sub=False: bool):
+def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
     """Fully converts a raw tiff to binary png image. 
     
     Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps
@@ -307,7 +307,7 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
     save_image(binary_image, image_number, os.path.join(save_location,"bin"),"png")
     pass
 
-def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], save_location: typing.Union[str, bytes, os.PathLike], save_crop=False: bool,save_bg_sub=False: bool):
+def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
     """
     Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
     

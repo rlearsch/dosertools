@@ -19,6 +19,16 @@ import file_handling.folder as folder
 def define_initial_parameters() -> dict:
     """
     Initalizes the parameters dictionary with coefficients for the initial image crop.
+    
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    params_dict: dict
+        The partial dictionary of parameters
+
     """
     params_dict = dict(
         nozzle_row = 1,
@@ -96,7 +106,8 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
     Returns
     -------
     bg_median: np.ndarray
-        The median of the frames in the background. We prefer median because it is less sensitive to random noise and the values are likely to be integers 
+        The median of the frames in the background. 
+        We prefer median because it is less sensitive to random noise and the values are likely to be integers 
     """
     nozzle_row = params_dict["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]

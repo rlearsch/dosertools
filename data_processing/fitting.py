@@ -58,7 +58,7 @@ def annotate_lambdaE_df(fitting_results_list: list) -> pd.DataFrame:
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df 
 
-def find_lambdaE(df: pd.DataFrame, fitting_bounds=[0.1, 0.045]: list[float, float]) -> pd.DataFrame:
+def find_lambdaE(df: pd.DataFrame, fitting_bounds: list[float, float] = [0.1, 0.045]) -> pd.DataFrame:
     """
     Condenses a DOS run into an extensional relaxation time by fitting the EC region (t > tc) to a decaying exponential
 

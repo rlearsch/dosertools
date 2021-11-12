@@ -8,7 +8,7 @@ from scipy import stats
 import data_processing.array as array
 import data_processing.csv as process
 
-def find_EC_slope(run_dataset, start, end):
+def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> list[float, float, float]:
     """
     Finds the exponential decay of the EC region for a single dataset. Also returns the intercept and r value of the fit
 
@@ -33,7 +33,7 @@ def find_EC_slope(run_dataset, start, end):
     slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_radius)
     return slope, intercept, r_value
 
-def annotate_lambdaE_df(fitting_results_list):
+def annotate_lambdaE_df(fitting_results_list: list) -> pd.DataFrame:
     """
     Do we want to bring other columns with us like ion, polymer identity, etc? How to code that?
 
@@ -58,7 +58,7 @@ def annotate_lambdaE_df(fitting_results_list):
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df 
 
-def find_lambdaE(df, fitting_bounds=[0.1, 0.045]):
+def find_lambdaE(df: pd.DataFrame, fitting_bounds=[0.1, 0.045]: list[float, float]) -> pd.DataFrame:
     """
     Condenses a DOS run into an extensional relaxation time by fitting the EC region (t > tc) to a decaying exponential
 

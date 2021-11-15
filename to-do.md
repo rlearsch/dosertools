@@ -9,12 +9,9 @@
 * Save/produce dataset of fluid properties with sample variables 
 * Find eta_E plateau value
 * Plotting functions (mostly as a vetting step)
-* Finish tests for binary related functions
-* New sample data set
 * Clean up fixtures folder
 * Integration tests
 * Variable, function, module naming cleanup pass
-* Docstrings, type hinting
 * Comment cleanup
 * Improved filename parsing
   * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside) - **double check this**

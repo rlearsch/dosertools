@@ -10,9 +10,8 @@ from skimage.filters import (threshold_otsu, threshold_li)
 from skimage import exposure
 
 import image_processing.tiff_handling as th
-import image_processing as ip
-
-import file_handling as fh
+import image_processing.binary as binary
+import file_handling.folder as folder
 
 fixtures_folder = os.path.join("tests","fixtures")
 fixtures_binary = os.path.join(fixtures_folder,"fixture_binary")
@@ -38,17 +37,17 @@ def test_define_image_parameters():
     assert target_params_dict == params_dict
 
 class TestTiffConversions:
-       
+
     bg_median = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
     image_location = os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534000261.tif")
     image = skimage.io.imread(image_location)
     image_number = 261
     save_crop = True
     save_bg_subtract = True
-        
+
     def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
         save_location = tmp_path
-        fh.folder.make_destination_folders(save_location, True, True)
+        folder.make_destination_folders(save_location, True, True)
         th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
@@ -57,8 +56,8 @@ class TestTiffConversions:
     def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
         #assert saved file matches
         save_location = tmp_path
-        fh.folder.make_destination_folders(save_location, True, True)
-        
+        folder.make_destination_folders(save_location, True, True)
+
         th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
         target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
         target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
@@ -69,12 +68,12 @@ class TestTiffConversions:
         assert np.all(target_bin == produced_bin)
         assert np.all(target_crop == produced_crop)
         assert np.all(target_bg_sub == produced_bg_sub)
-        
+
     def test_convert_tiff_sequence_to_binary(self, tmp_path):
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
         save_location = tmp_path
-        fh.folder.make_destination_folders(save_location)
+        folder.make_destination_folders(save_location)
 
         experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
         target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence","bin","*"))
@@ -96,28 +95,28 @@ def test_produce_background_image():
 class TestBackgroundSubtraction:
     """
     Tests substract_background_single_image
-    
+
     Tests
     -----
     test_brighter_backround
-        This is the more common case, but we want to produce a uniformly bright image 
-    
+        This is the more common case, but we want to produce a uniformly bright image
+
     test_darker_background
-    
+
     test_mixed_background
-            This is the most common case, we want to produce a background subtracted image with some 0s, and some non-zeros        
+            This is the most common case, we want to produce a background subtracted image with some 0s, and some non-zeros
     """
     def test_brighter_image(self):
         test_brighter_than_bg = np.zeros([4,4]) + 1100
         test_bg_image = np.zeros([4,4]) + 1000
         brighter_image_subtract = th.subtract_background_single_image(test_brighter_than_bg, test_bg_image)
-        assert np.all(brighter_image_subtract != 0) 
+        assert np.all(brighter_image_subtract != 0)
         assert np.all(brighter_image_subtract == 65535)
     def test_darker_image(self):
         test_darker_than_bg = np.zeros([4,4]) + 900
         test_bg_image = np.zeros([4,4]) + 1000
         darker_image_subtract = th.subtract_background_single_image(test_darker_than_bg, test_bg_image)
-        assert np.all(darker_image_subtract == 0) 
+        assert np.all(darker_image_subtract == 0)
         #assert np.all(darker_bg_subtract != 65535)
     def test_mixed_background(self):
         test_mixed = [
@@ -130,7 +129,7 @@ class TestBackgroundSubtraction:
         mixed_bg_subtraction = th.subtract_background_single_image(test_mixed,test_bg_image)
         assert np.any(mixed_bg_subtraction == 0)
         assert np.any(mixed_bg_subtraction != 0)
-    
+
 
 def test_tiffs_to_binary():
     #integration test
@@ -146,9 +145,9 @@ class TestTopBorder:
     Tests
     -----
     test_returns_int:
-        checks if top_border returns an integer
+        Checks if top_border returns an integer.
     test_returns_correct_value:
-        checks if top_border returns the correct value for a test background
+        Checks if top_border returns the correct value for a test background.
     """
 
     # Import example background image previously stored as an array.
@@ -156,11 +155,11 @@ class TestTopBorder:
 
     def test_returns_int(self):
         # Fails if top_border does not return an integer.
-        assert type(ip.tiff_handling.top_border(self.example_background).item()) is int
+        assert type(th.top_border(self.example_background).item()) is int
 
     def test_returns_correct_value(self):
         # Fails if top_border does not return correct value for test background.
-        assert ip.tiff_handling.top_border(self.example_background) == 120
+        assert th.top_border(self.example_background) == 120
 
 class TestExportParams:
     """
@@ -169,8 +168,8 @@ class TestExportParams:
     Tests
     -----
     test_saves_correct_csv:
-        checks if export_params saves a csv and then if it saves the csv with
-        the correct values
+        Checks if export_params saves a csv and then if it saves the csv with
+        the correct values.
     """
 
     params_dict = {"window_top": 120, "nozzle_diameter": 40}
@@ -180,7 +179,7 @@ class TestExportParams:
         # values to the file.
         save_location = tmp_path / "sample_file"
         os.mkdir(save_location)
-        ip.tiff_handling.export_params(save_location,self.params_dict)
+        th.export_params(save_location,self.params_dict)
         path = os.path.join(save_location,"sample_file_params.csv")
 
         # Check if csv exists.
@@ -199,10 +198,10 @@ class TestBottomBorder:
     Tests
     -----
     test_returns_int:
-        checks if bottom_border returns an integer
+        Checks if bottom_border returns an integer.
     test_returns_correct_values:
-        checks if bottom_border returns the correct values for a series of test
-        images
+        Checks if bottom_border returns the correct values for a series of test
+        images.
     """
 
     sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
@@ -213,16 +212,16 @@ class TestBottomBorder:
 
     def test_returns_int(self):
         # Fails if bottom_border does not return an integer.
-        assert type(ip.binary.bottom_border(self.sample_image1).item()) is int
+        assert type(binary.bottom_border(self.sample_image1).item()) is int
 
     def test_returns_correct_values(self):
         # Fails if bottom_border does not return correct values for series
         # of test images.
-        assert ip.binary.bottom_border(self.black) == 5
-        assert ip.binary.bottom_border(self.white) == 5
-        assert ip.binary.bottom_border(self.sample_image1) == 520
-        assert ip.binary.bottom_border(self.sample_image2) == 439
-        assert ip.binary.bottom_border(self.sample_image3) == 630
+        assert binary.bottom_border(self.black) == 5
+        assert binary.bottom_border(self.white) == 5
+        assert binary.bottom_border(self.sample_image1) == 520
+        assert binary.bottom_border(self.sample_image2) == 439
+        assert binary.bottom_border(self.sample_image3) == 630
 
 
 class TestCalculateMinDiameter:
@@ -232,10 +231,10 @@ class TestCalculateMinDiameter:
     Tests
     -----
     test_returns_float:
-        checks if calculate_min_diameter returns a float
+        Checks if calculate_min_diameter returns a float.
     test_returns_correct_values:
-        checks if calculate_min_diameter returns correct values for a series of
-        test images
+        Checks if calculate_min_diameter returns correct values for a series of
+        test images.
     """
 
     sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
@@ -251,7 +250,7 @@ class TestCalculateMinDiameter:
         # Fails if calculate_min_diameter does not return a float.
         (height,width) = np.shape(self.sample_image1)
         window = [0,0,width,height]
-        assert type(ip.binary.calculate_min_diameter(self.sample_image1,window).item()) is float
+        assert type(binary.calculate_min_diameter(self.sample_image1,window).item()) is float
 
     def test_returns_correct_values(self):
         # Fails if calculate_min_diameter does not return correct values for
@@ -260,7 +259,7 @@ class TestCalculateMinDiameter:
         for image in self.images:
             (height,width) = np.shape(image)
             window = [0,self.top_borders[i],width,height]
-            diameter = ip.binary.calculate_min_diameter(image,window)
+            diameter = binary.calculate_min_diameter(image,window)
             assert round(diameter,4) == self.diameters[i]
             i = i + 1
 
@@ -271,21 +270,33 @@ class TestBinariesToRadiusTime:
     Tests
     -----
     test_returns_df:
-        checks if binaries_to_radius_time returns a dataframe
+        Checks if binaries_to_radius_time returns a dataframe.
+    test_returns_correct_values:
+        Checks if binaries_to_radius_time returns correct values for given
+        test sequence
     """
 
-    binary_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1","bin")
+    binary_location = os.path.join(fixtures_folder,"test_sequence","bin")
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
-    window = [0,0,width,height] # window: [left, top, right, bottom]
+    window_top = 100
+    window = [0,window_top,width,height] # window: [left, top, right, bottom]
     params_dict = {"fps": 25000, "nozzle_diameter": 317}
 
     def test_returns_df(self):
         # Fails if binaries_to_radius_time does not return a dataframe.
-        assert type(ip.binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)) is pd.DataFrame
+        assert type(binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)) is pd.DataFrame
 
-    ## TODO: test returns correct values
+    def test_returns_correct_values(self):
+        # Fails if binaries_to_radius_time does not return the correct values
+        # for the given sequence of images.
+        results = binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        print(results)
+        print(test_data)
+        for column in results.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
 class TestBinariesToCSV:
     """
@@ -298,17 +309,24 @@ class TestBinariesToCSV:
         a given test sequence
     """
 
-    save_location = os.path.join(fixtures_folder,"test_sequence","test_fps25000_1")
+    save_location = os.path.join(fixtures_folder,"test_sequence")
+    fps = 25000
 
-    def test_saves_correct_csv(self,tmp_path):
+    def test_saves_csv(self,tmp_path):
         # Fails if binaries_to_csv does not save a csv or does not save the
         # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        ip.binary.binaries_to_csv(self.save_location,csv_path,"sampleinfo_fps_run","name")
-        #ip.binary.binaries_to_csv(self.save_location,os.path.join(fixtures_folder,"test_sequence","csv"),"sampleinfo_fps_run","name")
-        assert os.path.exists(os.path.join(csv_path,"test_fps25000_1.csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_fps25000_1.csv"))
-        results = pd.read_csv(os.path.join(csv_path,"test_fps25000_1.csv"))
+        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        assert os.path.exists(os.path.join(csv_path,"test_sequence.csv"))
+
+    def test_saves_correct_csv(self,tmp_path):
+        # Fails if binaries_to_csv does not save a csv or does not save the
+        # correct values
+        csv_path = tmp_path / "csv"
+        os.mkdir(csv_path)
+        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        results = pd.read_csv(os.path.join(csv_path,"test_sequence.csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

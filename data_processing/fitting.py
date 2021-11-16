@@ -34,7 +34,7 @@ def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing
     slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_radius)
     return slope, intercept, r_value
 
-def annotate_lambdaE_df(fitting_results_list: list) -> pd.DataFrame:
+def annotate_summary_df(fitting_results_list: list) -> pd.DataFrame:
     """
     Do we want to bring other columns with us like ion, polymer identity, etc? How to code that?
 
@@ -58,7 +58,7 @@ def annotate_lambdaE_df(fitting_results_list: list) -> pd.DataFrame:
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df
 
-def find_lambdaE(df: pd.DataFrame, fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
+def make_summary_dataframe(df: pd.DataFrame, fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
     """
     Condenses a DOS run into an extensional relaxation time by fitting the EC region (t > tc) to a decaying exponential
 
@@ -89,6 +89,13 @@ def find_lambdaE(df: pd.DataFrame, fitting_bounds: typing.Tuple[float, float] = 
             fitting_results_temp =  [sample, *find_EC_slope(run_dataset, start, end),run, R_tc_R0]
             fitting_results_list.append(fitting_results_temp)
     #### Clean up the dataframe column names ###
-    lambdaE_df = annotate_lambdaE_df(fitting_results_list)
+    summary_df = annotate_summary_df(fitting_results_list)
                                      ### Save the df as a csv later in integration ? ###
-    return lambdaE_df
+    return summary_df
+
+
+    # Reads in parameters from file name and add to dataframe.
+    fname = Path(csv).name
+    params = fh.folder.parse_filename(fname,fname_format,sampleinfo_format,fname_split,sample_split)
+    for key, value in params.items():
+        dataset[key] = value

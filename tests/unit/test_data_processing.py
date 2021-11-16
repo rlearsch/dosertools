@@ -12,6 +12,8 @@ import data_processing.csv as dpcsv
 import data_processing.fitting as fitting
 import data_processing.extension as extension
 
+import file_handling.folder as folder
+
 # Assigns folders for fixtures.
 fixtures_folder = os.path.join("tests","fixtures")
 fixtures_fitting = os.path.join(fixtures_folder,"fixtures_fitting")
@@ -604,20 +606,28 @@ def test_find_EC_slope():
     assert np.isclose(intercept, 0.2809024757035168)
     assert np.isclose(r_value,-0.9996926885633579)
 
-def test_annotate_lambdaE_df():
-    fitting_results_list = [["test sample", -347, 0.28, -0.999, 1]]
+def test_annotate_summary_df():
+    sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
+    # header_params was produced by the following function: folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
+    # it is hard-coded in to not use folder.parse_filename in the test 
+    header_params = {'sample': '0.8MDa-PAM-1wtpct-2M-NaCl',
+                     'MW': '0.8MDa',
+                     'Polymer': 'PAM',
+                     'c': '1wtpct',
+                     'salt_c': '2M',
+                     'salt_id': 'NaCl'}
+    fitting_results_list = [[*header_params.values(), -347, 0.28, -0.999, 1, 0.56]]
     target_lambdaE_df = pd.io.json.read_json(os.path.join(fixtures_fitting,"target_lambdaE_df.json"))
-    lambdaE_df = fitting.annotate_lambdaE_df(fitting_results_list)
+    lambdaE_df = fitting.annotate_summary_df(fitting_results_list, header_params)
     pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False)
     #pass
 
-def test_find_lambdaE():
+def test_make_summary_dataframe():
     test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
-    find_lambdaE_with_default_bounds = fitting.find_lambdaE(test_generated_df)
-    find_lambdaE_with_modified_bounds = fitting.find_lambdaE(test_generated_df, [0.8, 0.1])
+    find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
+    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c', fitting_bounds =[0.8, 0.1])
     target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
     target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
     ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
-    #pass

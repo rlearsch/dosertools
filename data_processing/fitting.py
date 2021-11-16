@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+import os
 import typing
+import datetime
 
 from scipy.optimize import curve_fit
 from scipy.optimize import fsolve
@@ -121,6 +123,16 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, fname_split
                                      ### Save the df as a csv later in integration ? ###
     return summary_df
 
-def save_summary_df(summary_df: dict, filename: str, save_location ) -> None:
-    # saves summary df to specific location with filename #
+def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
+    # right now, I'm not sure what information the computer will have about the files it's processing
+    # because of this, I'm going to use the current date and time to name this summary csv
+    # I anticipate we can come up with a better filename convention at a later time
+    # thus, the filename arguemnt is present, but unused in the function
+    
+    date_and_time = datetime.datetime.now()
+    #I don't want colons or periods in my filename string
+    date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
+    filename_string = date_time_string + '_DOS-summary.csv'
+    full_save_path = os.path.join(save_location,filename_string)
+    summary_df.to_csv(full_save_path)
     pass

@@ -631,3 +631,19 @@ def test_make_summary_dataframe():
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
     ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+    
+class TestSaveSummary:
+    date_and_time = datetime.now()
+    date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
+    # produce dummy dataframe that is empty 
+    dummy_df = pd.DataFrame(0, index = range(2), columns = range(2))
+    def test_save_summary_df(self, tmp_path):
+            # Checks that file exists in save_directory, with correct filename (based on date)
+            save_location = tmp_path 
+            fitting.save_summary_df(self.dummy_df, save_location)
+            assert os.path.isdir(save_location)
+            if os.path.isdir(save_location):
+                saved_filename = os.listdir(save_location)[0]
+                file_location = os.path.join(save_location, saved_filename)
+            assert os.path.exists(file_location)
+            

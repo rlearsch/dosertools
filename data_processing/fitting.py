@@ -124,6 +124,25 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, fname_split
     return summary_df
 
 def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
+    """
+    Saves the summary dataset from a large processed batch of videos.
+    
+    The summary dataset includes only the fluid properties, not the 'raw' radius vs time data.
+    
+    Parameters
+    ----------
+    summary_df : pd.DataFrame
+        Contains LambdaE, R(tc)/R0, and sample info for multiple runs and samples
+    save_location: path-like
+        path to folder in which to save the csv
+    filename: string
+        Currently not used, but this will be the name to give to the summary dataset csv
+    
+    Returns
+    -------
+    None. Saves file to disk.
+    """
+    
     # right now, I'm not sure what information the computer will have about the files it's processing
     # because of this, I'm going to use the current date and time to name this summary csv
     # I anticipate we can come up with a better filename convention at a later time

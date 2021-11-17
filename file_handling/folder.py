@@ -2,7 +2,7 @@ import os
 import typing
 import warnings
 
-def parse_filename(filename: str, fname_format: str, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-') -> dict:
+def parse_filename(filename: str, fname_format: str, sampleinfo_format: str, fname_split: str = "_", sample_split: str = '-') -> dict:
     """
     Parses filenames into a dictonary of parameters using supplied format
 
@@ -129,10 +129,12 @@ def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag:
         success = True
     return success
 
-def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format, fname_split='_', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False) -> typing.Tuple[list,list,list]:
+def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, fname_split='_', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False) -> typing.Tuple[list,list,list]:
     """
 
     """
+
+    ##TODO: docstring, test against timestamped folders
 
     fnames = []
     exp_video_folders = []
@@ -149,7 +151,6 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
         tag_count_expected = fname_tag_count + 2
 
     for subfolder in subfolders:
-        print(subfolder)
         if (subfolder.count(fname_split) +1) == tag_count_expected:
             # Only look at subfolders that have the expected number of tags
             # based on user provided filename format.

@@ -6,11 +6,13 @@ import numpy as np
 from datetime import datetime
 import os
 import json
+import fnmatch
 
 import data_processing.array as dparray
 import data_processing.csv as dpcsv
 import data_processing.fitting as fitting
 import data_processing.extension as extension
+import data_processing.integration as integration
 
 # Assigns folders for fixtures.
 fixtures_folder = os.path.join("tests","fixtures")
@@ -621,3 +623,27 @@ def test_find_lambdaE():
     ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
     #pass
+
+class TestVideosToFits:
+    """
+
+    """
+
+    videos_folder = fixtures_folder
+    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
+    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534"
+    video_folder = os.path.join(fixtures_folder, fname)
+    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+
+
+    @pytest.mark.videos
+    def test_saves_binary_files(self,tmp_path):
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        integration.videos_to_fits(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, experiment_tag='')
+        print(os.listdir(images_folder))
+        for i in range(0,self.image_count):
+            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}."+"png"))

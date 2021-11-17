@@ -175,6 +175,7 @@ class TestSelectVideoFolders:
     fname_format = "date_sampleinfo_fps_run"
     example_name1 = "2021103_6M-PEO-0p01_25k"
     example_name2 = "2021105_4M-PEO-0p1_25k"
+    fname_format_ts = "date_sampleinfo_fps_run_tag_remove_remove"
 
     # Create list of experimental folders with "exp" tag.
     exp_folders = []
@@ -217,6 +218,45 @@ class TestSelectVideoFolders:
         bg_video = example_name2 + "_bg"
         bg_one_folders.append(bg_video)
 
+    # Create list of experimental folders with "exp" tag and timestamps.
+    exp_ts_folders = []
+    for i in range(1,6):
+        exp_video = example_name1 + "_" + str(i) + "_exp" + "_" + f"{i:04}" + "_" + f"{2*i:04}"
+        exp_ts_folders.append(exp_video)
+    for i in range(1,6):
+        exp_video = example_name2 + "_" + str(i) + "_exp" + "_" + f"{i:04}" + "_" + f"{2*i:04}"
+        exp_ts_folders.append(exp_video)
+
+    # Create list of experimental folders with timestamps and no "exp" tag.
+    exp_no_tag_ts_folders = []
+    for i in range(1,6):
+        fname = example_name1 + "_" + str(i) + "_" + f"{i:04}" + "_" + f"{2*i:04}"
+        exp_no_tag_ts_folders.append(fname)
+    for i in range(1,6):
+        fname = example_name2 + "_" + str(i) + "_" + f"{i:04}" + "_" + f"{2*i:04}"
+        exp_no_tag_ts_folders.append(fname)
+
+    # Create list of background folders when paired 1:1 with timestamps.
+    bg_pair_ts_folders = []
+    for i in range(1,6):
+        bg_video = example_name1 + "_" + str(i) + "_bg" + "_" + f"{4*i:04}" + "_" + f"{2*i:04}"
+        bg_pair_ts_folders.append(bg_video)
+    for i in range(1,6):
+        bg_video = example_name2 + "_" + str(i) + "_bg" + "_" + f"{4*i:04}" + "_" + f"{2*i:04}"
+        bg_pair_ts_folders.append(bg_video)
+
+    # Create list of background folders when 1 background per group of
+    # experiments with timestamps.
+    bg_one_ts_folders = []
+    bg_one_ts_folders_creation = [example_name1 + "_bg" + "_" + "1234" + "_" + "2345",example_name2 + "_bg" + "_" + "3556" + "_" + "2345"]
+    for i in range(1,6):
+        bg_video = example_name1 + "_bg" + "_" + "1234" + "_" + "2345"
+        bg_one_folders.append(bg_video)
+    for i in range(1,6):
+        bg_video = example_name2 + "_bg" + "_" + "3556" + "_" + "2345"
+        bg_one_folders.append(bg_video)
+
+    @pytest.mark.videos
     def test_returns_lists(self,tmp_path):
         # Fails if select_video_folders does not return three lists.
         fnames, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format)
@@ -224,6 +264,7 @@ class TestSelectVideoFolders:
         assert type(exp_videos) is list
         assert type(bg_videos) is list
 
+    @pytest.mark.videos
     def test_pairs_matched_videos(self,tmp_path):
         # Fails if select_video_folders does not return paired background and
         # experimental video folders when they are 1:1, with experiment tag.
@@ -244,7 +285,8 @@ class TestSelectVideoFolders:
             assert str(bg) == bg_videos[index] # Check background folder paired
             assert self.filenames[i] == fnames[index] # Check filename
 
-    def test_no_experiment_tag(self,tmp_path):
+    @pytest.mark.videos
+    def test_pairs_no_experiment_tag(self,tmp_path):
         # Fails if select_video_folders does not return paired background and
         # experimental video folders when they are 1:1, with no experiment tag.
 
@@ -264,10 +306,12 @@ class TestSelectVideoFolders:
             assert str(bg) == bg_videos[index] # Check background folder paired
             assert self.filenames[i] == fnames[index] # Check filename
 
+    @pytest.mark.videos
     def test_pairs_one_bg_per_group_videos(self,tmp_path):
         # Fails if select_video_folders does not return paired background and
         # experimental video folders when there is 1 background folder for each
         # series of experimental videos that only differ by run number.
+
         # Creates directories for experimental videos and backgrounds
         for ef in self.exp_folders:
             os.mkdir(tmp_path / ef)
@@ -284,6 +328,7 @@ class TestSelectVideoFolders:
             assert str(bg) == bg_videos[index] # Check background folder paired
             assert self.filenames[i] == fnames[index] # Check filename
 
+    @pytest.mark.videos
     def test_ignores_nonconforming_folders(self,tmp_path):
         # Fails if select_video_folders includes folders that do not follow the
         # filename format provided or do not have a matching background.
@@ -315,3 +360,70 @@ class TestSelectVideoFolders:
         assert fnames == []
         assert exp_videos == []
         assert bg_videos == []
+
+    @pytest.mark.videos
+    def test_pairs_timestamp_matched_videos(self,tmp_path):
+        # Fails if select_video_folders does not return paired background and
+        # experimental video folders when they are 1:1, with experiment tag
+        # and timestamps.
+
+        # Creates directories for experimental videos and backgrounds
+        for ef in self.exp_ts_folders:
+            os.mkdir(tmp_path / ef)
+        for bgf in self.bg_pair_ts_folders:
+            os.mkdir(tmp_path / bgf)
+        fnames, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts)
+
+        # Checks that the folders found match the folders inputted.
+        for i in range(0,len(self.exp_ts_folders)):
+            ef = tmp_path / self.exp_ts_folders[i]
+            bg = tmp_path / self.bg_pair_ts_folders[i]
+            assert str(ef) in exp_videos # experimental folder in output list
+            index = exp_videos.index(str(ef)) # find location of folder in list
+            assert str(bg) == bg_videos[index] # Check background folder paired
+            assert self.filenames[i] == fnames[index] # Check filename
+
+    @pytest.mark.videos
+    def test_pairs_timestamp_no_experiment_tag(self,tmp_path):
+        # Fails if select_video_folders does not return paired background and
+        # experimental video folders when they are 1:1, with no experiment tag
+        # and with timestamps.
+
+        # Creates directories for experimental videos and backgrounds.
+        for ef in self.exp_no_tag_ts_folders:
+            os.mkdir(tmp_path / ef)
+        for bgf in self.bg_pair_ts_folders:
+            os.mkdir(tmp_path / bgf)
+        fnames, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts,experiment_tag = '')
+
+        # Checks that the folders found match the folders inputted.
+        for i in range(0,len(self.exp_no_tag_ts_folders)):
+            ef = tmp_path / self.exp_no_tag_ts_folders[i]
+            bg = tmp_path / self.bg_pair_ts_folders[i]
+            assert str(ef) in exp_videos # experimental folder in output list
+            index = exp_videos.index(str(ef)) # find location of folder in list
+            assert str(bg) == bg_videos[index] # Check background folder paired
+            assert self.filenames[i] == fnames[index] # Check filename
+
+    @pytest.mark.videos
+    def test_pairs_timestamp_one_bg_per_group_videos(self,tmp_path):
+        # Fails if select_video_folders does not return paired background and
+        # experimental video folders when there is 1 background folder for each
+        # series of experimental videos that only differ by run number with
+        # timestamped videos.
+
+        # Creates directories for experimental videos and backgrounds
+        for ef in self.exp_ts_folders:
+            os.mkdir(tmp_path / ef)
+        for bgf in self.bg_one_folders_ts_creation:
+            os.mkdir(tmp_path / bgf)
+        fnames, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts, one_background = True)
+
+        # Checks that the folders found match the folders inputted.
+        for i in range(0,len(self.exp_ts_folders)):
+            ef = tmp_path / self.exp_ts_folders[i]
+            bg = tmp_path / self.bg_one_ts_folders[i]
+            assert str(ef) in exp_videos # experimental folder in output list
+            index = exp_videos.index(str(ef)) # find location of folder in list
+            assert str(bg) == bg_videos[index] # Check background folder paired
+            assert self.filenames[i] == fnames[index] # Check filename

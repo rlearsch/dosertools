@@ -81,6 +81,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, fname_split
     ----------
     df : pd.DataFrame
         Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
+        generated from data_processing.csv.generate_df
     fitting_bounds: list, optional
         [start, end]
         These are the R/R0 values we look for to set the bounds for the EC region fitting
@@ -155,3 +156,60 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
     full_save_path = os.path.join(save_location,filename_string)
     summary_df.to_csv(full_save_path)
     pass
+
+def derivative_EC_fit(Rtc, b, time, tc):
+    #rewrite for lambdaE (ms) instead of b
+    return Rtc*np.exp(-b*tc)*(-b)*np.exp(-b*time)
+
+def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, needle_diameter_mm: float=0.7176) -> pd.DataFrame:
+    """
+    Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset. 
+     
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
+        generated from data_processing.csv.generate_df
+    summary_df : pd.DataFrame
+        Contains relaxation time, R(t_c)/R0, and sample info for all runs and samples
+        generated from data_procescing.fitting.make_summary_dataframe
+    needle_diameter_mm: float
+        diameter of the needle used for the experiment, in milimeters
+        Default value of 0.7176 mm is used for 22G needles
+    
+    Returns
+    ------
+    dataset_w_visc : pd.DataFrame
+        Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)
+    """
+    
+    # calculate timestep from the first two rows of data 
+    # (could also just read the 'first' (0-indexing) value of time?)
+    #timestep = df["time (s)", 1] - df["time (s)", 0]
+    
+    #get mean relaxation time and R(tc)/R0 from summary_df for current sample
+    #Calculate strain and elongational viscosity / surface tension
+    #Append them to the dataframe
+    df_w_visc_list = []
+    mean_summary_df = summary_df.groupby("sample").mean()
+    for sample in summary_df["sample"].unqiue():
+        #subset_sample = summary_df[summary_df["sample"] == str(sample)]
+        Rtc_mean = mean_summary_df[sample, "Rtc/R0"] 
+        lambdaE_mean = mean_summary_df[sample, "Lambda E (ms)"]
+        
+        
+        for run in df[df["sample"] == sample]["Run #"].unique():
+            dataset = df[df["Sample"]==str(sample)]
+            dataset = dataset[dataset["Run #"] == str(run)]
+            dataset['Strain (integral)'] = np.cumsum(dataset['Strain rate'])*timestep
+            dataset=dataset.reset_index(drop=True)
+            
+            for value in range(0,len(dataset)-1):
+                t_minus_tc = dataset.at[value, "t - tc (s)"]
+                #strain_rate = derivative_EC_fit(A, b, t_minus_tc, 0)
+                #R_t = needle_diam*EC_region.at[value, "R/R0"]
+                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc,0))*needle_diam))
+                dataset.at[value, "(e visc / surface tension) (s/m)"] = e_visc_sigma
+            df_w_visc_list.append(dataset)
+    dataset_w_visc = pd.concat(df_w_visc_list)
+    return dataset_w_visc

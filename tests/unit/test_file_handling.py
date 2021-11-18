@@ -3,19 +3,19 @@ import os
 import pytest
 import warnings
 
-class TestParseFilename:
+class TestParseFname:
     """
-    Tests parse_filename
+    Tests parse_fname
 
     Tests
     -----
     test_returns_dict:
-        Checks if parse_filename returns a dictionary.
+        Checks if parse_fname returns a dictionary.
     test_correct_parse_fps_k:
-        Checks to see if parse_filename correctly parsing folder_name
+        Checks to see if parse_fname correctly parsing folder_name
         in the case that the fps is written with the notation of k for a 1000.
     test_correct_parse_fps_nok:
-        Checks to see if parse_filename correctly parsing folder_name
+        Checks to see if parse_fname correctly parsing folder_name
         in the case that the fps is written as a number.
     """
 
@@ -36,18 +36,18 @@ class TestParseFilename:
     }
 
     def test_returns_dict(self):
-        # Fails if the parse_filename method does not return a dictionary.
-        assert type(folder.parse_filename(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split)) is dict
+        # Fails if the parse_fname method does not return a dictionary.
+        assert type(folder.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split)) is dict
 
     def test_correct_parse_fps_k(self):
-        # Fails if the parse_filename method does not return the correct entry
+        # Fails if the parse_fname method does not return the correct entry
         # (case for testing when fps is formatted with a k).
-        assert folder.parse_filename(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert folder.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
 
     def test_correct_parse_fps_nok(self):
-        # Fails if the parse_filename method does not return the correct entry
+        # Fails if the parse_fname method does not return the correct entry
         # (case for testing when fps is formatted without a k).
-        assert folder.parse_filename(self.filename_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert folder.parse_fname(self.filename_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
 
 # next steps, produce warnings if fps, run, sampleinfo? not present
 
@@ -142,6 +142,67 @@ class TestMakeFolder:
         destination = tmp_path / folder_tag
         os.mkdir(destination)
         assert not folder.make_folder(tmp_path,folder_tag)
+
+class TestRemoveTagFromFname:
+    """
+    """
+
+    fname = "20210929_6M-PEO_fps-25k_1_2394_1235"
+    fname_format = "date_sampleinfo_fps_run_remove_remove"
+
+    def test_returns_string(self):
+        tag = "date"
+        assert type(folder.remove_tag_from_fname(self.fname,self.fname_format,tag)) is str
+
+    def test_removes_unique_tag(self):
+        tag = "run"
+        new_fname = folder.remove_tag_from_fname(self.fname,self.fname_format,tag)
+        assert new_fname == "20210929_6M-PEO_fps-25k_2394_1235"
+
+    def test_removes_repeated_tag(self):
+        tag = "remove"
+        new_fname = folder.remove_tag_from_fname(self.fname,self.fname_format,tag)
+        assert new_fname == "20210929_6M-PEO_fps-25k_1"
+
+    def test_warn_if_missing_tag(self):
+        tag = "none"
+        with pytest.warns(UserWarning, match="Tag"):
+            folder.remove_tag_from_fname(self.fname,self.fname_format,tag)
+
+class TestCheckFnameFormatForTag:
+    """
+    Test check_fname_format_for_tag
+
+    Tests
+    -----
+    test_returns_bool:
+        Test if check_fname_format_for_tag returns a boolean.
+    test_returns_true_if_tag_present:
+        Test if check_fname_format_for_tag returns True when tag is present
+        in the fname_format.
+    test_returns_false_if_tag_absent:
+        Test if check_fname_format_for_tag returns False when tag is absent
+        from the fname_format.
+    """
+
+    fname_format = "date_sampleinfo_fps_run_remove_remove"
+
+    def test_returns_bool(self):
+        # Fails if check_fname_format_for_tag does not return a boolean.
+        tag = "run"
+        assert type(folder.check_fname_format_for_tag(self.fname_format, tag)) is bool
+
+    def test_returns_true_if_tag_present(self):
+        # Fails if check_fname_format_for_tag returns False when the tag is
+        # present.
+        tag = "run"
+        assert folder.check_fname_format_for_tag(self.fname_format, tag)
+
+    def test_returns_false_if_tag_absent(self):
+        # Fails if check_fname_format_for_tag returns True when the tag is
+        # absent.
+        tag = "vtype"
+        assert not folder.check_fname_format_for_tag(self.fname_format, tag)
 
 class TestSelectVideoFolders:
     """

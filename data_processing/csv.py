@@ -71,7 +71,7 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
 
     # Reads in parameters from file name and add to dataframe.
     fname = Path(csv).name
-    params = fh.folder.parse_filename(fname,fname_format,sampleinfo_format,fname_split,sample_split)
+    params = fh.folder.parse_fname(fname,fname_format,sampleinfo_format,fname_split,sample_split)
     for key, value in params.items():
         dataset[key] = value
 

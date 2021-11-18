@@ -184,30 +184,29 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, need
     """
     
     # calculate timestep from the first two rows of data 
-    # (could also just read the 'first' (0-indexing) value of time?)
-    #timestep = df["time (s)", 1] - df["time (s)", 0]
+    # (could also just read the value of time at position 1?)
+    timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
     
     #get mean relaxation time and R(tc)/R0 from summary_df for current sample
     #Calculate strain and elongational viscosity / surface tension
     #Append them to the dataframe
     df_w_visc_list = []
     mean_summary_df = summary_df.groupby("sample").mean()
-    for sample in summary_df["sample"].unqiue():
+    for sample in summary_df["sample"].unique():
         #subset_sample = summary_df[summary_df["sample"] == str(sample)]
-        Rtc_mean = mean_summary_df[sample, "Rtc/R0"] 
-        lambdaE_mean = mean_summary_df[sample, "Lambda E (ms)"]
-        
-        
-        for run in df[df["sample"] == sample]["Run #"].unique():
-            dataset = df[df["Sample"]==str(sample)]
-            dataset = dataset[dataset["Run #"] == str(run)]
-            dataset['Strain (integral)'] = np.cumsum(dataset['Strain rate'])*timestep
+        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"] 
+        lambdaE_mean = mean_summary_df.loc[sample, "Lambda E (ms)"]
+        #calculate elongational viscosity from original DOS data and mean values of Rtc and lambdaE
+        for run in df[df["sample"] == sample]["run"].unique():
+            dataset = df[df["sample"]==str(sample)]
+            dataset = dataset[dataset["run"] == run]
+            dataset['strain'] = np.cumsum(dataset['strain rate (1/s)'])*timestep_s
             dataset=dataset.reset_index(drop=True)
             
-            for value in range(0,len(dataset)-1):
+            for value in range(0,len(dataset)):
                 t_minus_tc = dataset.at[value, "t - tc (s)"]
-                #strain_rate = derivative_EC_fit(A, b, t_minus_tc, 0)
-                #R_t = needle_diam*EC_region.at[value, "R/R0"]
+                # NOTE: Because we prefer the needle diameter to give the length scale, 
+                # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
                 e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc,0))*needle_diam))
                 dataset.at[value, "(e visc / surface tension) (s/m)"] = e_visc_sigma
             df_w_visc_list.append(dataset)

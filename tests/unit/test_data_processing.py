@@ -608,7 +608,8 @@ def test_find_EC_slope():
 
 def test_annotate_summary_df():
     sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
-    # header_params was produced by the following function: folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
+    # header_params was produced by the following function: 
+    # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
     # it is hard-coded in to not use folder.parse_filename in the test 
     header_params = {'sample': '0.8MDa-PAM-1wtpct-2M-NaCl',
                      'MW': '0.8MDa',

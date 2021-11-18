@@ -116,14 +116,14 @@ class TestMakeDestinationFolders:
 
 class TestMakeFolder:
     """
-    Test make_folder
+    Tests make_folder.
 
     Tests
     -----
     test_new_folder:
-        Check if make_folder makes a directory and then if directory exists.
+        Checks if make_folder makes a directory and then if directory exists.
     test_exist_folder:
-        Check if returns False if folder already exists.
+        Checks if returns False if folder already exists.
     """
 
     def test_new_folder(self,tmp_path):
@@ -143,6 +143,43 @@ class TestMakeFolder:
         os.mkdir(destination)
         assert not folder.make_folder(tmp_path,folder_tag)
 
+class TestIdentifyTagInFnameFormat:
+    """
+    Tests identify_tag_in_fname_format.
+
+    Tests
+    -----
+    test_returns_list:
+        Checks if identify_tag_in_fname_format returns a list.
+
+    """
+
+    fname_format = "date_sampleinfo_fps_run_remove_remove"
+
+    @pytest.mark.tags
+    def test_returns_list(self):
+        # Fails if identify_tag_in_fname_format does not return a list.
+        tag = "remove"
+        assert type(folder.identify_tag_in_fname_format(self.fname_format, tag)) is list
+
+    @pytest.mark.tags
+    def test_returns_correct_values(self):
+        # Fails if identify_tag_in_fname_format does not return correct values
+        # for unique and repeated tags, regardless of case.
+        tag = "remove"
+        assert folder.identify_tag_in_fname_format(self.fname_format, tag) == [4,5]
+        tag = "run"
+        assert folder.identify_tag_in_fname_format(self.fname_format, tag) == [3]
+        tag = "Run"
+        assert folder.identify_tag_in_fname_format(self.fname_format, tag) == [3]
+
+    @pytest.mark.tags
+    def test_returns_empty_if_absent(self):
+        # Fails if identify_tag_in_fname_format does not return an empty list
+        # for an absent tag.
+        tag = "none"
+        assert folder.identify_tag_in_fname_format(self.fname_format, tag) == []
+
 class TestRemoveTagFromFname:
     """
     """
@@ -150,10 +187,12 @@ class TestRemoveTagFromFname:
     fname = "20210929_6M-PEO_fps-25k_1_2394_1235"
     fname_format = "date_sampleinfo_fps_run_remove_remove"
 
+    @pytest.mark.tags
     def test_returns_string(self):
         tag = "date"
         assert type(folder.remove_tag_from_fname(self.fname,self.fname_format,tag)) is str
 
+    @pytest.mark.tags
     def test_removes_unique_tag(self):
         tag = "run"
         new_fname = folder.remove_tag_from_fname(self.fname,self.fname_format,tag)
@@ -233,10 +272,10 @@ class TestSelectVideoFolders:
 
 
     # Create sample data.
-    fname_format = "date_sampleinfo_fps_run"
+    fname_format = "date_sampleinfo_fps_run_vtype"
     example_name1 = "2021103_6M-PEO-0p01_25k"
     example_name2 = "2021105_4M-PEO-0p1_25k"
-    fname_format_ts = "date_sampleinfo_fps_run_tag_remove_remove"
+    fname_format_ts = "date_sampleinfo_fps_run_vtype_remove_remove"
 
     # Create list of experimental folders with "exp" tag.
     exp_folders = []
@@ -324,6 +363,12 @@ class TestSelectVideoFolders:
         assert type(fnames) is list
         assert type(exp_videos) is list
         assert type(bg_videos) is list
+
+    @pytest.mark.videos
+    def test_error_if_missing_vtype(self,tmp_path):
+        missing_fname_format = "date_sampleinfo_fps_run"
+        with pytest.raises(ValueError,match="vtype"):
+            folder.select_video_folders(tmp_path,missing_fname_format)
 
     @pytest.mark.videos
     def test_pairs_matched_videos(self,tmp_path):

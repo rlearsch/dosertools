@@ -4,7 +4,9 @@ import os
 import image_processing.tiff_handling as th
 import file_handling.folder as folder
 
-def videos_to_fits(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike],csv_folder: typing.Union[str, bytes, os.PathLike],fname_format: str, sampleinfo_format: str, fname_split: str = "_", sample_split: str = '-', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False, save_crop: bool = False, save_bg_sub: bool = False):
+def videos_to_fits(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike],csv_folder: typing.Union[str, bytes, os.PathLike],fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+    # fname_split: str = "_", sample_split: str = '-', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False, save_crop: bool = False, save_bg_sub: bool = False
+
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, fname_split, experiment_tag, background_tag, one_background)
     print(fnames)

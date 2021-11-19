@@ -10,8 +10,7 @@
         * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside) - **double check this**
     * Handling if folders/files already exists
 * **Saving all outputs**: 
-    * csv of R vs t, lambda_E, plot of R vs t, plot of eta_E vs strain, eta_E plateau value
-    * Save/produce dataset of fluid properties with sample variables 
+    * plot of eta_E vs strain, eta_E plateau value
     * Plotting functions (mostly as a vetting step)
 * **New features**: 
     * Read nozzle diameter off background and compare it to experimental

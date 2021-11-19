@@ -1,10 +1,11 @@
 # dostools
 
-dostools is a Python package for analyzing dripping-onto-substrate rheology videos.
+dostools is a Python package for analyzing dripping-onto-substrate rheology videos.\
+The software converts an input video into a series of binary images, produces a dataset of $\frac{R}{R_0}$ and time values for each frame in the video, and generates values for for the elongational relaxation time $\lambda_E$, the radius at critical time $\frac{R(t_c)}{R_0}$, and a guess for the quantity of (elongational viscosity / surface tension) $\frac{\eta_E}{\sigma}$.  
 
 ## Authors
-Rob Learsch and Red Lhota
-Contact: 
+Rob Learsch and Red Lhota\
+Contact:\
 rlearsch (at) caltech (dot) edu 
 
 ## Installation

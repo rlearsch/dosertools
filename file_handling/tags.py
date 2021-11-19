@@ -1,7 +1,9 @@
 import typing
 import warnings
 
-def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, fname_split: str = "_", sample_split: str = '-') -> dict:
+import data_processing.integration as integration
+
+def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, optional_settings: dict = {}) -> dict:
     """
     Parses folder/file names into a dictonary of parameters using supplied format.
 
@@ -28,6 +30,9 @@ def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, fname_spl
     parse_fname: dict
         Dictionary of parameters from fname.
     """
+    settings = integration.set_defaults(optional_settings)
+    fname_split = settings["fname_split"]
+    sample_split = settings["sample_split"]
 
     # Split fname and format into components.
     name_split = fname.split(fname_split)

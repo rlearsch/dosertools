@@ -5,7 +5,7 @@ import os
 import numpy as np
 from pathlib import Path
 
-import file_handling as fh
+import file_handling.tags as tags
 import data_processing.extension as extension
 
 def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
@@ -28,7 +28,7 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return sorted(csvs)
 
-def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sampleinfo_format : str,fname_split="_", sample_split='-') -> pd.DataFrame:
+def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in a csv into a dataframe with sample parameters.
 
@@ -71,13 +71,13 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
 
     # Reads in parameters from file name and add to dataframe.
     fname = Path(csv).name
-    params = fh.folder.parse_fname(fname,fname_format,sampleinfo_format,fname_split,sample_split)
+    params = tags.parse_fname(fname,fname_format,sampleinfo_format,optional_settings)
     for key, value in params.items():
         dataset[key] = value
 
     return dataset
 
-def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds : np.array, fname_format : str, sampleinfo_format : str, fname_split="_", sample_split='-') -> pd.DataFrame:
+def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in all csvs and process them into a dataframe.
 
@@ -117,7 +117,7 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds 
 
     # Runs the processing for each csv in the folder.
     for csv in csvs:
-        sample_df = csv_to_dataframe(csv,tc_bounds,fname_format,sampleinfo_format,fname_split,sample_split)
+        sample_df = csv_to_dataframe(csv,tc_bounds,fname_format,sampleinfo_format,optional_settings)
         df_list.append(sample_df)
     df = pd.concat(df_list,ignore_index=True)
 

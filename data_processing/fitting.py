@@ -157,9 +157,34 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
     summary_df.to_csv(full_save_path)
     pass
 
-def derivative_EC_fit(Rtc, b, time, tc):
-    #rewrite for lambdaE (ms) instead of b
-    return Rtc*np.exp(-b*tc)*(-b)*np.exp(-b*time)
+def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> float:
+    """
+    The derivative of the elasto-capillary region.
+    
+    R(t)/R0 = R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
+    R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * exp(tc/(3*LambdaE)) * (exp(-(t - tc)/(3*LambdaE)))
+    
+    Parameters
+    ----------
+    RtcR0: float
+        The radius at which the transition to EC behavior occurs
+    
+    LambdaE: float
+        The relaxation time of the polymer solutoin
+        
+    time: float
+        the moment in time to evaluate the derivative
+    
+    tc: float
+        the critical time for the experiment, this number is purely emperical 
+        (it depends entirely on when in the process the video starts)
+    
+    Returns
+    -------
+    R'(t)/R0: float
+    
+    """
+    return RtcR0*np.exp(tc/(3*lambdaE))*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, needle_diameter_mm: float=0.7176) -> pd.DataFrame:
     """

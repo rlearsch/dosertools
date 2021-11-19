@@ -648,3 +648,23 @@ class TestSaveSummary:
                 file_location = os.path.join(save_location, saved_filename)
             assert os.path.exists(file_location)
             
+def TestDerivativeECFit():
+    """
+    
+    """
+    test1 = fitting.derivative_EC_fit(0, 1/3, 5, 1)
+    assert test1 == 0
+    test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
+    assert test2 == -1
+    
+    
+def Test_calculate_elongational_visc():
+    #construct pathological summary dataframe
+    summary_dict = {"Lambda E (ms)": [0, 1/3, 2/3], "Rtc/R0":[0.9, 1.0, 1.1]}
+    summary_df = pd.DataFrame(summary_dict)
+    summary_df["sample"] = "fake-data-test"
+    df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
+    df_with_elongational_visc = calculate_elongational_visc(df, summary_df, needle_dia_mm=1.0)
+    mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
+    #this is kind of lazy but it checks that we have the correct order of magntidue 
+    assert (mean_elongational > 1000 and mean_elongational < 1020)

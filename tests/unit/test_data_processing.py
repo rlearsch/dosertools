@@ -631,10 +631,10 @@ class TestVideosToFits:
     """
 
     videos_folder = fixtures_folder
-    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
+    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
     sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534"
-    video_folder = os.path.join(fixtures_folder, fname)
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
     image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
 
@@ -643,7 +643,8 @@ class TestVideosToFits:
         os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        integration.videos_to_fits(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, experiment_tag='')
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_fits(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
         print(os.listdir(images_folder))
         for i in range(0,self.image_count):
             assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}."+"png"))

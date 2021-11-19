@@ -4,6 +4,7 @@ import warnings
 import glob
 
 import file_handling.tags as tags
+import data_processing.integration as integration
 
 def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False, save_bg_sub: bool = False):
     """

@@ -42,13 +42,12 @@ class TestTiffConversions:
     image_location = os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534000261.tif")
     image = skimage.io.imread(image_location)
     image_number = 261
-    save_crop = True
-    save_bg_subtract = True
+    optional_settings = {"save_crop" : True, "save_bg_sub" : True}
 
     def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
         save_location = tmp_path
-        folder.make_destination_folders(save_location, True, True)
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        folder.make_destination_folders(save_location, self.optional_settings)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
@@ -56,9 +55,9 @@ class TestTiffConversions:
     def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
         #assert saved file matches
         save_location = tmp_path
-        folder.make_destination_folders(save_location, True, True)
+        folder.make_destination_folders(save_location, self.optional_settings)
 
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
         target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
         target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
         target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))

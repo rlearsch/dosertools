@@ -184,19 +184,21 @@ class TestParseFname:
         "run" : 1
     }
 
+    optional_settings = {"fname_split": fname_split, "sampleinfo_split": "sample_split"}
+
     def test_returns_dict(self):
         # Fails if the parse_fname method does not return a dictionary.
-        assert type(tags.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split)) is dict
+        assert type(tags.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.optional_settings)) is dict
 
     def test_correct_parse_fps_k(self):
         # Fails if the parse_fname method does not return the correct entry
         # (case for testing when fps is formatted with a k).
-        assert tags.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert tags.parse_fname(self.filename,self.fname_format,self.sampleinfo_format,self.optional_settings) == self.param_dict
 
     def test_correct_parse_fps_nok(self):
         # Fails if the parse_fname method does not return the correct entry
         # (case for testing when fps is formatted without a k).
-        assert tags.parse_fname(self.filename_nok,self.fname_format,self.sampleinfo_format,self.fname_split,self.sample_split) == self.param_dict
+        assert tags.parse_fname(self.filename_nok,self.fname_format,self.sampleinfo_format,self.optional_settings) == self.param_dict
 
 # TODO: produce warnings if fps, run, sampleinfo? not present?
 
@@ -473,14 +475,16 @@ class TestMakeDestinationFolders:
 
     def test_make_crop_folder(self,tmp_path):
         # Fails if does not make a new crop folder in the correct location.
-        folder.make_destination_folders(tmp_path,True)
+        optional_settings = {"save_crop" : True}
+        folder.make_destination_folders(tmp_path,optional_settings)
         destination = tmp_path / "crop"
         assert os.path.isdir(destination)
 
     def test_make_bgsub_folder(self,tmp_path):
         # Fails if does not make a new background subtract folder in the
         # correct location.
-        folder.make_destination_folders(tmp_path,False,True)
+        optional_settings = {"save_bg_sub" : True}
+        folder.make_destination_folders(tmp_path,optional_settings)
         destination = tmp_path / "bg_sub"
         assert os.path.isdir(destination)
 
@@ -495,15 +499,17 @@ class TestMakeDestinationFolders:
         # Fails if does not warn if crop folder already exists.
         destination = tmp_path / "crop"
         os.mkdir(destination)
+        optional_settings = {"save_crop" : True}
         with pytest.warns(UserWarning, match="Crop"):
-            folder.make_destination_folders(tmp_path, True)
+            folder.make_destination_folders(tmp_path, optional_settings)
 
     def test_warn_if_bg_sub_exists(self,tmp_path):
         # Fails if does not warn if bg_sub folder already exists.
         destination = tmp_path / "bg_sub"
         os.mkdir(destination)
+        optional_settings = {"save_bg_sub" : True}
         with pytest.warns(UserWarning, match="Background"):
-            folder.make_destination_folders(tmp_path, False, True)
+            folder.make_destination_folders(tmp_path, optional_settings)
 
 class TestMakeFolder:
     """

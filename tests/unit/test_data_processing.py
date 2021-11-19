@@ -1,4 +1,3 @@
-import data_processing as dp
 import pandas as pd
 import pandas._testing
 import pytest
@@ -7,6 +6,7 @@ from datetime import datetime
 import os
 import json
 import fnmatch
+import skimage.io
 
 import data_processing.array as dparray
 import data_processing.csv as dpcsv
@@ -625,7 +625,7 @@ def test_find_lambdaE():
     #pass
 
 @pytest.mark.videos
-class TestVideosToFits:
+class TestVideosToBinaries:
     """
 
     """
@@ -641,10 +641,51 @@ class TestVideosToFits:
     def test_saves_binary_files(self,tmp_path):
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_binaries(self.videos_folder, images_folder, self.fname_format, optional_settings)
+        for i in range(0,self.image_count):
+            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        output_sequence = skimage.io.imread_collection(str(output_path))
+        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_sequence = skimage.io.imread_collection(str(target_path))
+        for i in range(0,len(output_sequence)):
+            #print(target_sequence[i])
+            assert (np.all(target_sequence[i] == output_sequence[i]))
+
+@pytest.mark.videos
+class TestVideosToCSVs:
+    """
+    """
+
+    videos_folder = fixtures_folder
+    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
+    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
+    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+
+    def test_saves_binary_files(self,tmp_path):
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_fits(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
-        print(os.listdir(images_folder))
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
         for i in range(0,self.image_count):
-            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}."+"png"))
+            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        output_sequence = skimage.io.imread_collection(str(output_path))
+        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_sequence = skimage.io.imread_collection(str(target_path))
+        for i in range(0,len(output_sequence)):
+            assert (np.all(target_sequence[i] == output_sequence[i]))
+
+    def test_saves_csvs(self,tmp_path):
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))

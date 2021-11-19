@@ -6,7 +6,7 @@ import glob
 import file_handling.tags as tags
 import data_processing.integration as integration
 
-def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False, save_bg_sub: bool = False):
+def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
     """
     Creates destination folders for binary files (crop and bg_sub optional)
 
@@ -26,6 +26,10 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
         True if user wants to save intermediate background-subtracted images
         (default: False).
     """
+
+    settings = integration.set_defaults(optional_settings)
+    save_crop = settings["save_crop"]
+    save_bg_sub = settings["save_bg_sub"]
 
     if not os.path.isdir(save_location):
         # Makes outer save_location folder if it does not exist.
@@ -255,7 +259,7 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
 
     """
 
-    ##TODO: docstring, test against timestamped folders
+    ##TODO: docstring
 
     # Checks for "vtype" before trying to identify folders.
     settings = integration.set_defaults(optional_settings)

@@ -1,2 +1,1 @@
-__all__ = ["folder"]
-import file_handling.folder
+__all__ = ["folder","tags"]

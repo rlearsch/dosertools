@@ -624,6 +624,7 @@ def test_find_lambdaE():
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
     #pass
 
+@pytest.mark.videos
 class TestVideosToFits:
     """
 
@@ -637,7 +638,6 @@ class TestVideosToFits:
     image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
 
-    @pytest.mark.videos
     def test_saves_binary_files(self,tmp_path):
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)

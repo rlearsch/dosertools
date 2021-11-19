@@ -445,6 +445,32 @@ class TestInsertTagInFname:
         new_fname = tags.insert_tag_in_fname(fname,self.fname_format,tag,"*")
         assert new_fname == "20210929_6M-PEO_fps-25k_1_*_*"
 
+#@pytest.mark.tags
+class TestShortenFnameFormat:
+    """
+    Tests shorten_fname_format.
+
+    Tests
+    -----
+    test_returns_string:
+        Checks if shorten_fname_format returns a string.
+    test_shortens_correctly:
+        Checks if shorten_fname_format correctly removes "vtype" and "remove"
+        from the fname_format
+    """
+
+    fname_format = "date_sampleinfo_fps_run_vtype_remove_remove"
+
+    def test_returns_string(self):
+        # Fails if shorten_fname_format does not return a string.
+        assert type(tags.shorten_fname_format(self.fname_format)) is str
+
+    def test_shortens_correctly(self):
+        # Fails if shorten_fname_format does not return the format string
+        # correctly shortened.
+        short_fname = tags.shorten_fname_format(self.fname_format)
+        assert short_fname == "date_sampleinfo_fps_run"
+
 class TestMakeDestinationFolders:
     """
     Test make_destination_folders

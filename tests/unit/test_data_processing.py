@@ -624,7 +624,7 @@ def test_find_lambdaE():
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
     #pass
 
-@pytest.mark.videos
+#@pytest.mark.videos
 class TestVideosToBinaries:
     """
 
@@ -689,3 +689,9 @@ class TestVideosToCSVs:
         optional_settings = {"experiment_tag" : ''}
         integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
         assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        for column in test_data.columns:
+            print(results[column])
+            print(test_data[column])
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

@@ -4,6 +4,7 @@ import os
 import image_processing.tiff_handling as th
 import file_handling.folder as folder
 import file_handling.tags as tags
+import image_processing.binary as binary
 
 def set_defaults(optional_settings: dict = {}) -> dict:
     """
@@ -57,11 +58,12 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
     pass
 
-def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike],csv_folder: typing.Union[str, bytes, os.PathLike],fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
+    short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     for subfolder in subfolders:
-        print(subfolder)
-        params_dict = tags.parse_fname(subfolder,fname_format,sampleinfo_format,optional_settings)
-        binaries_to_csv(subfolder,csv_folder,params_dict["fps"])
+        params_dict = tags.parse_fname(subfolder,short_fname_format,sampleinfo_format,optional_settings)
+        img_folder = os.path.join(images_folder,subfolder)
+        binary.binaries_to_csv(img_folder,csv_folder,params_dict["fps"])
     pass

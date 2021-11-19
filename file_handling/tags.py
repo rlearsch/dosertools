@@ -19,11 +19,11 @@ def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, optional_
     sampleinfo_format: str
         The format of the sampleinfo section of the fname
         separated by the deliminator specified by sample_split.
-    fname_split: str, optional
-        The deliminator for splitting the fname (default is "_").
-    sample_split: str, optional
-        The deliminator for splitting the sampleinfo section
-        of the filename (default is "-").
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            fname_split, default "_"
+            sample_split, default "-"
 
     Returns
     -------
@@ -301,3 +301,33 @@ def insert_tag_in_fname(fname: str, fname_format: str, tag: str, value: str, fna
     new_fname = fname_split.join(name_split)
 
     return new_fname
+
+def shorten_fname_format(fname_format: str, optional_settings: dict = {}) -> str:
+    """
+    Shortens the fname_format to remove the "vtype" and "remove" tags.
+
+    Parameters
+    ----------
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split.
+        ex. "date_sampleinfo_fps_run"
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            fname_split, default "_"
+
+    Returns
+    -------
+    shorten_fname_format: str
+        fname_format with "vtype" and "remove" tags removed.
+    """
+
+    settings = integration.set_defaults(optional_settings)
+    fname_split = settings["fname_split"]
+
+    new_format = remove_tag_from_fname(fname_format,fname_format,"vtype",fname_split)
+    if check_fname_format_for_tag(fname_format,"remove",fname_split):
+        new_format = remove_tag_from_fname(new_format,new_format,"remove",fname_split)
+
+    return new_format

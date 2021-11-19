@@ -279,7 +279,7 @@ class TestBinariesToRadiusTime:
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
-    window_top = 100
+    window_top = 120
     window = [0,window_top,width,height] # window: [left, top, right, bottom]
     params_dict = {"fps": 25000, "nozzle_diameter": 317}
 
@@ -308,7 +308,7 @@ class TestBinariesToCSV:
         a given test sequence
     """
 
-    save_location = os.path.join(fixtures_folder,"test_sequence")
+    images_location = os.path.join(fixtures_folder,"test_sequence")
     fps = 25000
 
     def test_saves_csv(self,tmp_path):
@@ -316,7 +316,7 @@ class TestBinariesToCSV:
         # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
         assert os.path.exists(os.path.join(csv_path,"test_sequence.csv"))
 
     def test_saves_correct_csv(self,tmp_path):
@@ -324,7 +324,7 @@ class TestBinariesToCSV:
         # correct values
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
         test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
         results = pd.read_csv(os.path.join(csv_path,"test_sequence.csv"))
         for column in test_data.columns:

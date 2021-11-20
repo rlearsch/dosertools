@@ -78,7 +78,38 @@ def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag:
 
 def identify_experimental_video_folder(folder: str, fname_format: str, optional_settings: dict = {}) -> typing.Tuple[str,bool]:
     """
+    Identifies if a given folder is an experimental video folder.
 
+    Using the given fname_format, identifies if the given folder is an
+    experimental video folder.
+
+    Parameters
+    ----------
+    folder: str
+        Folder to check if it matches the format for the experimental video.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag.
+        ex. "date_sampleinfo_fps_run_vtype"
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            fname_split, default "_"
+            experiment_tag, default "exp"
+
+    Returns
+    -------
+    fname: string
+        Base name of the folder if the given folder matches the pattern for an
+        experimental folder, '' otherwise.
+    exp_video: bool
+        True if the folder matches the pattern for an experimental folder,
+        False otherwise.
+
+    Errors
+    ------
+    Raises an error if the given fname_format does not contain the tag "vtype."
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -156,8 +187,45 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
 
 def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.PathLike], fname: str, fname_format: str, optional_settings: dict = {}) -> typing.Tuple[bool,str]:
     """
+    Identifies a background folder that matches a given experimental fname.
 
-    
+    Identifies a background folder tagged with appropriate parameters such that
+    it matches the given base folder name for an experimental video.
+
+    Parameters
+    ----------
+    parent_folder: path-like
+        Path in which to look for background video folders.
+    fname: str
+        The base name of the experimental video folder.
+        ex. "20210929_6M-PEO_fps-25k_1"
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag.
+        ex. "date_sampleinfo_fps_run_vtype"
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            fname_split, default "_"
+            background_tag, default "bg"
+            one_background, default False; True to use one background for
+                a group of experiments only differing by run number
+
+    Returns
+    -------
+    matched_bg: bool
+        True if a matching background is found, False otherwise.
+    bg_folder: string
+        Name of background folder if a matching one is found, '' otherwise.
+
+    Errors
+    ------
+    Raises an error if the given fname_format does not contain the tag "vtype."
+
+    Warns
+    -----
+    Warns if multiple matched backgrounds are found for a given fname.
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -220,19 +288,51 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
     """
     Pairs experimental and background videos in a given folder.
 
+    Iterates through every folder in a given folder, checks if the folder
+    matches the pattern for an experimental video folder, looks for a matching
+    background video folder if it is, and returns three matched lists, a list of
+    base folder names, a list of paths to experimental video folders, and a
+    list of paths to background video folders.
+
     Parameters
     ----------
+    parent_folder: path-like
+        Path in which to look for experimental and background video folder pairs.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag.
+        ex. "date_sampleinfo_fps_run_vtype"
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            fname_split, default "_"
+        Used in nested functions:
+            fname_split, default "_"
+            experiment_tag, default "exp"
+            background_tag, default "bg"
+            one_background, default False; True to use one background for
+                a group of experiments only differing by run number
 
     Returns
     -------
-
+    fnames: list of strings
+        List of base folder names for each matched pair of experimental and
+        background folders.
+    exp_videos: list of paths
+        List of paths to experimental video folders that were matched with
+        backgrounds.
+    bg_videos: list of paths
+        List of paths to background video folders matched with exp_videos.
 
     Examples
     --------
 
+
+
     """
 
-    ##TODO: docstring
+    ## TODO: examples in docstring
 
     # Checks for "vtype" before trying to identify folders.
     settings = integration.set_defaults(optional_settings)

@@ -156,6 +156,8 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
 
 def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.PathLike], fname: str, fname_format: str, optional_settings: dict = {}) -> typing.Tuple[bool,str]:
     """
+
+    
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -168,10 +170,10 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
         # fname_format must have vtype to be able to match videos.
         raise ValueError("fname_format must contain the tag 'vtype' (video type) to identify background vs. experimental videos.")
 
-    # Start by inserting background_tag in vtype location.
+    # Starts by inserting background_tag in vtype location.
     bg_fname = tags.insert_tag_in_fname(fname,fname_format,"vtype",background_tag)
 
-    # Then put "*" where "remove" tags would exist.
+    # Then puts "*" where "remove" tags would exist.
     bg_fname = tags.insert_tag_in_fname(bg_fname,fname_format,"remove","*")
 
     if one_background:
@@ -185,7 +187,7 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
         bg_run_fname = tags.replace_tag_in_fname(bg_fname,fname_format,"run","*")
         bg_run_folders = glob.glob(os.path.join(parent_folder,bg_run_fname))
 
-        # Combine, sort, then take the 1st.
+        # Combines, sorts, then takes the 1st.
         bg_folders = bg_run_folders + bg_norun_folders
         bg_folders = sorted(bg_folders)
 
@@ -197,7 +199,7 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
             matched_bg = True
 
     else:
-        # If matched backgrounds, match by run number.
+        # If matched backgrounds, matchs by run number.
         bg_folders = glob.glob(os.path.join(parent_folder,bg_fname))
         bg_folders = sorted(bg_folders)
 
@@ -208,40 +210,11 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
             bg_folder = os.path.basename(bg_folders[0])
             matched_bg = True
 
+    # Warns if there are multiple matching backgrounds.
     if len(bg_folders) > 1:
         warnings.warn("Multiple folders matched background for " + str(fname) + ". First used.", UserWarning)
 
     return matched_bg, bg_folder
-
-
-
-        #     if experiment_video:
-        #         if one_background:
-        #             # Constructs the expected background folder name if there
-        #             # is only one background for a series of runs
-        #             tag_split = fname_format.split(fname_split)
-        #             tag_lower = [t.lower() for t in tag_split]
-        #             if "run" in tag_lower:
-        #                 index = tag_lower.index("run")
-        #                 name_split = fname.split(fname_split)
-        #                 name_split.pop(index)
-        #                 new_name = fname_split.join(name_split)
-        #                 bg_folder = new_name + fname_split + background_tag
-        #             else:
-        #                 # If "run" is not a tag, then warn that one_background
-        #                 # ????? #TODO: WARNING
-        #                 bg_folder = fname + fname_split + background_tag
-        #
-        #
-        #         else:
-        #             # Construct the expected background folder name
-        #             bg_folder = fname + fname_split + background_tag
-        #         # If it is in the subfolders, then we have a matched background
-        #         if bg_folder in subfolders:
-        #             matched_bg = True
-        #         else:
-        #             matched_bg = False
-
 
 def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}) -> typing.Tuple[list,list,list]:
     """

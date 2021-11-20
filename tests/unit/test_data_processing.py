@@ -627,9 +627,16 @@ def test_find_lambdaE():
 #@pytest.mark.videos
 class TestVideosToBinaries:
     """
+    Tests videos_to_binaries.
 
+    Tests
+    -----
+    test_saves_binary_files:
+        Checks if videos_to_binaries saves binary images and if those binary
+        images are correct.
     """
 
+    # Sets up sample values.
     videos_folder = fixtures_folder
     fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
     sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
@@ -637,8 +644,9 @@ class TestVideosToBinaries:
     video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
     image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
-
     def test_saves_binary_files(self,tmp_path):
+        # Fails if videos_to_binaries does not save binary images or if those
+        # binary images are incorrect.
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         optional_settings = {"experiment_tag" : ''}
@@ -656,6 +664,15 @@ class TestVideosToBinaries:
 @pytest.mark.videos
 class TestVideosToCSVs:
     """
+    Tests videos_to_csvs.
+
+    Tests
+    -----
+    test_saves_binary_files:
+        Checks if videos_to_csvs saves binary images and if those images are
+        correct.
+    test_saves_csvs:
+        Checks if videos_to_csvs saves csvs and if the test csv is correct.
     """
 
     videos_folder = fixtures_folder
@@ -666,6 +683,8 @@ class TestVideosToCSVs:
     image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
     def test_saves_binary_files(self,tmp_path):
+        # Fails if videos_to_csvs does not save binary images or if those
+        # binary images are incorrect.
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"
@@ -682,6 +701,8 @@ class TestVideosToCSVs:
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
     def test_saves_csvs(self,tmp_path):
+        # Fails if videos_to_binaries does not save csvs or if the csv is
+        # incorrect.
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"

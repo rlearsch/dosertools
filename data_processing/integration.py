@@ -2,12 +2,25 @@ import typing
 import os
 
 import image_processing.tiff_handling as th
+import image_processing.binary as binary
 import file_handling.folder as folder
 import file_handling.tags as tags
-import image_processing.binary as binary
 
 def set_defaults(optional_settings: dict = {}) -> dict:
     """
+    Sets default values for unset kets in optional_settings.
+
+    Parameters
+    ----------
+    optional_settings: dict
+        Dictionary of optional settings.
+
+    Returns
+    -------
+    settings: dict
+        Dictionary with optional_settings and default values, prioritizing
+        optional_settings values.
+
     """
 
     settings = {}
@@ -45,7 +58,42 @@ def set_defaults(optional_settings: dict = {}) -> dict:
 
 
 def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
-    # fname_split: str = "_", sample_split: str = '-', experiment_tag: str = 'exp', background_tag: str = 'bg', one_background: bool = False, save_crop: bool = False, save_bg_sub: bool = False
+    """
+    Converts videos in given folder into binary images.
+
+    Matches videos in videos_folder into experimental and background pairs, and
+    converts those paired videos into background-subtracted binaries.
+
+    Parameters
+    ----------
+    videos_folder: path-like
+        Path to a folder of experimental and background video folders.
+    images_folder: path-like
+        Path to a folder in which to save the results of image processing,
+        binaries and optional cropped and background-subtracted images.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag corresponding to experiment vs. background. Can contain "remove" to
+        remove information that is not relevant or is different between the
+        experimental and background video names and would prevent matching.
+        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
+    sampleinfo_format: str
+        The format of the sampleinfo section of the fname
+        separated by the deliminator specified by sample_split.
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in nested functions:
+            fname_split, default "_"
+            sample_split, default "-"
+            experiment_tag, default "exp"
+            background_tag, default "bg"
+            one_background, default False; True to use one background for
+                a group of experiments only differing by run number
+            save_crop, default False; True to save the intermediate cropped image
+            save_bg_sub, default False; True to save the background-subtracted image
+    """
+
 
     settings = set_defaults(optional_settings)
 
@@ -59,6 +107,46 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
     pass
 
 def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+    """
+    Converts videos in given folder into csvs of R/R0 vs. time.
+
+    Matches videos in videos_folder into experimental and background pairs,
+    converts those paired videos into background-subtracted binaries,
+    analyzes the resulting binaries to extract R/R0 vs. time, and
+    saves the results to csvs.
+
+    Parameters
+    ----------
+    videos_folder: path-like
+        Path to a folder of experimental and background video folders.
+    images_folder: path-like
+        Path to a folder in which to save the results of image processing,
+        binaries and optional cropped and background-subtracted images.
+    csv_folder: path-like
+        Path to a folder in which to save the csv containing R/R0 vs. time.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag corresponding to experiment vs. background. Can contain "remove" to
+        remove information that is not relevant or is different between the
+        experimental and background video names and would prevent matching.
+        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
+    sampleinfo_format: str
+        The format of the sampleinfo section of the fname
+        separated by the deliminator specified by sample_split.
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in nested functions:
+            fname_split, default "_"
+            sample_split, default "-"
+            experiment_tag, default "exp"
+            background_tag, default "bg"
+            one_background, default False; True to use one background for
+                a group of experiments only differing by run number
+            save_crop, default False; True to save the intermediate cropped image
+            save_bg_sub, default False; True to save the background-subtracted image
+    """
+
     videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]

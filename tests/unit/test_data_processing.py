@@ -624,7 +624,38 @@ def test_find_lambdaE():
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
     #pass
 
-#@pytest.mark.videos
+class TestSetDefaults:
+    """
+    Tests set_defaults.
+
+    Tests
+    -----
+    test_returns_dict:
+        Checks if set_defaults returns a dictionary.
+    test_keeps_optional:
+        Checks if set_defaults keeps the values from optional_settings.
+    test_sets_default:
+        Checks if set_defaults sets a default when a value is not provided
+        by optional_settings.
+    """
+
+    def test_returns_dict(self):
+        # Fails if set_defaults does not return a dictonary.
+        assert type(integration.set_defaults()) is dict
+
+    def test_keeps_optional(self):
+        # Fails if set_defaults overwrites the value in optional_settings.
+        optional_settings = {"one_background" : True}
+        settings = integration.set_defaults(optional_settings)
+        assert settings["one_background"]
+
+    def test_sets_default(self):
+        # Fails if set_defaults does not set a default for a value not
+        # provided in optional_settings.
+        optional_settings = {"one_background" : True}
+        settings = integration.set_defaults(optional_settings)
+        assert settings["fname_split"] == "_"
+
 class TestVideosToBinaries:
     """
     Tests videos_to_binaries.
@@ -661,7 +692,6 @@ class TestVideosToBinaries:
             #print(target_sequence[i])
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-@pytest.mark.videos
 class TestVideosToCSVs:
     """
     Tests videos_to_csvs.

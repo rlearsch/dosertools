@@ -566,13 +566,38 @@ class TestMakeFolder:
         os.mkdir(destination)
         assert not folder.make_folder(tmp_path,folder_tag)
 
-#@pytest.mark.videos1
 class TestIdentifyExperimentalVideoFolder:
     """
     Tests identify_experimental_video_folder.
 
     Tests
     -----
+    test_returns_string_bool:
+        Checks if identify_experimental_video_folder does not return a string
+        and a boolean.
+    test_error_if_missing_vtype:
+        Checks if identify_experimental_video_folder does not raise an error
+        if the fname_format is missing the tag "vtype."
+    test_returns_correct_values_tag:
+        Checks if identify_experimental_video_folder returns the correct values
+        in the case where the folders have an experiment tag and no timestamp.
+    test_returns_correct_values_no_tag:
+        Checks if identify_experimental_video_folder returns the correct values
+        in the case where the folders have no experiment tag and no timestamp.
+    test_returns_correct_values_tag_ts:
+        Checks if identify_experimental_video_folder returns the correct values
+        in the case where the folders have an experiment tag and a timestamp.
+    test_returns_correct_values_no_tag_ts:
+        Checks if identify_experimental_video_folder returns the correct values
+        in the case where the folders have no experiment tag and a timestamp.
+    test_returns_empty_false_if_no_match:
+        Checks if identify_experimental_video_folder returns an empty string
+        for fname and False for experiment_video if the folder name is not of
+        the correct format.
+    test_returns_empty_false_if_not_exp:
+        Checks if identify_experimental_video_folder returns an empty string
+        for fname and False for experiment_video if the folder name is not
+        tagged as an experiment.
     """
 
     fname_format = "date_sampleinfo_fps_run_vtype"
@@ -633,20 +658,71 @@ class TestIdentifyExperimentalVideoFolder:
             assert exp_video
 
     def test_returns_empty_false_if_no_match(self):
-        nomatch_fname = "2021103_6M-PEO-0p01"
-        fname, exp_video = folder.identify_experimental_video_folder(nomatch_fname,self.fname_format)
+        # Fails if identify_experimental_video_folder does not return an empty
+        # string and False in the case of a folder with an incorrect number of
+        # tags.
+        nomatch_fname = "2021103_6M-PEO-0p01_exp"
+        fname, exp_video = folder.identify_experimental_video_folder(nomatch_fname,self.fname_format,)
         assert fname == ''
         assert not exp_video
 
     def test_returns_empty_false_if_not_exp(self):
+        # Fails if identify_experimental_video_folder does not return an empty
+        # string and False in the case of a folder with an incorrect "vtype"
+        # tag.
         bg_fname = "2021103_6M-PEO-0p01_25k_1_bg"
         fname, exp_video = folder.identify_experimental_video_folder(bg_fname,self.fname_format)
         assert fname == ''
         assert not exp_video
 
-#@pytest.mark.videos1
 class TestIdentifyBackgroundVideoFolder:
     """
+    Tests identify_background_video_folder.
+
+    Tests
+    -----
+    test_returns_bool_string:
+        Checks if identify_background_video_folder returns a boolean and a
+        string.
+    test_error_if_missing_vtype:
+        Checks if identify_background_video_folder raises an error if the
+        fname_format is missing "vtype."
+    test_returns_correct_values_pair:
+        Checks if identify_background_video_folder returns the correct
+        background folder in the case where there is one background for every
+        experimental video.
+    test_returns_correct_values_one:
+        Checks if identify_background_video_folder returns the correct
+        background folder in the case where there is one background for a group
+        of experimental videos only differing by run number.
+    test_returns_correct_values_pair_ts:
+        Checks if identify_background_video_folder returns the correct
+        background folder in the case where there is one background for every
+        experimental video and the folders have timestamps.
+    test_returns_correct_values_one_ts:
+        Checks if identify_background_video_folder returns the correct
+        background folder in the case where there is one background for a group
+        of experimental videos only differing by run number and the folders
+        have timestamps.
+    test_returns_correct_values_one_run:
+        Checks if identify_background_video_folder returns the correct
+        background folder in the case where there is one background for a group
+        of experimental videos only differing by run number and that background
+        has a run number in the name.
+    test_warn_if_multiple_one_background:
+        Checks if identify_background_video_folder finds multiple background
+        video matches and thus picks the first one in the one background case.
+    test_warn_if_multiple_pair_background:
+        Checks if identify_background_video_folder finds multiple background
+        video matches and thus picks the first one in the paired background
+        case.
+    test_returns_false_empty_if_no_folders:
+        Checks if identify_background_video_folder returns False for matched_bg
+        and an empty string for bg_folder if there are no folders.
+    test_returns_false_empty_if_no_match:
+        Checks if identify_background_video_folder returns False for matched_bg
+        and an empty string for bg_folder if there is no matching background
+        for an experimental video.
     """
 
     fname_format = "date_sampleinfo_fps_run_vtype"
@@ -790,7 +866,7 @@ class TestIdentifyBackgroundVideoFolder:
         assert bg_folder == ''
         assert not matched_bg
 
-    def test_returns_empty_false_if_no_match(self,tmp_path):
+    def test_returns_false_empty_if_no_match(self,tmp_path):
         # Fails if identify_background_video_folder does not return False
         # and an empty string if there are no matching backgrounds for a
         # given fname.
@@ -801,7 +877,6 @@ class TestIdentifyBackgroundVideoFolder:
         assert bg_folder == ''
         assert not matched_bg
 
-#@pytest.mark.videos1
 class TestSelectVideoFolders:
     """
     Test select_video_folders.
@@ -823,13 +898,26 @@ class TestSelectVideoFolders:
         experimental and background videos paired as expected, in the case
         where there is one background for each group of experiments only
         differing by run number.
+    test_pairs_timestamp_matched_videos:
+        Checks if select_video_folders returns folder names expected, with
+        experimental and background videos paired as expected, in the case
+        where there is one background for every experiment and the folders are
+        labeled with timestamps.
+    test_pairs_timestamp_no_experiment_tag:
+        Checks if select_video_folders returns folder names expected, with
+        experimental and background vidoes paired as expected, in the case
+        where there is no tag identifying experimental videos and the folders
+        are labeled with timestamps.
+    test_pairs_timestamp_one_bg_per_group_videos:
+        Checks if select_video_folders returns folder names expected, with
+        experimental and background videos paired as expected, in the case
+        where there is one background for each group of experiments only
+        differing by run number and the folders are labeled with timestamps.
     test_ignores_nonconforming_folders:
         Checks if select_video_folders correctly does not return folders that
         do not conform to inputted filename formating (i.e. metadata or
         experimental videos with no matching background)
     """
-
-
 
     fname_format = "date_sampleinfo_fps_run_vtype"
     fname_format_ts = "date_sampleinfo_fps_run_vtype_remove_remove"

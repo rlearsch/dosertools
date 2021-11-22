@@ -167,10 +167,10 @@ def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> f
     Parameters
     ----------
     RtcR0: float
-        The radius at which the transition to EC behavior occurs
+        The normalized radius at which the transition to EC behavior occurs
     
     LambdaE: float
-        The relaxation time of the polymer solutoin
+        The relaxation time of the polymer solution
         
     time: float
         the moment in time to evaluate the derivative
@@ -230,9 +230,11 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, need
             
             for value in range(0,len(dataset)):
                 t_minus_tc = dataset.at[value, "t - tc (s)"]
+                t_minus_tc_ms = t_minus_tc*1000
                 # NOTE: Because we prefer the needle diameter to give the length scale, 
                 # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
-                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc,0))*needle_diam))
+                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diam))
+                # e visc / surface tension [=] -1/D'(t) = [1/(mm/ms)] = [1/(m/s)] = [s/m]
                 dataset.at[value, "(e visc / surface tension) (s/m)"] = e_visc_sigma
             df_w_visc_list.append(dataset)
     dataset_w_visc = pd.concat(df_w_visc_list)

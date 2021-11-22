@@ -656,6 +656,8 @@ def TestDerivativeECFit():
     assert test1 == 0
     test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
     assert test2 == -1
+    test3 = fitting.derivative_EC_fit(1, 1, 3, 3)
+    assert test3 == -np.exp(1)
     
     
 def Test_calculate_elongational_visc():

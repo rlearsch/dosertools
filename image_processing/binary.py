@@ -6,6 +6,7 @@ import pandas as pd
 from pathlib import Path
 
 import file_handling.folder as folder
+import data_processing.integration as integration
 
 def add_saved_params_to_dict(save_location: typing.Union[str, bytes, os.PathLike],params_dict: dict):
     """
@@ -192,7 +193,7 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
 
     ## TODO: errors if missing parameters
 
-def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float):
+def binaries_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float):
     """
     Convert from binary images to csv of normalized radius versus time
 
@@ -209,12 +210,12 @@ def binaries_to_csv(save_location: typing.Union[str, bytes, os.PathLike], csv_lo
         Frames per second for the video (likely parsed from file name)
     """
 
-    binary_location = os.path.join(save_location,"bin")
+    binary_location = os.path.join(images_location,"bin")
 
     # Construct params_dict from filename and saved metadata.
-    folder_name = os.path.basename(save_location)
+    folder_name = os.path.basename(images_location)
     params_dict = {"fps": fps}
-    params_dict = add_saved_params_to_dict(save_location,params_dict)
+    params_dict = add_saved_params_to_dict(images_location,params_dict)
 
     # Construct window based on first image.
     first_image = os.path.join(binary_location,"000.png")

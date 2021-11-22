@@ -11,19 +11,19 @@ import skimage.morphology
 from skimage.filters import (threshold_otsu, threshold_mean, threshold_li)
 from skimage import exposure
 
-import data_processing as dp
+import data_processing.array as dparray
 import file_handling.folder as folder
-#import file_handling.folder as folder
+import data_processing.integration as integration
 
 
 def define_initial_parameters() -> dict:
     """
     Initalizes the parameters dictionary with coefficients for the initial image crop.
-    
+
     Parameters
     ----------
     None
-    
+
     Returns
     -------
     params_dict: dict
@@ -41,18 +41,17 @@ def define_initial_parameters() -> dict:
 
 def define_image_parameters(background_video: skimage.io.collection.ImageCollection, params_dict: dict) -> dict:
     """
-    From the background video, determines the first-guess for the cropping operation. 
-    
+    From the background video, determines the first-guess for the cropping operation.
+
     Based on the nozzle width and safety factors crop_width_coefficient, crop_height_coefficient, etc.
-    
+
     Parameters
     ----------
-     background_video: skimage.io.collection.ImageCollection
+    background_video: skimage.io.collection.ImageCollection
          The video identified as the background video from the researcher
-         
-     params_dict: dict
+    params_dict: dict
          The partial dictionary of parameters, to which we will add the crop information
-         
+
     Returns
     -------
     params_dict: dict
@@ -93,21 +92,20 @@ def define_image_parameters(background_video: skimage.io.collection.ImageCollect
 
 def produce_background_image(background_video: skimage.io.collection.ImageCollection, params_dict: dict) -> np.ndarray:
     """
-    Produces the background image from which the experimental video will be subtracted. 
-    
+    Produces the background image from which the experimental video will be subtracted.
+
     Parameters
     ----------
-     background_video: skimage.io.collection.ImageCollection
+    background_video: skimage.io.collection.ImageCollection
          The video identified as the background video from the researcher
-         
     params_dict: dict
         Dictionary of parameters with the crop information added
-        
+
     Returns
     -------
     bg_median: np.ndarray
-        The median of the frames in the background. 
-        We prefer median because it is less sensitive to random noise and the values are likely to be integers 
+        The median of the frames in the background.
+        We prefer median because it is less sensitive to random noise and the values are likely to be integers
     """
     nozzle_row = params_dict["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
@@ -121,54 +119,49 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
 
     return bg_median
 
-def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
+def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
     """
-    Takes as arguments the skiamge image sequence holding the experimental video and the background image to subtract.
-    
+    Takes as arguments the skimage image sequence holding the experimental video and the background image to subtract.
+
     Performs, sequentially, cropping, background subtraction, and binarization by the Mean method, and saves the binary images.
-    
+
     Parameters
     ----------
     experimental_sequence: skimage.io.collection.ImageCollection
          The video identified as the experiment video from the researcher
-    
     bg_median: np.ndarray
         The single background image produced from produce_background_image
-         
     params_dict: dict
         Dictionary of parameters with the crop information added
-        
     save_location: path-like
         The folder where file should be saved
-        
-    save_crop: bool
-        Mark true to save the intemediate cropped image
-    
-    save_bg_sub: bool
-        Mark true to save the intermediate cropped and background-subtracted image
-            
-   
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            save_crop, default False; True to save the intermediate cropped image
+            save_bg_sub, default False; True to save the background-subtracted image
+
     Returns
     -------
     Image(s) saved locally in save_location
     """
-    ### Make folder will be it's own function ###
+
     for image_number in range(0,len(experimental_sequence)):
         image = experimental_sequence[image_number]
-        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, save_crop,save_bg_sub)
+        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, optional_settings)
     pass
 
 def crop_single_image(image: np.ndarray, params_dict: dict) -> np.ndarray:
-    """Crops a single image according to parameters from params_dict
-    
+    """
+    Crops a single image according to parameters from params_dict
+
     Parameters
     ----------
     image: np.ndarray (scikit.io.imread)
          The video identified as the experiment video from the researcher
-         
     params_dict: dict
         Dictionary of parameters with the crop information added
-    
+
     Returns
     -------
     cropped_image: np.ndarray
@@ -184,24 +177,24 @@ def crop_single_image(image: np.ndarray, params_dict: dict) -> np.ndarray:
     return cropped_image
 
 def subtract_background_single_image(cropped_image: np.ndarray, bg_median: np.ndarray) -> np.ndarray:
-    """Performs background subtraction from a cropped image. 
-    
+    """
+    Performs background subtraction from a cropped image.
+
     Assumes cropped_image and bg_median are the same size.
-    
+
     Parameters
     ----------
     cropped_image: np.ndarray
         The initial image, cropped according to values in parameters dictionary
-    
     bg_median: np.ndarray
         The single background image produced from produce_background_image
-        
+
     Returns
     -------
     background_subtracted_image: np.ndarray
         The cropped image with the background subtraction performed
 
-    
+
     """
     background_subtracted_image_org = np.int32(cropped_image) - np.int32(bg_median)
     if np.any(background_subtracted_image_org < 0):
@@ -219,18 +212,19 @@ def subtract_background_single_image(cropped_image: np.ndarray, bg_median: np.nd
     return background_subtracted_image
 
 def mean_binarize_single_image(background_subtracted_image: np.ndarray) -> np.ndarray:
-    """Performs global binarization on an image according to the Otsu method
-    
+    """
+    Performs global binarization on an image according to the Otsu method
+
     Parameters
     ----------
     background_subtracted_image: np.ndarray
         The cropped image with the background subtraction performed
-    
+
     Returns
     -------
     binary_otsu: np.ndarray
         The binarized version of the input image
-    
+
     """
     #thresh_mean = threshold_mean(background_subtracted_image)
     thresh_otsu = threshold_otsu(background_subtracted_image)
@@ -240,22 +234,20 @@ def mean_binarize_single_image(background_subtracted_image: np.ndarray) -> np.nd
     return binary_otsu
 
 def save_image(image: np.ndarray, image_number: int, save_location: typing.Union[str, bytes, os.PathLike], extension: str):
-    """Saves a single image to the hard drive in save_location
-    
+    """
+    Saves a single image to the hard drive in save_location
+
     Parameters
     ----------
     image: np.ndarray
         The image to save
-    
     image_number: int
         Part of the filename. The frame number of this particular image in the video
-       
     save_location: path-like
         The folder where file should be saved
-    
     extension: str
         The file extension, eg, .tiff, .png
-    
+
     Returns
     -------
     Image saved on the hard drive at save_location
@@ -265,100 +257,97 @@ def save_image(image: np.ndarray, image_number: int, save_location: typing.Union
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
-    """Fully converts a raw tiff to binary png image. 
-    
+def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, images_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
+    """
+    Fully converts a raw tiff to binary png image.
+
     Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps
-    
+
     Parameters
     ----------
     image: np.ndarray
         The image to convert and save
-
     bg_median: np.ndarray
         The single background image produced from produce_background_image
-         
     params_dict: dict
         Dictionary of parameters with the crop information added
-        
-    save_location: path-like
+    images_location: path-like
         The folder where file should be saved
-        
-    save_crop: bool
-        Mark true to save the intemediate cropped image
-    
-    save_bg_sub: bool
-        Mark true to save the intermediate cropped and background-subtracted image
-    
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            save_crop, default False; True to save the intermediate cropped image
+            save_bg_sub, default False; True to save the background-subtracted image
+
     Returns
     -------
     Image sequence (video) saved on the hard drive at save_location
     """
+
+    settings = integration.set_defaults(optional_settings)
+    save_crop = settings["save_crop"]
+    save_bg_sub = settings["save_bg_sub"]
+
     image = exposure.rescale_intensity(image, in_range='uint12', out_range='uint16')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop:
-        save_image(cropped_image, image_number, os.path.join(save_location,"crop"),"tiff")
-        #save_crop = False
+        save_image(cropped_image, image_number, os.path.join(images_location,"crop"),"tiff")
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_sub:
-        save_image(background_subtracted_image, image_number, os.path.join(save_location,"bg_sub"), "tiff")
-        #save_bg_sub=False
+        save_image(background_subtracted_image, image_number, os.path.join(images_location,"bg_sub"), "tiff")
     binary_image = mean_binarize_single_image(background_subtracted_image)
-    save_image(binary_image, image_number, os.path.join(save_location,"bin"),"png")
+    save_image(binary_image, image_number, os.path.join(images_location,"bin"),"png")
     pass
 
-def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], save_location: typing.Union[str, bytes, os.PathLike], save_crop: bool = False,save_bg_sub: bool = False):
+def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], images_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
     """
     Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
-    
+
     Parameters
     ----------
     experimental_video_folder: path-like
-        Points to the folder which contains the experimental video to analyse 
-
+        Points to the folder which contains the experimental video to analyse.
     background_video_folder: path-like
-        Points to the folder which contains the background video used in analysis 
-                
-    save_location: path-like
-        The folder where file should be saved
-        
-    save_crop: bool
-        Mark true to save the intemediate cropped image
-    
-    save_bg_sub: bool
-        Mark true to save the intermediate cropped and background-subtracted image
-    
+        Points to the folder which contains the background video used in analysis.
+    images_location: path-like
+        The folder where folders of images should be saved.
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            save_crop, default False; True to save the intermediate cropped image
+            save_bg_sub, default False; True to save the background-subtracted image
+
     Returns
     -------
-    Image sequence (video) saved on the hard drive at save_location
+    Image sequence(s) (video) saved on the hard drive at images_location
     """
     params_dict = define_initial_parameters()
     experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*"), plugin='tifffile')
     background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*"), plugin='tifffile')
-    folder.make_destination_folders(save_location, save_crop, save_bg_sub)
+    folder.make_destination_folders(images_location, optional_settings)
     params_dict = define_image_parameters(background_video, params_dict)
     bg_median = produce_background_image(background_video, params_dict)
-    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, save_location, save_crop,save_bg_sub)
+    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, optional_settings)
     params_dict["window_top"] = top_border(bg_median)
-    export_params(save_location, params_dict)
+    export_params(images_location, params_dict)
     pass
 
 def top_border(bg_median: np.ndarray) -> int:
     """
-    Find the top border of interest for image analysis given a background image
+    Finds the top border of interest given a background image.
 
-    Find the last row of the nozzle in the background image to use as the top
-    border in further analysis.
+    Finds the last row of the nozzle in the background image to use as the top
+    border in further image analysis.
 
     Parameters
     ----------
     bg_median: np.ndarray
-        background image corresponding to a particular run
+        Background image corresponding to a particular run.
 
     Returns
     -------
     top_border: int
-        last row of the nozzle
+        Last row of the nozzle.
     """
 
     # Convert the background image to binary.
@@ -368,25 +357,25 @@ def top_border(bg_median: np.ndarray) -> int:
     # Find last row of the needle.
     # Row of sum is nonzero if any white pixels in row.
     binary_sum = np.sum(bg_binary, axis = 1)
-    white_blocks = dp.array.continuous_nonzero(binary_sum)
+    white_blocks = dparray.continuous_nonzero(binary_sum)
     top = white_blocks[0][1] # Take the last row of the first block of white.
     return top
 
-def export_params(save_location: typing.Union[str, bytes, os.PathLike], params_dict: dict):
+def export_params(images_location: typing.Union[str, bytes, os.PathLike], params_dict: dict):
     """
-    Export image parameters to a file to be stored with processed images
+    Exports image parameters to a file to be stored with processed images.
 
     Parameters
     ----------
-    save_location: path-like
-        path in which to save the parameters
+    images_location: path-like
+        Path in which to save the parameters.
     params_dict: dict
-        dictonary of parameters to save
+        Dictonary of parameters to save.
     """
 
     # Convert the dictionary to a pandas DataFrame and save to a csv
-    folder_name = os.path.basename(save_location)
-    path = os.path.join(save_location,folder_name + "_params.csv")
+    folder_name = os.path.basename(images_location)
+    path = os.path.join(images_location,folder_name + "_params.csv")
     params_df = pd.DataFrame(list(params_dict.items()), columns = ['Keys','Values'])
     params_df.to_csv(path, index=False)
     pass

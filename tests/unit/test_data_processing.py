@@ -1,4 +1,3 @@
-import data_processing as dp
 import pandas as pd
 import pandas._testing
 import pytest
@@ -6,11 +5,14 @@ import numpy as np
 from datetime import datetime
 import os
 import json
+import fnmatch
+import skimage.io
 
 import data_processing.array as dparray
 import data_processing.csv as dpcsv
 import data_processing.fitting as fitting
 import data_processing.extension as extension
+import data_processing.integration as integration
 
 import file_handling.folder as folder
 
@@ -632,6 +634,129 @@ def test_make_summary_dataframe():
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
     ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+
+class TestSetDefaults:
+    """
+    Tests set_defaults.
+
+    Tests
+    -----
+    test_returns_dict:
+        Checks if set_defaults returns a dictionary.
+    test_keeps_optional:
+        Checks if set_defaults keeps the values from optional_settings.
+    test_sets_default:
+        Checks if set_defaults sets a default when a value is not provided
+        by optional_settings.
+    """
+
+    def test_returns_dict(self):
+        # Fails if set_defaults does not return a dictonary.
+        assert type(integration.set_defaults()) is dict
+
+    def test_keeps_optional(self):
+        # Fails if set_defaults overwrites the value in optional_settings.
+        optional_settings = {"one_background" : True}
+        settings = integration.set_defaults(optional_settings)
+        assert settings["one_background"]
+
+    def test_sets_default(self):
+        # Fails if set_defaults does not set a default for a value not
+        # provided in optional_settings.
+        optional_settings = {"one_background" : True}
+        settings = integration.set_defaults(optional_settings)
+        assert settings["fname_split"] == "_"
+
+class TestVideosToBinaries:
+    """
+    Tests videos_to_binaries.
+
+    Tests
+    -----
+    test_saves_binary_files:
+        Checks if videos_to_binaries saves binary images and if those binary
+        images are correct.
+    """
+
+    # Sets up sample values.
+    videos_folder = fixtures_folder
+    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
+    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
+    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+
+    def test_saves_binary_files(self,tmp_path):
+        # Fails if videos_to_binaries does not save binary images or if those
+        # binary images are incorrect.
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_binaries(self.videos_folder, images_folder, self.fname_format, optional_settings)
+        for i in range(0,self.image_count):
+            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        output_sequence = skimage.io.imread_collection(str(output_path))
+        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_sequence = skimage.io.imread_collection(str(target_path))
+        for i in range(0,len(output_sequence)):
+            #print(target_sequence[i])
+            assert (np.all(target_sequence[i] == output_sequence[i]))
+
+class TestVideosToCSVs:
+    """
+    Tests videos_to_csvs.
+
+    Tests
+    -----
+    test_saves_binary_files:
+        Checks if videos_to_csvs saves binary images and if those images are
+        correct.
+    test_saves_csvs:
+        Checks if videos_to_csvs saves csvs and if the test csv is correct.
+    """
+
+    videos_folder = fixtures_folder
+    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
+    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
+    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+
+    def test_saves_binary_files(self,tmp_path):
+        # Fails if videos_to_csvs does not save binary images or if those
+        # binary images are incorrect.
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
+        for i in range(0,self.image_count):
+            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        output_sequence = skimage.io.imread_collection(str(output_path))
+        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_sequence = skimage.io.imread_collection(str(target_path))
+        for i in range(0,len(output_sequence)):
+            assert (np.all(target_sequence[i] == output_sequence[i]))
+
+    def test_saves_csvs(self,tmp_path):
+        # Fails if videos_to_binaries does not save csvs or if the csv is
+        # incorrect.
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        optional_settings = {"experiment_tag" : ''}
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        for column in test_data.columns:
+            print(results[column])
+            print(test_data[column])
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
     
 class TestSaveSummary:
     date_and_time = datetime.now()

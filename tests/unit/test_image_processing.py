@@ -42,13 +42,12 @@ class TestTiffConversions:
     image_location = os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534000261.tif")
     image = skimage.io.imread(image_location)
     image_number = 261
-    save_crop = True
-    save_bg_subtract = True
+    optional_settings = {"save_crop" : True, "save_bg_sub" : True}
 
     def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
         save_location = tmp_path
-        folder.make_destination_folders(save_location, True, True)
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        folder.make_destination_folders(save_location, self.optional_settings)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
@@ -56,9 +55,9 @@ class TestTiffConversions:
     def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
         #assert saved file matches
         save_location = tmp_path
-        folder.make_destination_folders(save_location, True, True)
+        folder.make_destination_folders(save_location, self.optional_settings)
 
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.save_crop, self.save_bg_subtract)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
         target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
         target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
         target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))
@@ -280,7 +279,7 @@ class TestBinariesToRadiusTime:
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
-    window_top = 100
+    window_top = 120
     window = [0,window_top,width,height] # window: [left, top, right, bottom]
     params_dict = {"fps": 25000, "nozzle_diameter": 317}
 
@@ -309,7 +308,7 @@ class TestBinariesToCSV:
         a given test sequence
     """
 
-    save_location = os.path.join(fixtures_folder,"test_sequence")
+    images_location = os.path.join(fixtures_folder,"test_sequence")
     fps = 25000
 
     def test_saves_csv(self,tmp_path):
@@ -317,7 +316,7 @@ class TestBinariesToCSV:
         # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
         assert os.path.exists(os.path.join(csv_path,"test_sequence.csv"))
 
     def test_saves_correct_csv(self,tmp_path):
@@ -325,7 +324,7 @@ class TestBinariesToCSV:
         # correct values
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.save_location,csv_path,self.fps)
+        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
         test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
         results = pd.read_csv(os.path.join(csv_path,"test_sequence.csv"))
         for column in test_data.columns:

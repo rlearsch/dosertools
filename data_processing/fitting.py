@@ -12,6 +12,7 @@ import data_processing.array as dparray
 import data_processing.csv as process
 import file_handling.folder as folder
 import file_handling.tags as tags
+import data_processing.integration as integration
 
  
 def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
@@ -74,8 +75,6 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     return lambdaE_df
 
 def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}) -> pd.DataFrame:
-#def make_summary_dataframe(df, fitting_bounds = [0.1, 0.045], sampleinfo_format, fname_split ="_", sample_split ='-'):
-
     """
     Condenses a DOS run into an extensional relaxation time by fitting the EC region (t > tc) to a decaying exponential
 

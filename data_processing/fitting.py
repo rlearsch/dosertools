@@ -73,7 +73,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df
 
-def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}, fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
+def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}) -> pd.DataFrame:
 #def make_summary_dataframe(df, fitting_bounds = [0.1, 0.045], sampleinfo_format, fname_split ="_", sample_split ='-'):
 
     """
@@ -103,8 +103,11 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
         dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info
     """
     # Initalize parameters and empty list #
+    settings = integration.set_defaults(optional_settings)
+    fitting_bounds = settings["fitting_bounds"]
     start = fitting_bounds[0]
     end = fitting_bounds[1]
+    
     fitting_results_list = []
     
 

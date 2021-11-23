@@ -53,7 +53,10 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["save_bg_sub"] = optional_settings["save_bg_sub"]
     except KeyError:
         settings["save_bg_sub"] = False
-
+    try:
+        settings["fitting_bounds"] = optional_settings["fitting_bounds"]
+    except KeyError:
+        settings["fitting_bounds"] = [0.1, 0.045]
     return settings
 
 

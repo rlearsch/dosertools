@@ -295,8 +295,6 @@ class TestBinariesToRadiusTime:
         # for the given sequence of images.
         results = binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)
         test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
-        print(results)
-        print(test_data)
         for column in results.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 

@@ -705,6 +705,12 @@ class TestVideosToBinaries:
 
 class TestBinariesToCSVs:
     """
+    Tests binaries_to_csvs
+
+    Tests
+    -----
+    test_saves_csvs:
+        Checks if binaries_to_csvs saves csvs and if the test csv is correct.
     """
 
     short_fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"

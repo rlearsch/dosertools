@@ -700,7 +700,6 @@ class TestVideosToBinaries:
         target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
-            #print(target_sequence[i])
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
 class TestBinariesToCSVs:

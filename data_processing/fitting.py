@@ -11,6 +11,8 @@ from scipy import stats
 import data_processing.array as dparray
 import data_processing.csv as process
 import file_handling.folder as folder
+import file_handling.tags as tags
+
  
 def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
     """
@@ -71,7 +73,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
     return lambdaE_df
 
-def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, fname_split: str ="_", sample_split: str ='-', fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
+def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}, fitting_bounds: typing.Tuple[float, float] = [0.1, 0.045]) -> pd.DataFrame:
 #def make_summary_dataframe(df, fitting_bounds = [0.1, 0.045], sampleinfo_format, fname_split ="_", sample_split ='-'):
 
     """
@@ -109,7 +111,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, fname_split
     samples = df["sample"].unique()
     for sample in samples:
         # Grab sample info from "sample" field #
-        header_params = folder.parse_filename(sample,"sampleinfo",sampleinfo_format,fname_split,sample_split)
+        header_params = tags.parse_fname(sample,"sampleinfo",sampleinfo_format,optional_settings)
         # Select individual sample from df
         sample_dataset = df[(df["sample"] == sample)]
         run_values = sample_dataset['run'].unique()
@@ -162,7 +164,7 @@ def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> f
     The derivative of the elasto-capillary region.
     
     R(t)/R0 = R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
-    R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * exp(tc/(3*LambdaE)) * (exp(-(t - tc)/(3*LambdaE)))
+    R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
     
     Parameters
     ----------
@@ -184,7 +186,7 @@ def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> f
     R'(t)/R0: float
     
     """
-    return RtcR0*np.exp(tc/(3*lambdaE))*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
+    return RtcR0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, needle_diameter_mm: float=0.7176) -> pd.DataFrame:
     """
@@ -210,7 +212,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, need
     
     # calculate timestep from the first two rows of data 
     # (could also just read the value of time at position 1?)
-    timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
+    #timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
     
     #get mean relaxation time and R(tc)/R0 from summary_df for current sample
     #Calculate strain and elongational viscosity / surface tension
@@ -225,7 +227,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, need
         for run in df[df["sample"] == sample]["run"].unique():
             dataset = df[df["sample"]==str(sample)]
             dataset = dataset[dataset["run"] == run]
-            dataset['strain'] = np.cumsum(dataset['strain rate (1/s)'])*timestep_s
+            dataset['strain'] = -2*np.log(dataset['R/R0'])
             dataset=dataset.reset_index(drop=True)
             
             for value in range(0,len(dataset)):
@@ -233,7 +235,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, need
                 t_minus_tc_ms = t_minus_tc*1000
                 # NOTE: Because we prefer the needle diameter to give the length scale, 
                 # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
-                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diam))
+                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diameter_mm))
                 # e visc / surface tension [=] -1/D'(t) = [1/(mm/ms)] = [1/(m/s)] = [s/m]
                 dataset.at[value, "(e visc / surface tension) (s/m)"] = e_visc_sigma
             df_w_visc_list.append(dataset)

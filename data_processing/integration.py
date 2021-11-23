@@ -153,5 +153,5 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     for subfolder in subfolders:
         params_dict = tags.parse_fname(subfolder,short_fname_format,sampleinfo_format,optional_settings)
         img_folder = os.path.join(images_folder,subfolder)
-        binary.binaries_to_csv(img_folder,csv_folder,params_dict["fps"])
+        binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"])
     pass

@@ -629,7 +629,9 @@ def test_annotate_summary_df():
 def test_make_summary_dataframe():
     test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
-    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c', fitting_bounds =[0.8, 0.1])
+    optional_settings = {}
+    optional_settings["fitting_bounds"] = [0.8, 0.1]
+    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c',optional_settings)
     target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
     target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)

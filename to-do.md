@@ -9,13 +9,10 @@
     * Improved filename parsing
         * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside) - **double check this**
     * Handling if folders/files already exists
-* **Saving all outputs**: 
-    * plot of eta_E vs strain, eta_E plateau value
-    * Plotting functions (mostly as a vetting step)
 * **New features**: 
     * Read nozzle diameter off background and compare it to experimental
     * Rob's/JAK's "frame shifting" idea to dial in t_c
-    * Find $\eta_E$ plateau value
+    * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation 
 * **Clean up** 
     * fixtures folder

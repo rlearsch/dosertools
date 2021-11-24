@@ -259,7 +259,6 @@ class TestCSVToDataFrame:
     # Sets up sample data.
     data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
-    tc_bounds = [0.3,0.07]
     fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "molecular weight-backbone-concentration"
@@ -278,7 +277,7 @@ class TestCSVToDataFrame:
         self.dataset.to_csv(path,index=False)
         csv = str(path)
 
-        assert type(dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+        assert type(dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
     def test_correct_columns(self,tmp_path):
         # Fails if csv_to_dataframe does not return correct columns.
@@ -290,7 +289,7 @@ class TestCSVToDataFrame:
         csv = str(path)
 
         # Checks columns of output.
-        columns = dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format).columns
+        columns = dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format).columns
 
         # Checks standard columns for every dataset.
         assert "time (s)" in columns
@@ -319,7 +318,7 @@ class TestCSVToDataFrame:
         csv = str(path)
 
         # Gets results from csv_to_dataframe.
-        results = dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+        results = dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format)
 
         # Imports csv of validated values.
         correct = pd.read_csv(os.path.join(fixtures_folder,"fixture_csv_to_dataframe.csv"))
@@ -349,7 +348,6 @@ class TestGenerateDF:
     # Sets up sample data.
     data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
-    tc_bounds = [0.3,0.07]
     fname_base = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "mw-backbone-conc"
@@ -363,7 +361,7 @@ class TestGenerateDF:
             path = tmp_path / csv_name
             self.dataset.to_csv(path,index=False)
 
-        assert type(dpcsv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+        assert type(dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
     def test_correct_values(self,tmp_path):
         # Fails if generate_df does not return correct_values.
@@ -375,7 +373,7 @@ class TestGenerateDF:
             self.dataset.to_csv(path,index=False)
 
         # Checks results against validated csv.
-        results = dpcsv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+        results = dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)
         correct = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
         for column in results.columns:
             if dparray.is_dataframe_column_numeric(results,column):
@@ -547,18 +545,16 @@ class TestAddCriticalTime:
             sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
     dataset["strain rate (1/s)"] = sr
 
-    tc_bounds = [0.3,0.07]
-
     tc = 0.4
     Rtc = 0.2
 
     def test_returns_df(self):
         # Fails if add_critical_time does not return a DataFrame.
-        assert type(extension.add_critical_time(self.dataset,self.tc_bounds)) is pd.DataFrame
+        assert type(extension.add_critical_time(self.dataset)) is pd.DataFrame
 
     def test_correct_columns(self):
         # Fails if output does not contain correct columns.
-        columns = extension.add_critical_time(self.dataset,self.tc_bounds).columns
+        columns = extension.add_critical_time(self.dataset).columns
         assert "time (s)" in columns
         assert "R/R0" in columns
         assert "strain rate (1/s)" in columns
@@ -568,7 +564,7 @@ class TestAddCriticalTime:
 
     def test_correct_values(self):
         # Fails if tc, Rtc, or t-tc are wrong.
-        result = extension.add_critical_time(self.dataset,self.tc_bounds)
+        result = extension.add_critical_time(self.dataset)
 
         # Checks tc.
         assert result["tc (s)"][0] == self.tc
@@ -588,18 +584,18 @@ class TestAddCriticalTime:
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
         with pytest.raises(KeyError,match="column R/R0"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
         # Tests if "time (s)" missing.
         data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01]}
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
         with pytest.raises(KeyError,match="column time"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
         # Tests if "strain rate (1/s)" missing.
         data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="column strain"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
 
 
 def test_find_EC_slope():
@@ -611,9 +607,9 @@ def test_find_EC_slope():
 
 def test_annotate_summary_df():
     sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
-    # header_params was produced by the following function: 
+    # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
-    # it is hard-coded in to not use folder.parse_filename in the test 
+    # it is hard-coded in to not use folder.parse_filename in the test
     header_params = {'sample': '0.8MDa-PAM-1wtpct-2M-NaCl',
                      'MW': '0.8MDa',
                      'Polymer': 'PAM',
@@ -759,25 +755,25 @@ class TestVideosToCSVs:
             print(results[column])
             print(test_data[column])
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
-    
+
 class TestSaveSummary:
     date_and_time = datetime.now()
     date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
-    # produce dummy dataframe that is empty 
+    # produce dummy dataframe that is empty
     dummy_df = pd.DataFrame(0, index = range(2), columns = range(2))
     def test_save_summary_df(self, tmp_path):
             # Checks that file exists in save_directory, with correct filename (based on date)
-            save_location = tmp_path 
+            save_location = tmp_path
             fitting.save_summary_df(self.dummy_df, save_location)
             assert os.path.isdir(save_location)
             if os.path.isdir(save_location):
                 saved_filename = os.listdir(save_location)[0]
                 file_location = os.path.join(save_location, saved_filename)
             assert os.path.exists(file_location)
-            
+
 def test_DerivativeECFit():
     """
-    
+
     """
     test1 = fitting.derivative_EC_fit(0, 1/3, 5, 1)
     assert test1 == 0
@@ -787,8 +783,8 @@ def test_DerivativeECFit():
     assert test3 == -1
     test4 = fitting.derivative_EC_fit(3,1,-3,0)
     assert test4 == -np.exp(1)
-    
-    
+
+
 def test_calculate_elongational_visc():
     #construct pathological summary dataframe
     summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
@@ -797,5 +793,5 @@ def test_calculate_elongational_visc():
     df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, needle_diameter_mm=1.0)
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
-    #this is kind of lazy but it checks that we have the correct order of magntidue 
+    #this is kind of lazy but it checks that we have the correct order of magntidue
     assert (mean_elongational > 1300 and mean_elongational < 1500)

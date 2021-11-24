@@ -63,7 +63,7 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     try:
         settings["tc_bounds"] = optional_settings["tc_bounds"]
     except KeyError:
-        settings["fitting_bounds"] = [0.3, 0.07]
+        settings["tc_bounds"] = [0.3, 0.07]
     try:
         settings["needle_diameter_mm"] = optional_settings["needle_diameter_mm"]
     except KeyError:
@@ -171,8 +171,8 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
 def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
-    
-    Parameters    
+
+    Parameters
     ----------
     csv_folder: path-like
         Path to a folder in which to save the csv containing R/R0 vs. time.
@@ -201,16 +201,16 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_f
             the deliminator for splitting the sampleinfo section
             of the fname (default is "-")
     """
-    
+
     df = csv.generate_df(csv_folder, tc_bounds, fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     # make folder to save summary and mega csvs #
-    # this is just a suggestion on where to save them, 
+    # this is just a suggestion on where to save them,
     one_level_up_from_csv_folder = os.path.dirname(csv_folder)
     summary_save_location = os.path.join(one_level_up_from_csv_folder, "summary_csvs")
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)
     fitting.save_summary_df(summary_df, summary_save_location)
-    processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings) 
+    processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     fitting.save_processed_df(processed_df, summary_save_location)
     pass

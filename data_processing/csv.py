@@ -46,11 +46,13 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     sampleinfo_format : str
         the format of the sampleinfo section of the fname
         separated by the deliminator specified by sample_split
-    fname_split : str, optional
-        the deliminator for splitting the name (default is "_")
-    sample_split : str, optional
-        the deliminator for splitting the sampleinfo section
-        of the fname (default is "-")
+    optional_settings: dict
+    Takes the following optional settings:
+        fname_split : str, optional
+            the deliminator for splitting the name (default is "_")
+        sample_split : str, optional
+            the deliminator for splitting the sampleinfo section
+            of the fname (default is "-")
 
     Returns
     -------
@@ -114,7 +116,6 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds 
 
     df_list = []
     csvs = get_csvs(csv_location)
-
     # Runs the processing for each csv in the folder.
     for csv in csvs:
         sample_df = csv_to_dataframe(csv,tc_bounds,fname_format,sampleinfo_format,optional_settings)

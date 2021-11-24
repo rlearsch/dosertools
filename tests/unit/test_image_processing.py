@@ -43,6 +43,7 @@ class TestTiffConversions:
     image = skimage.io.imread(image_location)
     image_number = 261
     optional_settings = {"save_crop" : True, "save_bg_sub" : True}
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
 
     def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
         save_location = tmp_path
@@ -75,7 +76,7 @@ class TestTiffConversions:
         folder.make_destination_folders(save_location)
 
         experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
-        target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence","bin","*"))
+        target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence",self.fname,"bin","*"))
         th.convert_tiff_sequence_to_binary(experimental_sequence, self.bg_median, target_params_dict, save_location)
         produced_converted_sequence_path = save_location / "bin" / '*'
         #convert to string for skimage.io.imread_collection
@@ -275,13 +276,15 @@ class TestBinariesToRadiusTime:
         test sequence
     """
 
-    binary_location = os.path.join(fixtures_folder,"test_sequence","bin")
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    binary_location = os.path.join(fixtures_folder,"test_sequence",fname,"bin")
     first_image = os.path.join(binary_location,"000.png")
     image = skimage.io.imread(first_image)
     (height, width) = image.shape
     window_top = 120
     window = [0,window_top,width,height] # window: [left, top, right, bottom]
     params_dict = {"fps": 25000, "nozzle_diameter": 317}
+
 
     def test_returns_df(self):
         # Fails if binaries_to_radius_time does not return a dataframe.
@@ -291,15 +294,13 @@ class TestBinariesToRadiusTime:
         # Fails if binaries_to_radius_time does not return the correct values
         # for the given sequence of images.
         results = binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
-        print(results)
-        print(test_data)
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
         for column in results.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-class TestBinariesToCSV:
+class TestBinaryImagesToCSV:
     """
-    Test binaries_to_csv
+    Test binary_images_to_csv
 
     Tests
     -----
@@ -308,24 +309,25 @@ class TestBinariesToCSV:
         a given test sequence
     """
 
-    images_location = os.path.join(fixtures_folder,"test_sequence")
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    images_location = os.path.join(fixtures_folder,"test_sequence",fname)
     fps = 25000
 
     def test_saves_csv(self,tmp_path):
-        # Fails if binaries_to_csv does not save a csv or does not save the
+        # Fails if binary_images_to_csv does not save a csv or does not save the
         # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
-        assert os.path.exists(os.path.join(csv_path,"test_sequence.csv"))
+        binary.binary_images_to_csv(self.images_location,csv_path,self.fps)
+        assert os.path.exists(os.path.join(csv_path,self.fname + ".csv"))
 
     def test_saves_correct_csv(self,tmp_path):
-        # Fails if binaries_to_csv does not save a csv or does not save the
+        # Fails if binary_images_to_csv does not save a csv or does not save the
         # correct values
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binaries_to_csv(self.images_location,csv_path,self.fps)
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
-        results = pd.read_csv(os.path.join(csv_path,"test_sequence.csv"))
+        binary.binary_images_to_csv(self.images_location,csv_path,self.fps)
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname +".csv"))
+        results = pd.read_csv(os.path.join(csv_path,self.fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

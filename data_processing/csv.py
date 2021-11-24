@@ -79,7 +79,7 @@ def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, opt
 
     return dataset
 
-def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
+def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in all csvs and process them into a dataframe.
 
@@ -118,7 +118,7 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds 
     csvs = get_csvs(csv_location)
     # Runs the processing for each csv in the folder.
     for csv in csvs:
-        sample_df = csv_to_dataframe(csv,tc_bounds,fname_format,sampleinfo_format,optional_settings)
+        sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
         df_list.append(sample_df)
     df = pd.concat(df_list,ignore_index=True)
 

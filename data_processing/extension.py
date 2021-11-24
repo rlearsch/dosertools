@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import data_processing.array as dparray
+import data_processing.integration as integration
 
 def truncate_data(dataset : pd.DataFrame, before: bool = True) -> pd.DataFrame:
     """
@@ -135,7 +136,7 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
     dataset = dataset.reset_index(drop=True)
     return dataset
 
-def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFrame:
+def add_critical_time(dataset : pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Finds critical time from maximum in strain rate, adds relevant columns.
 
@@ -149,16 +150,22 @@ def add_critical_time(dataset : pd.DataFrame, tc_bounds : np.array) -> pd.DataFr
     dataset : pandas.DataFrame
         dataset to which to add the "tc (s)", "t-tc (s)", and "Rtc/R0" columns
         must contain "R/R0", "time (s)", and "strain rate (1/s)" columns
-    tc_bounds : np.array
-        two value array containing the upper and lower bounds in "R/R0" where
-        tc will be found in between
+    
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in nested functions:
+        tc_bounds : np.array
+            two value array containing the upper and lower bounds in "R/R0" where
+            tc will be found in between
 
     Returns
     -------
     add_critical_time : pd.DataFrame
         dataset with "tc", "t - tc (s)", and "Rtc/R0" columns added
     """
-
+    settings = integration.set_defaults(optional_settings)
+    tc_bounds = settings["tc_bounds"]
+    
     # Checks for missing necessary columns and raise KeyError if missing.
     if not "R/R0" in dataset.columns:
         raise KeyError("column R/R0 must be present in dataset")

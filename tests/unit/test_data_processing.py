@@ -791,7 +791,8 @@ def test_calculate_elongational_visc():
     summary_df = pd.DataFrame(summary_dict)
     summary_df["sample"] = "1M-PEO-0.01wtpt"
     df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
-    df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, needle_diameter_mm=1.0)
+    optional_settings = {"needle_diameter_mm":1.0}
+    df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
     #this is kind of lazy but it checks that we have the correct order of magntidue
     assert (mean_elongational > 1300 and mean_elongational < 1500)

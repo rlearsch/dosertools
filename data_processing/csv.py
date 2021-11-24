@@ -28,7 +28,7 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return sorted(csvs)
 
-def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
+def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in a csv into a dataframe with sample parameters.
 
@@ -69,7 +69,7 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     dataset = extension.add_strain_rate(dataset)
 
     # Finds critical time by locating the maximum strain rate within the bounds.
-    dataset = extension.add_critical_time(dataset, tc_bounds)
+    dataset = extension.add_critical_time(dataset, optional_settings)
 
     # Reads in parameters from file name and add to dataframe.
     fname = Path(csv).name

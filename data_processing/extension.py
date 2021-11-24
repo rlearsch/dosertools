@@ -151,7 +151,7 @@ def add_critical_time(dataset : pd.DataFrame, optional_settings: dict = {}) -> p
         dataset to which to add the "tc (s)", "t-tc (s)", and "Rtc/R0" columns
         must contain "R/R0", "time (s)", and "strain rate (1/s)" columns
     
-    optional_settings: dict
+    optional_settings: dict 
         A dictionary of optional settings.
         Used in nested functions:
         tc_bounds : np.array

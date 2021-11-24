@@ -610,9 +610,9 @@ def test_find_EC_slope():
 
 def test_annotate_summary_df():
     sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
-    # header_params was produced by the following function: 
+    # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
-    # it is hard-coded in to not use folder.parse_filename in the test 
+    # it is hard-coded in to not use folder.parse_filename in the test
     header_params = {'sample': '0.8MDa-PAM-1wtpct-2M-NaCl',
                      'MW': '0.8MDa',
                      'Polymer': 'PAM',
@@ -697,11 +697,36 @@ class TestVideosToBinaries:
             assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
         output_path = os.path.join(images_folder,self.fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
-            #print(target_sequence[i])
             assert (np.all(target_sequence[i] == output_sequence[i]))
+
+class TestBinariesToCSVs:
+    """
+    Tests binaries_to_csvs
+
+    Tests
+    -----
+    test_saves_csvs:
+        Checks if binaries_to_csvs saves csvs and if the test csv is correct.
+    """
+
+    short_fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
+    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    images_folder = os.path.join(fixtures_folder,"test_sequence")
+
+    def test_saves_csvs(self,tmp_path):
+        # Fails if videos_to_binaries does not save csvs or if the csv is
+        # incorrect.
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        integration.binaries_to_csvs(self.images_folder, csv_folder, self.short_fname_format)
+        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        for column in test_data.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
 class TestVideosToCSVs:
     """
@@ -718,7 +743,6 @@ class TestVideosToCSVs:
 
     videos_folder = fixtures_folder
     fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
-    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
     fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
     video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
     image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
@@ -731,12 +755,12 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
         for i in range(0,self.image_count):
             assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
         output_path = os.path.join(images_folder,self.fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence","bin","*")
+        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
@@ -749,40 +773,38 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, self.sampleinfo_format, optional_settings)
+        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
         assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence","csv","test_sequence.csv"))
+        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
         results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
         for column in test_data.columns:
-            print(results[column])
-            print(test_data[column])
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
-    
+
 class TestSaveSummary:
     date_and_time = datetime.now()
     date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
-    # produce dummy dataframe that is empty 
+    # produce dummy dataframe that is empty
     dummy_df = pd.DataFrame(0, index = range(2), columns = range(2))
     def test_save_summary_df(self, tmp_path):
             # Checks that file exists in save_directory, with correct filename (based on date)
-            save_location = tmp_path 
+            save_location = tmp_path
             fitting.save_summary_df(self.dummy_df, save_location)
             assert os.path.isdir(save_location)
             if os.path.isdir(save_location):
                 saved_filename = os.listdir(save_location)[0]
                 file_location = os.path.join(save_location, saved_filename)
             assert os.path.exists(file_location)
-            
+
 def TestDerivativeECFit():
     """
-    
+
     """
     test1 = fitting.derivative_EC_fit(0, 1/3, 5, 1)
     assert test1 == 0
     test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
     assert test2 == -1
-    
-    
+
+
 def Test_calculate_elongational_visc():
     #construct pathological summary dataframe
     summary_dict = {"Lambda E (ms)": [0, 1/3, 2/3], "Rtc/R0":[0.9, 1.0, 1.1]}
@@ -791,5 +813,5 @@ def Test_calculate_elongational_visc():
     df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     df_with_elongational_visc = calculate_elongational_visc(df, summary_df, needle_dia_mm=1.0)
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
-    #this is kind of lazy but it checks that we have the correct order of magntidue 
+    #this is kind of lazy but it checks that we have the correct order of magntidue
     assert (mean_elongational > 1000 and mean_elongational < 1020)

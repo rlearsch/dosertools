@@ -106,7 +106,42 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
     pass
 
-def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, optional_settings: dict = {}):
+    """
+    Converts binary image folders into csvs of R/R0 vs. time.
+
+    Given a folder of folders of binary images, converts each set of binary
+    images into a csv of R/R0 vs. time, retaining information in the filename.
+
+    Parameters
+    ----------
+        images_folder: path-like
+            Path to a folder in which the results of image processing were saved
+            (i.e. the folders of binary images).
+        csv_folder: path-like
+            Path to a folder in which to save the csv containing R/R0 vs. time.
+        short_fname_format: str
+            The format of the fname with parameter names separated
+            by the deliminator specified by fname_split with only tags present
+            in the names of the folders in images_folder. Should have "vtype"
+            and "remove" tags removed compared to videos_to_binaries.
+            Must contain "fps" tag.
+            ex. "date_sampleinfo_fps_run"
+        optional_settings: dict
+            A dictionary of optional settings.
+            Used in nested functions:
+                fname_split, default "_"
+    """
+
+    subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
+    for subfolder in subfolders:
+        params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
+        ## TODO: deal with missing fps tag
+        img_folder = os.path.join(images_folder,subfolder)
+        binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"])
+    pass
+
+def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
     """
     Converts videos in given folder into csvs of R/R0 vs. time.
 
@@ -130,15 +165,12 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
         tag corresponding to experiment vs. background. Can contain "remove" to
         remove information that is not relevant or is different between the
         experimental and background video names and would prevent matching.
+        Must contain "fps" tag.
         ex. "date_sampleinfo_fps_run_vtype_remove_remove"
-    sampleinfo_format: str
-        The format of the sampleinfo section of the fname
-        separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
         Used in nested functions:
             fname_split, default "_"
-            sample_split, default "-"
             experiment_tag, default "exp"
             background_tag, default "bg"
             one_background, default False; True to use one background for
@@ -149,9 +181,5 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
 
     videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
-    subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
-    for subfolder in subfolders:
-        params_dict = tags.parse_fname(subfolder,short_fname_format,sampleinfo_format,optional_settings)
-        img_folder = os.path.join(images_folder,subfolder)
-        binary.binaries_to_csv(img_folder,csv_folder,params_dict["fps"])
+    binaries_to_csvs(images_folder,csv_folder,short_fname_format,optional_settings)
     pass

@@ -193,7 +193,7 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
 
     ## TODO: errors if missing parameters
 
-def binaries_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float):
+def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float):
     """
     Convert from binary images to csv of normalized radius versus time
 

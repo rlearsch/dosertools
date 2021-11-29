@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
+import shutil
 import json
 import fnmatch
 import skimage.io
@@ -796,3 +797,40 @@ def test_calculate_elongational_visc():
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
     #this is kind of lazy but it checks that we have the correct order of magntidue
     assert (mean_elongational > 1300 and mean_elongational < 1500)
+
+class TestCSVsToSummaries:
+        
+    # csvs_to_summaries doesn't specifcy a save location, only in relation to the load location
+    # i'm copying my seed csvs to a load location in temp, 
+    # so my save location will be in temp
+    
+    #csv_folder = tmp_path / "csv_seeds"
+    #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+    #shutil.copytree(csv_seed_fixture, "csv_folder")
+    
+    def test_csvs_broad(self, tmp_path):
+        csv_folder = tmp_path / "csv_seeds"
+        csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+        shutil.copytree(csv_seed_fixture, csv_folder)
+        
+        integration.csvs_to_summaries(csv_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c")
+        summary_save_location = os.path.join(os.path.dirname(csv_folder), "summary_csvs")
+        saved_files = os.listdir(summary_save_location)
+        
+        assert os.path.isdir(summary_save_location)
+        for filename in saved_files:
+            assert '.csv' in filename
+            if 'summary' in filename:
+                file_location = os.path.join(summary_save_location, filename)
+                test_summary_df = pd.read_csv(file_location)
+            if 'annotated' in filename:
+                file_location = os.path.join(summary_save_location, filename)
+                test_annotated_df = pd.read_csv(file_location)
+        fixture_annotated_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
+        fixture_summary_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
+        pandas.testing.assert_frame_equal(fixture_annotated_df,test_annotated_df, check_exact=False, atol=1E-6)
+        pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
+        #assert they have the correct columns
+        pass
+
+    

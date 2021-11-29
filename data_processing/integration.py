@@ -214,3 +214,36 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_f
     processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     fitting.save_processed_df(processed_df, summary_save_location)
     pass
+
+
+def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+    """
+    Full integrating function: converts from videos to csv files
+    
+    Parameters
+    ----------
+    videos_folder: path-like
+        Path to a folder of experimental and background video folders.
+    images_folder: path-like
+        Path to a folder in which to save the results of image processing,
+        binaries and optional cropped and background-subtracted images.
+    csv_folder: path-like
+        Path to a folder in which to save the csv containing R/R0 vs. time.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag corresponding to experiment vs. background. Can contain "remove" to
+        remove information that is not relevant or is different between the
+        experimental and background video names and would prevent matching.
+        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
+    sampleinfo_format: str
+        The format of the sampleinfo section of the fname
+        separated by the deliminator specified by sample_split.
+    optional_settings: dict
+        A dictionary of optional settings.
+    
+    """
+    set_defaults(optional_settings)
+    videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
+    csvs_to_summaries(csv_folder, fname_format, sampleinfo_format, optional_settings)
+    pass

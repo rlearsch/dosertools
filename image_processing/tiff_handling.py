@@ -322,8 +322,8 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     Image sequence(s) (video) saved on the hard drive at images_location
     """
     params_dict = define_initial_parameters()
-    experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*"), plugin='tifffile')
-    background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*"), plugin='tifffile')
+    experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
+    background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
     folder.make_destination_folders(images_location, optional_settings)
     params_dict = define_image_parameters(background_video, params_dict)
     bg_median = produce_background_image(background_video, params_dict)

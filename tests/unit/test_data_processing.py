@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
+import shutil
 import json
 import fnmatch
 import skimage.io
@@ -15,6 +16,7 @@ import data_processing.extension as extension
 import data_processing.integration as integration
 
 import file_handling.folder as folder
+import file_handling.tags as tags
 
 # Assigns folders for fixtures.
 fixtures_folder = os.path.join("tests","fixtures")
@@ -258,7 +260,6 @@ class TestCSVToDataFrame:
     # Sets up sample data.
     data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
-    tc_bounds = [0.3,0.07]
     fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "molecular weight-backbone-concentration"
@@ -277,7 +278,7 @@ class TestCSVToDataFrame:
         self.dataset.to_csv(path,index=False)
         csv = str(path)
 
-        assert type(dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+        assert type(dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
     def test_correct_columns(self,tmp_path):
         # Fails if csv_to_dataframe does not return correct columns.
@@ -289,7 +290,7 @@ class TestCSVToDataFrame:
         csv = str(path)
 
         # Checks columns of output.
-        columns = dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format).columns
+        columns = dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format).columns
 
         # Checks standard columns for every dataset.
         assert "time (s)" in columns
@@ -318,7 +319,7 @@ class TestCSVToDataFrame:
         csv = str(path)
 
         # Gets results from csv_to_dataframe.
-        results = dpcsv.csv_to_dataframe(csv,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+        results = dpcsv.csv_to_dataframe(csv,self.fname_format,self.sampleinfo_format)
 
         # Imports csv of validated values.
         correct = pd.read_csv(os.path.join(fixtures_folder,"fixture_csv_to_dataframe.csv"))
@@ -348,7 +349,6 @@ class TestGenerateDF:
     # Sets up sample data.
     data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
-    tc_bounds = [0.3,0.07]
     fname_base = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "mw-backbone-conc"
@@ -362,7 +362,7 @@ class TestGenerateDF:
             path = tmp_path / csv_name
             self.dataset.to_csv(path,index=False)
 
-        assert type(dpcsv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+        assert type(dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
     def test_correct_values(self,tmp_path):
         # Fails if generate_df does not return correct_values.
@@ -374,7 +374,7 @@ class TestGenerateDF:
             self.dataset.to_csv(path,index=False)
 
         # Checks results against validated csv.
-        results = dpcsv.generate_df(tmp_path,self.tc_bounds,self.fname_format,self.sampleinfo_format)
+        results = dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)
         correct = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
         for column in results.columns:
             if dparray.is_dataframe_column_numeric(results,column):
@@ -546,18 +546,16 @@ class TestAddCriticalTime:
             sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
     dataset["strain rate (1/s)"] = sr
 
-    tc_bounds = [0.3,0.07]
-
     tc = 0.4
     Rtc = 0.2
 
     def test_returns_df(self):
         # Fails if add_critical_time does not return a DataFrame.
-        assert type(extension.add_critical_time(self.dataset,self.tc_bounds)) is pd.DataFrame
+        assert type(extension.add_critical_time(self.dataset)) is pd.DataFrame
 
     def test_correct_columns(self):
         # Fails if output does not contain correct columns.
-        columns = extension.add_critical_time(self.dataset,self.tc_bounds).columns
+        columns = extension.add_critical_time(self.dataset).columns
         assert "time (s)" in columns
         assert "R/R0" in columns
         assert "strain rate (1/s)" in columns
@@ -567,7 +565,7 @@ class TestAddCriticalTime:
 
     def test_correct_values(self):
         # Fails if tc, Rtc, or t-tc are wrong.
-        result = extension.add_critical_time(self.dataset,self.tc_bounds)
+        result = extension.add_critical_time(self.dataset)
 
         # Checks tc.
         assert result["tc (s)"][0] == self.tc
@@ -587,18 +585,18 @@ class TestAddCriticalTime:
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
         with pytest.raises(KeyError,match="column R/R0"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
         # Tests if "time (s)" missing.
         data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01]}
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
         with pytest.raises(KeyError,match="column time"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
         # Tests if "strain rate (1/s)" missing.
         data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="column strain"):
-            extension.add_critical_time(dataset,self.tc_bounds)
+            extension.add_critical_time(dataset)
 
 
 def test_find_EC_slope():
@@ -628,7 +626,8 @@ def test_annotate_summary_df():
 def test_make_summary_dataframe():
     test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
-    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c', fitting_bounds =[0.8, 0.1])
+    optional_settings = {"fitting_bounds":[0.8, 0.1]}
+    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c',optional_settings)
     target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
     target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
@@ -795,7 +794,7 @@ class TestSaveSummary:
                 file_location = os.path.join(save_location, saved_filename)
             assert os.path.exists(file_location)
 
-def TestDerivativeECFit():
+def test_derivative_EC_fit():
     """
 
     """
@@ -803,15 +802,47 @@ def TestDerivativeECFit():
     assert test1 == 0
     test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
     assert test2 == -1
+    test3 = fitting.derivative_EC_fit(3, 1, 3, 3)
+    assert test3 == -1
+    test4 = fitting.derivative_EC_fit(3,1,-3,0)
+    assert test4 == -np.exp(1)
 
 
-def Test_calculate_elongational_visc():
+def test_calculate_elongational_visc():
     #construct pathological summary dataframe
-    summary_dict = {"Lambda E (ms)": [0, 1/3, 2/3], "Rtc/R0":[0.9, 1.0, 1.1]}
+    summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
     summary_df = pd.DataFrame(summary_dict)
-    summary_df["sample"] = "fake-data-test"
+    summary_df["sample"] = "1M-PEO-0.01wtpt"
     df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
-    df_with_elongational_visc = calculate_elongational_visc(df, summary_df, needle_dia_mm=1.0)
+    optional_settings = {"needle_diameter_mm":1.0}
+    df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
-    #this is kind of lazy but it checks that we have the correct order of magntidue
-    assert (mean_elongational > 1000 and mean_elongational < 1020)
+    #this is kind of lazy but it checks that we have the correct order of magnitude
+    assert (mean_elongational > 1300 and mean_elongational < 1500)
+
+class TestCSVsToSummaries:
+    #csv_folder = tmp_path / "csv_seeds"
+    #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+    #shutil.copytree(csv_seed_fixture, "csv_folder")
+    
+    def test_csvs_to_summaries(self, tmp_path):
+        csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+        #shutil.copytree(csv_seed_fixture, csv_folder)
+        save_folder = tmp_path / "csv_summaries"
+        integration.csvs_to_summaries(csv_seed_fixture, save_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c")
+        assert os.path.isdir(save_folder)
+        saved_files = os.listdir(save_folder)
+        for filename in saved_files:
+            assert '.csv' in filename
+            if 'summary' in filename:
+                file_location = os.path.join(save_folder, filename)
+                test_summary_df = pd.read_csv(file_location)
+            if 'annotated' in filename:
+                file_location = os.path.join(save_folder, filename)
+                test_annotated_df = pd.read_csv(file_location)
+        fixture_annotated_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
+        fixture_summary_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
+        pandas.testing.assert_frame_equal(fixture_annotated_df,test_annotated_df, check_exact=False, atol=1E-6)
+        pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
+        #assert they have the correct columns
+        pass

@@ -9,7 +9,14 @@
     * Improved filename parsing
         * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside) - **double check this**
     * Handling if folders/files already exists
-* **New features**: 
+    * Let user specify what file type to look for (currently, looks only for .tif)
+* **Integrating into a single script**
+    * Different start/end points
+    * 
+* **Moonshots**: 
+    * Run different processing method if there is no background video to subtract from
+        * try to harvest one from the last frames of the video
+        * or, use Li method on experiment video, seems to work better than others when no background subtraction is present 
     * Read nozzle diameter off background and compare it to experimental
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
@@ -19,8 +26,6 @@
     * Variable, function, module naming cleanup pass
     * Comment cleanup
 * Integration tests
-* Different folders:
-  * Saving output of fits
 * check for file sorting issues when images exceed 999
   * Write a test that checks this
 

@@ -196,14 +196,17 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     binaries_to_csvs(images_folder,csv_folder,short_fname_format,optional_settings)
     pass
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
     Parameters
     ----------
     csv_folder: path-like
-        Path to a folder in which to save the csv containing R/R0 vs. time.
+        Path to a folder in which to find the csv containing R/R0 vs. time.
+    summary_save_location: path-like
+            Path to a folder in which to save the csv of the summary and the annotated datatset
     fname_format: str
         The format of the fname with parameter names separated
         by the deliminator specified by fname_split. Must contain the "vtype"
@@ -232,10 +235,6 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_f
 
     df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
-    # make folder to save summary and mega csvs #
-    # this is just a suggestion on where to save them,
-    one_level_up_from_csv_folder = os.path.dirname(csv_folder)
-    summary_save_location = os.path.join(one_level_up_from_csv_folder, "summary_csvs")
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)
     fitting.save_summary_df(summary_df, summary_save_location)
@@ -244,7 +243,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], fname_f
     pass
 
 
-def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Full integrating function: converts from videos to csv files
     
@@ -257,6 +256,8 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
         binaries and optional cropped and background-subtracted images.
     csv_folder: path-like
         Path to a folder in which to save the csv containing R/R0 vs. time.
+    summary_save_location: path-like
+        Path to a folder in which to save the csv of the summary and the annotated datatset
     fname_format: str
         The format of the fname with parameter names separated
         by the deliminator specified by fname_split. Must contain the "vtype"
@@ -271,7 +272,9 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
         A dictionary of optional settings.
     
     """
+    #### This is just a draft, I have written no tests for it... 
+    #### ... but it should work, right? Just need some optional breakpoints ### 
     set_defaults(optional_settings)
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
-    csvs_to_summaries(csv_folder, fname_format, sampleinfo_format, optional_settings)
+    csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
     pass

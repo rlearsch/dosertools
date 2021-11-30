@@ -17,6 +17,11 @@ pip install foobar
 ```
 -->
 ## Usage
+dostools is expecting experiments that contain a pair of videos - one "experimental" video that contains the fluid transitioning from needle to substrate, and one "background" video that contains only the needle and the literal background of the camera's view. In our testing, we found a background video of 100 frames gives plenty of data to overcome any noise that would be found in a single frame. 
+
+dostools is written for DOS videos of viscoelastic fluids. It can perform background subtraction and image processing on videos of any type. However, the data processing (calculating elongational relaxation time, elongational viscosity, etc) is done using assumptions that are only true for fluids that exhibit elastocapillary behavior. 
+
+dostools calculates values with machine precision. It is up to the user to decide where to truncate the data produced, based on the specifics of their own experimental setup. 
 <!--
 ```python
 import foobar

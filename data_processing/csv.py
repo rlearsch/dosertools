@@ -28,7 +28,7 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return sorted(csvs)
 
-def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
+def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in a csv into a dataframe with sample parameters.
 
@@ -46,11 +46,13 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     sampleinfo_format : str
         the format of the sampleinfo section of the fname
         separated by the deliminator specified by sample_split
-    fname_split : str, optional
-        the deliminator for splitting the name (default is "_")
-    sample_split : str, optional
-        the deliminator for splitting the sampleinfo section
-        of the fname (default is "-")
+    optional_settings: dict
+    Takes the following optional settings:
+        fname_split : str, optional
+            the deliminator for splitting the name (default is "_")
+        sample_split : str, optional
+            the deliminator for splitting the sampleinfo section
+            of the fname (default is "-")
 
     Returns
     -------
@@ -67,7 +69,7 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
     dataset = extension.add_strain_rate(dataset)
 
     # Finds critical time by locating the maximum strain rate within the bounds.
-    dataset = extension.add_critical_time(dataset, tc_bounds)
+    dataset = extension.add_critical_time(dataset, optional_settings)
 
     # Reads in parameters from file name and add to dataframe.
     fname = Path(csv).name
@@ -77,7 +79,7 @@ def csv_to_dataframe(csv : str, tc_bounds : np.array, fname_format : str, sample
 
     return dataset
 
-def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds : np.array, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
+def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in all csvs and process them into a dataframe.
 
@@ -114,10 +116,9 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], tc_bounds 
 
     df_list = []
     csvs = get_csvs(csv_location)
-
     # Runs the processing for each csv in the folder.
     for csv in csvs:
-        sample_df = csv_to_dataframe(csv,tc_bounds,fname_format,sampleinfo_format,optional_settings)
+        sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
         df_list.append(sample_df)
     df = pd.concat(df_list,ignore_index=True)
 

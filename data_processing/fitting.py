@@ -14,7 +14,7 @@ import file_handling.folder as folder
 import file_handling.tags as tags
 import data_processing.integration as integration
 
- 
+
 def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
     """
     Finds the exponential decay of the EC region for a single dataset. Also returns the intercept and r value of the fit
@@ -66,7 +66,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
         df_header[i] = keys_list[i]
     for i in range(len(header_params), (len(header_params) + len(constant_fitting_header))):
         df_header[i] = constant_fitting_header[i - len(header_params)]
-        
+
     lambdaE_df = lambdaE_df.rename(columns=df_header)
     lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
     lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
@@ -83,9 +83,6 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     df : pd.DataFrame
         Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
         generated from data_processing.csv.generate_df
-    fitting_bounds: list, optional
-        [start, end]
-        These are the R/R0 values we look for to set the bounds for the EC region fitting
     sampleinfo_format : str
         the format of the sampleinfo section of the filename
         separated by the deliminator specified by sample_split
@@ -106,9 +103,9 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     fitting_bounds = settings["fitting_bounds"]
     start = fitting_bounds[0]
     end = fitting_bounds[1]
-    
+
     fitting_results_list = []
-    
+
 
     samples = df["sample"].unique()
     for sample in samples:
@@ -130,9 +127,9 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
 def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
     """
     Saves the summary dataset from a large processed batch of videos.
-    
+
     The summary dataset includes only the fluid properties, not the 'raw' radius vs time data.
-    
+
     Parameters
     ----------
     summary_df : pd.DataFrame
@@ -141,17 +138,17 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
         path to folder in which to save the csv
     filename: string
         Currently not used, but this will be the name to give to the summary dataset csv
-    
+
     Returns
     -------
     None. Saves file to disk.
     """
-    
+
     # right now, I'm not sure what information the computer will have about the files it's processing
     # because of this, I'm going to use the current date and time to name this summary csv
     # I anticipate we can come up with a better filename convention at a later time
     # thus, the filename arguemnt is present, but unused in the function
-    
+
     date_and_time = datetime.datetime.now()
     #I don't want colons or periods in my filename string
     date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
@@ -163,36 +160,36 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
 def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> float:
     """
     The derivative of the elasto-capillary region.
-    
+
     R(t)/R0 = R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
     R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
-    
+
     Parameters
     ----------
     RtcR0: float
         The normalized radius at which the transition to EC behavior occurs
-    
+
     LambdaE: float
         The relaxation time of the polymer solution
-        
+
     time: float
         the moment in time to evaluate the derivative
-    
+
     tc: float
-        the critical time for the experiment, this number is purely emperical 
+        the critical time for the experiment, this number is purely emperical
         (it depends entirely on when in the process the video starts)
-    
+
     Returns
     -------
     R'(t)/R0: float
-    
+
     """
     return RtcR0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict ={}) -> pd.DataFrame:
     """
-    Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset. 
-     
+    Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset.
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -207,29 +204,29 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
         needle_diameter_mm: float
             diameter of the needle used for the experiment, in milimeters
             Default value of 0.7176 mm is used for 22G needles
-    
+
     Returns
     ------
     dataset_w_visc : pd.DataFrame
         Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)
     """
-    
-    # calculate timestep from the first two rows of data 
+
+    # calculate timestep from the first two rows of data
     # (could also just read the value of time at position 1?)
     #timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
-    
+
     #get mean relaxation time and R(tc)/R0 from summary_df for current sample
     #Calculate strain and elongational viscosity / surface tension
     #Append them to the dataframe
-    
+
     settings = integration.set_defaults(optional_settings)
     needle_diameter_mm = settings["needle_diameter_mm"]
-    
+
     df_w_visc_list = []
     mean_summary_df = summary_df.groupby("sample").mean()
     for sample in summary_df["sample"].unique():
         #subset_sample = summary_df[summary_df["sample"] == str(sample)]
-        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"] 
+        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"]
         lambdaE_mean = mean_summary_df.loc[sample, "Lambda E (ms)"]
         #calculate elongational viscosity from original DOS data and mean values of Rtc and lambdaE
         for run in df[df["sample"] == sample]["run"].unique():
@@ -237,11 +234,11 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
             dataset = dataset[dataset["run"] == run]
             dataset['strain'] = -2*np.log(dataset['R/R0'])
             dataset=dataset.reset_index(drop=True)
-            
+
             for value in range(0,len(dataset)):
                 t_minus_tc = dataset.at[value, "t - tc (s)"]
                 t_minus_tc_ms = t_minus_tc*1000
-                # NOTE: Because we prefer the needle diameter to give the length scale, 
+                # NOTE: Because we prefer the needle diameter to give the length scale,
                 # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
                 e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diameter_mm))
                 # e visc / surface tension [=] -1/D'(t) = [1/(mm/ms)] = [1/(m/s)] = [s/m]
@@ -253,9 +250,9 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
 def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
     """
     Saves the processed dataset from a large batch of videos.
-    
+
     The summary dataset includes the fluid properties, the 'raw' radius vs time data, and the sampleinfo from the filename.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -264,17 +261,17 @@ def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, 
         path to folder in which to save the csv
     filename: string
         Currently not used, but this will be the name to give to the summary dataset csv
-    
+
     Returns
     -------
     None. Saves file to disk.
     """
-    
+
     # right now, I'm not sure what information the computer will have about the files it's processing
     # because of this, I'm going to use the current date and time to name this summary csv
     # I anticipate we can come up with a better filename convention at a later time
     # thus, the filename arguemnt is present, but unused in the function
-    
+
     date_and_time = datetime.datetime.now()
     #I don't want colons or periods in my filename string
     date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)

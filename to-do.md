@@ -11,6 +11,7 @@
 * **Error Handling**
     * handle errors from threshold_otsu encountering a non-grayscale image
       * Print out a warning if non-grayscale, identifying the folder and then skip
+    * vet optional settings--validate that entries given make sense
 * **Moonshots**
     * Run different processing method if there is no background video to subtract from
         * try to harvest one from the last frames of the video
@@ -32,7 +33,6 @@
 * Dependencies
   * https://github.com/scikit-image/scikit-image/issues/4780
   * Write up of under what circumstances msvc-runtime may need to be installed
-
 
 ## Documentation
 * Installation instructions

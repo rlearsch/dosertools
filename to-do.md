@@ -1,27 +1,25 @@
 # Current Status, Suggestions for improvement, Outstanding questions
 
 ## Next Steps
-* **Video selector**: 
+* **Video selector**
     * identify videos that are already processed
-    * Pairing a background with its experiment
-    * Processing all videos in folder regardless of date
-      * eliminate _bg and binaries from folder_list
-    * Improved filename parsing
-        * can we make functions that look at the images be agnostic to what the folder is called? (so that people can easily rename their data folders to add additional information for the code without having to rename every image inside) - **double check this**
-    * Handling if folders/files already exists
+    * Handling if folders/files already exists -- overwrite vs. not overwrite
     * Let user specify what file type to look for (currently, looks only for .tif)
+    * Verbose mode
 * **Integrating into a single script**
     * Different start/end points
-    * 
-* **Moonshots**: 
+* **Error Handling**
+    * handle errors from threshold_otsu encountering a non-grayscale image
+      * Print out a warning if non-grayscale, identifying the folder and then skip
+* **Moonshots**
     * Run different processing method if there is no background video to subtract from
         * try to harvest one from the last frames of the video
-        * or, use Li method on experiment video, seems to work better than others when no background subtraction is present 
+        * or, use Li method on experiment video, seems to work better than others when no background subtraction is present
     * Read nozzle diameter off background and compare it to experimental
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
-    * Refine $\lambda_E$ calculation 
-* **Clean up** 
+    * Refine $\lambda_E$ calculation
+* **Clean up**
     * fixtures folder
     * Variable, function, module naming cleanup pass
     * Comment cleanup
@@ -32,6 +30,9 @@
 ## Packaging
 * Prepare package for installation
 * Dependencies
+  * https://github.com/scikit-image/scikit-image/issues/4780
+  * Write up of under what circumstances msvc-runtime may need to be installed
+
 
 ## Documentation
 * Installation instructions

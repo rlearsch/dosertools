@@ -24,6 +24,53 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         Dictionary with optional_settings and default values, prioritizing
         optional_settings values.
 
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    sample_split: string
+        The deliminator for splitting sampleinfo tag in folder/file names,
+        used in sampleinfo_format.
+        Default is "-".
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    fitting_bounds: 2 element list of floats
+        [start, end]
+        The R/R0 to bound the start and end of fitting of EC region.
+        Default is [0.1, 0.045].
+    tc_bounds: 2 element list of floats
+        [start, end]
+        The R/R0 to bound the start and end for finding the critical time.
+        Default is [0.3,0.07].
+    needle_diameter_mm: float
+        The needle outer diameter in millimeters.
+        Default is 0.7176 mm (22G needle).
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any
+    verbose: bool
+        dafsdaf
+    image_extension: string
+        The extension for images in the video folder. TIFF recommended.
+        Default is "tif".
+
     """
 
     settings = {}
@@ -68,6 +115,20 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["needle_diameter_mm"] = optional_settings["needle_diameter_mm"]
     except KeyError:
         settings["needle_diameter_mm"] = 0.7176
+    try:
+        settings["skip_existing"] = optional_settings["skip_existing"]
+    except KeyError:
+        settings["skip_existing"] = True
+    try:
+        settings["image_extension"] = optional_settings["image_extension"]
+    except KeyError:
+        settings["image_extension"] = "tif"
+    try:
+        settings["verbose"] = optional_settings["verbose"]
+    except KeyError:
+        settings["verbose"] = False
+
+
     return settings
 
 
@@ -246,7 +307,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
 def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Full integrating function: converts from videos to csv files
-    
+
     Parameters
     ----------
     videos_folder: path-like
@@ -270,11 +331,11 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
-    
+
     """
-    #### This is just a draft, I have written no tests for it... 
-    #### ... but it should work, right? Just need some optional breakpoints ### 
-    set_defaults(optional_settings)
+    #### This is just a draft, I have written no tests for it...
+    #### ... but it should work, right? Just need some optional breakpoints ###
+    #set_defaults(optional_settings)
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
     pass

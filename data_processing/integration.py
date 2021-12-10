@@ -70,7 +70,11 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     image_extension: string
         The extension for images in the video folder. TIFF recommended.
         Default is "tif".
-
+    summary_filename: string
+        The base filename (no extension) for saving the summary csvs. If not
+        provided, will be generated automatically based on the current date
+        and time.
+        Default is "" to trigger automatic generation.
     """
 
     settings = {}
@@ -127,7 +131,10 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["verbose"] = optional_settings["verbose"]
     except KeyError:
         settings["verbose"] = False
-
+    try:
+        settings["summary_filename"] = optional_settings["summary_filename"]
+    except KeyError:
+        settings["summary_filename"] = ""
 
     return settings
 

@@ -218,7 +218,7 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
         params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
         ## TODO: deal with missing fps tag
         img_folder = os.path.join(images_folder,subfolder)
-        binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"])
+        binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"], optional_settings)
     pass
 
 def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):

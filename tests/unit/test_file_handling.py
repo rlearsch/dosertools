@@ -493,12 +493,12 @@ class TestMakeDestinationFolders:
     """
 
     def test_returns_bool_bool_bool(self,tmp_path):
-        folders_exists = folder.make_destination_folders(tmp_path)
-        [bin_exists, crop_exists, bg_sub_exists] = folders_exists
+        folders_exist = folder.make_destination_folders(tmp_path)
+        [bin_exists, crop_exists, bg_sub_exists] = folders_exist
         assert type(bin_exists) is bool
         assert type(crop_exists) is bool
         assert type(bg_sub_exists) is bool
-        assert type(folders_exists) is list
+        assert type(folders_exist) is list
 
 
 

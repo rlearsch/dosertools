@@ -47,8 +47,8 @@ class TestTiffConversions:
 
     def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
         save_location = tmp_path
-        folder.make_destination_folders(save_location, self.optional_settings)
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
+        folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
@@ -56,9 +56,9 @@ class TestTiffConversions:
     def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
         #assert saved file matches
         save_location = tmp_path
-        folder.make_destination_folders(save_location, self.optional_settings)
+        folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
 
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, self.optional_settings)
+        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
         target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
         target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))
@@ -73,11 +73,11 @@ class TestTiffConversions:
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
         save_location = tmp_path
-        folder.make_destination_folders(save_location)
+        folders_exist = folder.make_destination_folders(save_location)
 
         experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
         target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence",self.fname,"bin","*"))
-        th.convert_tiff_sequence_to_binary(experimental_sequence, self.bg_median, target_params_dict, save_location)
+        th.convert_tiff_sequence_to_binary(experimental_sequence, self.bg_median, target_params_dict, save_location, folders_exist)
         produced_converted_sequence_path = save_location / "bin" / '*'
         #convert to string for skimage.io.imread_collection
         produced_converted_sequence = skimage.io.imread_collection(str(produced_converted_sequence_path))
@@ -132,10 +132,12 @@ class TestBackgroundSubtraction:
 
 
 def test_tiffs_to_binary():
+    # TODO: Tests for tiffs_to_binary
     #integration test
 
     #assert save_location exists
     #assert produced video matches test_sequence
+    # Test skip existing
     pass
 
 class TestTopBorder:

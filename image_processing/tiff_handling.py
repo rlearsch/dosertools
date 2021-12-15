@@ -135,7 +135,10 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
         Dictionary of parameters with the crop information added
     save_location: path-like
         The folder where file should be saved
-    folders_exist
+    folders_exist: Tuple of three bools
+        Booleans indicating whether the binary, crop, and bg_sub folders
+        already existed to allow convert_tiff_image image to skip the relevant
+        saves if optional_settings has skip_existing = True
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
@@ -149,7 +152,7 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
 
     for image_number in range(0,len(experimental_sequence)):
         image = experimental_sequence[image_number]
-        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, optional_settings)
+        convert_tiff_image(image, bg_median, params_dict, image_number, save_location, folders_exist, optional_settings)
     pass
 
 def crop_single_image(image: np.ndarray, params_dict: dict) -> np.ndarray:
@@ -258,7 +261,7 @@ def save_image(image: np.ndarray, image_number: int, save_location: typing.Union
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, images_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
+def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, images_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
     """
     Fully converts a raw tiff to binary png image.
 
@@ -274,11 +277,16 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
         Dictionary of parameters with the crop information added
     images_location: path-like
         The folder where file should be saved
+    folders_exist: Tuple of three bools
+        Booleans indicating whether the binary, crop, and bg_sub folders
+        already existed to allow convert_tiff_image image to skip the relevant
+        saves if optional_settings has skip_existing = True
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
             save_crop, default False; True to save the intermediate cropped image
             save_bg_sub, default False; True to save the background-subtracted image
+            skip_existing, default True; False to overwrite existing images
 
     Returns
     -------
@@ -288,16 +296,21 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
     settings = integration.set_defaults(optional_settings)
     save_crop = settings["save_crop"]
     save_bg_sub = settings["save_bg_sub"]
+    skip_existing = settings["skip_existing"]
+    [bin_exists, crop_exists, bg_sub_exists] = folders_exist
 
     image = exposure.rescale_intensity(image, in_range='uint12', out_range='uint16')
     cropped_image = crop_single_image(image, params_dict)
     if save_crop:
-        save_image(cropped_image, image_number, os.path.join(images_location,"crop"),"tiff")
+        if not crop_exists or not skip_existing:
+            save_image(cropped_image, image_number, os.path.join(images_location,"crop"),"tiff")
     background_subtracted_image = subtract_background_single_image(cropped_image, bg_median)
     if save_bg_sub:
-        save_image(background_subtracted_image, image_number, os.path.join(images_location,"bg_sub"), "tiff")
-    binary_image = mean_binarize_single_image(background_subtracted_image)
-    save_image(binary_image, image_number, os.path.join(images_location,"bin"),"png")
+        if not bg_sub_exists or not skip_existing:
+            save_image(background_subtracted_image, image_number, os.path.join(images_location,"bg_sub"), "tiff")
+    if not bin_exists or not skip_existing:
+        binary_image = mean_binarize_single_image(background_subtracted_image)
+        save_image(binary_image, image_number, os.path.join(images_location,"bin"),"png")
     pass
 
 def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], images_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
@@ -315,6 +328,8 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
+            skip_existing, default True; False to overwrite existing images
+        Used in nested functions:
             save_crop, default False; True to save the intermediate cropped image
             save_bg_sub, default False; True to save the background-subtracted image
 
@@ -322,15 +337,23 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     -------
     Image sequence(s) (video) saved on the hard drive at images_location
     """
-    params_dict = define_initial_parameters()
-    experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
-    background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
+
+    settings = integration.set_defaults(optional_settings)
+    skip_existing = settings["skip_existing"]
+
     folders_exist = folder.make_destination_folders(images_location, optional_settings)
-    params_dict = define_image_parameters(background_video, params_dict)
-    bg_median = produce_background_image(background_video, params_dict)
-    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
-    params_dict["window_top"] = top_border(bg_median)
-    export_params(images_location, params_dict)
+    # If all the image folders that would be saved exist and the skip_existing
+    # is True, skips loading and saving images completely.
+    if not all(folders_exist) or not skip_existing:
+        # TODO: implement image format handling
+        params_dict = define_initial_parameters()
+        experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
+        background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
+        params_dict = define_image_parameters(background_video, params_dict)
+        bg_median = produce_background_image(background_video, params_dict)
+        convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
+        params_dict["window_top"] = top_border(bg_median)
+        export_params(images_location, params_dict)
     pass
 
 def top_border(bg_median: np.ndarray) -> int:

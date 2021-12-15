@@ -119,7 +119,7 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
 
     return bg_median
 
-def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
+def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
     """
     Takes as arguments the skimage image sequence holding the experimental video and the background image to subtract.
 
@@ -135,6 +135,7 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
         Dictionary of parameters with the crop information added
     save_location: path-like
         The folder where file should be saved
+    folders_exist
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
@@ -324,10 +325,10 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     params_dict = define_initial_parameters()
     experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
     background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
-    folder.make_destination_folders(images_location, optional_settings)
+    folders_exist = folder.make_destination_folders(images_location, optional_settings)
     params_dict = define_image_parameters(background_video, params_dict)
     bg_median = produce_background_image(background_video, params_dict)
-    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, optional_settings)
+    convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
     params_dict["window_top"] = top_border(bg_median)
     export_params(images_location, params_dict)
     pass

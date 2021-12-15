@@ -333,3 +333,5 @@ class TestBinaryImagesToCSV:
         results = pd.read_csv(os.path.join(csv_path,self.fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
+
+    # TODO: test cases for csv existing!

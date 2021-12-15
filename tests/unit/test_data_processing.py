@@ -824,7 +824,7 @@ class TestCSVsToSummaries:
     #csv_folder = tmp_path / "csv_seeds"
     #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
     #shutil.copytree(csv_seed_fixture, "csv_folder")
-    
+
     def test_csvs_to_summaries(self, tmp_path):
         csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
         #shutil.copytree(csv_seed_fixture, csv_folder)

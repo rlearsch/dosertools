@@ -846,3 +846,5 @@ class TestCSVsToSummaries:
         pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
         #assert they have the correct columns
         pass
+
+# TODO: test skip_existing/warning for save_processed_df

@@ -210,7 +210,7 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
-            skip_existing, default True; False to overwrite existing images
+            skip_existing, default True; False to overwrite existing csv
     """
 
     settings = integration.set_defaults(optional_settings)

@@ -307,7 +307,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
         os.mkdir(summary_save_location)
     fitting.save_summary_df(summary_df, summary_save_location)
     processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
-    fitting.save_processed_df(processed_df, summary_save_location)
+    fitting.save_processed_df(processed_df, summary_save_location, optional_settings)
     pass
 
 

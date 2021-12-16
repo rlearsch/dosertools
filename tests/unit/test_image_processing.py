@@ -13,14 +13,37 @@ import image_processing.tiff_handling as th
 import image_processing.binary as binary
 import file_handling.folder as folder
 
-fixtures_folder = os.path.join("tests","fixtures")
-fixtures_binary = os.path.join(fixtures_folder,"fixture_binary")
+@pytest.fixture
+def fixtures_binary(fixtures_folder):
+    return os.path.join(fixtures_folder,"fixture_binary")
 
-background_video_location = os.path.join(fixtures_folder, "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_bg_2109_1534", "*")
-background_video = skimage.io.imread_collection(background_video_location, plugin='tifffile')
+@pytest.fixture
+def timecode():
+    return "_2109_1534"
 
-with open(os.path.join(fixtures_folder,"params.json")) as f:
-    target_params_dict = json.load(f)
+@pytest.fixture
+def background_video(fname, timecode, videos_folder):
+    background_video_location = os.path.join(videos_folder,fname + "_bg" + timecode, "*")
+    background_video = skimage.io.imread_collection(background_video_location, plugin='tifffile')
+    return background_video
+
+@pytest.fixture
+def target_params_dict(fixtures_folder):
+    with open(os.path.join(fixtures_folder,"params.json")) as f:
+        return json.load(f)
+
+@pytest.fixture
+def images_list(fixtures_binary):
+    sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
+    sample_image2 = skimage.io.imread(os.path.join(fixtures_binary,"287.png"))
+    sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
+    black = np.zeros((10,10),dtype=np.uint8)
+    white = np.ones((10,10),dtype=np.uint8)*255
+    return [sample_image1,sample_image2,sample_image3,black,white]
+
+@pytest.fixture
+def bg_median(fixtures_folder):
+    return np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
 def test_define_initial_parameters():
     "Initial coefficients for first crop iterations"
@@ -31,34 +54,35 @@ def test_define_initial_parameters():
     assert params_dict["crop_nozzle_coef"] == 0.15
 
 
-def test_define_image_parameters():
+def test_define_image_parameters(background_video,target_params_dict):
     params_dict = th.define_initial_parameters()
     params_dict = th.define_image_parameters(background_video, params_dict)
     assert target_params_dict == params_dict
 
 class TestTiffConversions:
 
-    bg_median = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
-    image_location = os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534000261.tif")
-    image = skimage.io.imread(image_location)
     image_number = 261
     optional_settings = {"save_crop" : True, "save_bg_sub" : True}
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
 
-    def test_convert_tiff_image_saves_intermediate_files(self, tmp_path):
+    @pytest.fixture
+    def image(self,fname,timecode,videos_folder):
+        image_location = os.path.join(videos_folder,fname + timecode, fname + timecode + "000261.tif")
+        return skimage.io.imread(image_location)
+
+    def test_convert_tiff_image_saves_intermediate_files(self, tmp_path, image, target_params_dict, bg_median):
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
+        th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
 
-    def test_convert_tiff_image_converts_intermediate_files(self, tmp_path):
+    def test_convert_tiff_image_converts_intermediate_files(self, tmp_path, image, target_params_dict, bg_median, fixtures_folder):
         #assert saved file matches
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
 
-        th.convert_tiff_image(self.image, self.bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
+        th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         target_bin = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin.png"))
         target_crop = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","crop.tiff"))
         target_bg_sub = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bg_sub.tiff"))
@@ -69,15 +93,15 @@ class TestTiffConversions:
         assert np.all(target_crop == produced_crop)
         assert np.all(target_bg_sub == produced_bg_sub)
 
-    def test_convert_tiff_sequence_to_binary(self, tmp_path):
+    def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, videos_folder, test_sequence, target_params_dict,bg_median):
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location)
 
-        experimental_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2_2109_1534","*"), plugin="tifffile")
-        target_converted_sequence = skimage.io.imread_collection(os.path.join(fixtures_folder,"test_sequence",self.fname,"bin","*"))
-        th.convert_tiff_sequence_to_binary(experimental_sequence, self.bg_median, target_params_dict, save_location, folders_exist)
+        experimental_sequence = skimage.io.imread_collection(os.path.join(videos_folder,fname + timecode,"*"), plugin="tifffile")
+        target_converted_sequence = skimage.io.imread_collection(os.path.join(test_sequence,fname,"bin","*"))
+        th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, target_params_dict, save_location, folders_exist)
         produced_converted_sequence_path = save_location / "bin" / '*'
         #convert to string for skimage.io.imread_collection
         produced_converted_sequence = skimage.io.imread_collection(str(produced_converted_sequence_path))
@@ -85,12 +109,11 @@ class TestTiffConversions:
             assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
 
 
-def test_produce_background_image():
+def test_produce_background_image(background_video,bg_median):
     params_dict = th.define_initial_parameters()
     params_dict = th.define_image_parameters(background_video, params_dict)
     bg_median_test = th.produce_background_image(background_video, params_dict)
-    target_bg_median_array = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
-    assert np.all(target_bg_median_array.astype(int) == bg_median_test.astype(int))
+    assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
 
 class TestBackgroundSubtraction:
     """
@@ -133,6 +156,7 @@ class TestBackgroundSubtraction:
 
 def test_tiffs_to_binary():
     # TODO: Tests for tiffs_to_binary
+    # TODO: Image format test
     #integration test
 
     #assert save_location exists
@@ -152,16 +176,13 @@ class TestTopBorder:
         Checks if top_border returns the correct value for a test background.
     """
 
-    # Import example background image previously stored as an array.
-    example_background = np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
-
-    def test_returns_int(self):
+    def test_returns_int(self,bg_median):
         # Fails if top_border does not return an integer.
-        assert type(th.top_border(self.example_background).item()) is int
+        assert type(th.top_border(bg_median).item()) is int
 
-    def test_returns_correct_value(self):
+    def test_returns_correct_value(self,bg_median):
         # Fails if top_border does not return correct value for test background.
-        assert th.top_border(self.example_background) == 120
+        assert th.top_border(bg_median) == 120
 
 class TestExportParams:
     """
@@ -206,24 +227,18 @@ class TestBottomBorder:
         images.
     """
 
-    sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
-    sample_image2 = skimage.io.imread(os.path.join(fixtures_binary,"287.png"))
-    sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
-    black = np.zeros((10,10),dtype=np.uint8)
-    white = np.ones((10,10),dtype=np.uint8)*255
-
-    def test_returns_int(self):
+    def test_returns_int(self, images_list):
         # Fails if bottom_border does not return an integer.
-        assert type(binary.bottom_border(self.sample_image1).item()) is int
+        assert type(binary.bottom_border(images_list[0]).item()) is int
 
-    def test_returns_correct_values(self):
+    def test_returns_correct_values(self, images_list):
         # Fails if bottom_border does not return correct values for series
         # of test images.
-        assert binary.bottom_border(self.black) == 5
-        assert binary.bottom_border(self.white) == 5
-        assert binary.bottom_border(self.sample_image1) == 520
-        assert binary.bottom_border(self.sample_image2) == 439
-        assert binary.bottom_border(self.sample_image3) == 630
+        assert binary.bottom_border(images_list[3]) == 5
+        assert binary.bottom_border(images_list[4]) == 5
+        assert binary.bottom_border(images_list[0]) == 520
+        assert binary.bottom_border(images_list[1]) == 439
+        assert binary.bottom_border(images_list[2]) == 630
 
 
 class TestCalculateMinDiameter:
@@ -239,30 +254,26 @@ class TestCalculateMinDiameter:
         test images.
     """
 
-    sample_image1 = skimage.io.imread(os.path.join(fixtures_binary,"102.png"))
-    sample_image2 = skimage.io.imread(os.path.join(fixtures_binary,"287.png"))
-    sample_image3 = skimage.io.imread(os.path.join(fixtures_binary,"707.png"))
-    black = np.zeros((10,10),dtype=np.uint8)
-    white = np.ones((10,10),dtype=np.uint8)*255
-    images = [sample_image1,sample_image2,sample_image3,black,white]
-    diameters = np.loadtxt(os.path.join(fixtures_binary,"fixture_diameters.csv"), delimiter=',')
-    top_borders = [165,167,240,0,0]
+    @pytest.fixture
+    def diameters(self,fixtures_binary):
+        return np.loadtxt(os.path.join(fixtures_binary,"fixture_diameters.csv"), delimiter=',')
 
-    def test_returns_float(self):
+    def test_returns_float(self, images_list):
         # Fails if calculate_min_diameter does not return a float.
-        (height,width) = np.shape(self.sample_image1)
+        (height,width) = np.shape(images_list[0])
         window = [0,0,width,height]
-        assert type(binary.calculate_min_diameter(self.sample_image1,window).item()) is float
+        assert type(binary.calculate_min_diameter(images_list[0],window).item()) is float
 
-    def test_returns_correct_values(self):
+    def test_returns_correct_values(self, images_list, diameters):
         # Fails if calculate_min_diameter does not return correct values for
         # a series of test images.
+        top_borders = [165,167,240,0,0]
         i = 0
-        for image in self.images:
+        for image in images_list:
             (height,width) = np.shape(image)
-            window = [0,self.top_borders[i],width,height]
+            window = [0,top_borders[i],width,height]
             diameter = binary.calculate_min_diameter(image,window)
-            assert round(diameter,4) == self.diameters[i]
+            assert round(diameter,4) == diameters[i]
             i = i + 1
 
 class TestBinariesToRadiusTime:
@@ -278,25 +289,29 @@ class TestBinariesToRadiusTime:
         test sequence
     """
 
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    binary_location = os.path.join(fixtures_folder,"test_sequence",fname,"bin")
-    first_image = os.path.join(binary_location,"000.png")
-    image = skimage.io.imread(first_image)
-    (height, width) = image.shape
-    window_top = 120
-    window = [0,window_top,width,height] # window: [left, top, right, bottom]
     params_dict = {"fps": 25000, "nozzle_diameter": 317}
 
+    @pytest.fixture
+    def binary_location(self,fname,fixtures_folder):
+        return os.path.join(fixtures_folder,"test_sequence",fname,"bin")
 
-    def test_returns_df(self):
+    @pytest.fixture
+    def window(self,binary_location):
+        first_image = os.path.join(binary_location,"000.png")
+        image = skimage.io.imread(first_image)
+        (height, width) = image.shape
+        window_top = 120
+        return [0,window_top,width,height] # window: [left, top, right, bottom]
+
+    def test_returns_df(self,binary_location,window):
         # Fails if binaries_to_radius_time does not return a dataframe.
-        assert type(binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)) is pd.DataFrame
+        assert type(binary.binaries_to_radius_time(binary_location,window,self.params_dict)) is pd.DataFrame
 
-    def test_returns_correct_values(self):
+    def test_returns_correct_values(self,fname,test_sequence,binary_location,window):
         # Fails if binaries_to_radius_time does not return the correct values
         # for the given sequence of images.
-        results = binary.binaries_to_radius_time(self.binary_location,self.window,self.params_dict)
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
+        results = binary.binaries_to_radius_time(binary_location,window,self.params_dict)
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         for column in results.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
@@ -311,26 +326,29 @@ class TestBinaryImagesToCSV:
         a given test sequence
     """
 
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    images_location = os.path.join(fixtures_folder,"test_sequence",fname)
+
     fps = 25000
 
-    def test_saves_csv(self,tmp_path):
+    @pytest.fixture
+    def images_location(self,fname,test_sequence):
+        return os.path.join(test_sequence,fname)
+
+    def test_saves_csv(self,tmp_path,fname,images_location):
         # Fails if binary_images_to_csv does not save a csv or does not save the
         # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binary_images_to_csv(self.images_location,csv_path,self.fps)
-        assert os.path.exists(os.path.join(csv_path,self.fname + ".csv"))
+        binary.binary_images_to_csv(images_location,csv_path,self.fps)
+        assert os.path.exists(os.path.join(csv_path,fname + ".csv"))
 
-    def test_saves_correct_csv(self,tmp_path):
+    def test_saves_correct_csv(self,tmp_path,fname,images_location):
         # Fails if binary_images_to_csv does not save a csv or does not save the
         # correct values
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
-        binary.binary_images_to_csv(self.images_location,csv_path,self.fps)
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname +".csv"))
-        results = pd.read_csv(os.path.join(csv_path,self.fname + ".csv"))
+        binary.binary_images_to_csv(images_location,csv_path,self.fps)
+        test_data = pd.read_csv(os.path.join(images_location,"csv",fname +".csv"))
+        results = pd.read_csv(os.path.join(csv_path,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 

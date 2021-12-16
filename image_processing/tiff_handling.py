@@ -330,10 +330,11 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
-            skip_existing, default True; False to overwrite existing images
+            skip_existing, bool; default True; False to overwrite existing images
+            image_extension, string; default "tif"; image format specified by user
         Used in nested functions:
-            save_crop, default False; True to save the intermediate cropped image
-            save_bg_sub, default False; True to save the background-subtracted image
+            save_crop, bool; default False; True to save the intermediate cropped image
+            save_bg_sub, boo; default False; True to save the background-subtracted image
 
     Returns
     -------
@@ -342,6 +343,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
 
     settings = integration.set_defaults(optional_settings)
     skip_existing = settings["skip_existing"]
+    image_extension = settings["image_extension"]
 
     folders_exist = folder.make_destination_folders(images_location, optional_settings)
     # If all the image folders that would be saved exist and the skip_existing
@@ -349,8 +351,13 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     if not all(folders_exist) or not skip_existing:
         # TODO: implement image format handling
         params_dict = define_initial_parameters()
-        experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
-        background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
+        if image_extension == "tif" or image_extension == "tiff":
+            experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension), plugin='tifffile')
+            background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*."+image_extension), plugin='tifffile')
+        else:
+            # No plugin used for non-TIFF image formats
+            experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension))
+            background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*." + image_extension))
         params_dict = define_image_parameters(background_video, params_dict)
         bg_median = produce_background_image(background_video, params_dict)
         convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)

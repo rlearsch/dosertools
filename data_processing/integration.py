@@ -69,7 +69,7 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         dafsdaf
     image_extension: string
         The extension for images in the video folder. TIFF recommended.
-        Default is "tif".
+        Default is "tif". Do not include ".".
     summary_filename: string
         The base filename (no extension) for saving the summary csvs. If not
         provided, will be generated automatically based on the current date

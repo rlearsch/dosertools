@@ -64,6 +64,8 @@ def define_image_parameters(background_video: skimage.io.collection.ImageCollect
     crop_height_coefficient = params_dict["crop_height_coefficient"]
 
     first_frame = background_video[0]
+    if len(first_frame.shape) == 3:
+        first_frame = skimage.color.rgb2gray(first_frame)
     thresh_otsu = threshold_otsu(first_frame)
     binary_otsu = first_frame < thresh_otsu
     binary_otsu = np.array(binary_otsu)*255

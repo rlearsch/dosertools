@@ -775,7 +775,7 @@ class TestVideosToCSVs:
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-class TestSaveSummary:
+class TestSaveSummaryDF:
     date_and_time = datetime.now()
     date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
     # produce dummy dataframe that is empty

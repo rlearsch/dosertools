@@ -399,6 +399,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
 
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
+    
     if verbose:
         print("Processing csvs of R/R0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 

@@ -215,6 +215,7 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
 
     settings = integration.set_defaults(optional_settings)
     skip_existing = settings["skip_existing"]
+    verbose = settings["verbose"]
 
     binary_location = os.path.join(images_location,"bin")
 
@@ -236,12 +237,16 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
 
         # Converts binaries to DataFrame to csv.
         df = binaries_to_radius_time(binary_location,window,params_dict)
-        if os.path.exists(os.path.join(csv_location,folder_name + ".csv")):
+        save_path = os.path.join(csv_location,folder_name + ".csv")
+        if os.path.exists(save_path):
             if not skip_existing:
                 # Deletes existing csv to replace it with new csv
-                os.remove(os.path.join(csv_location,folder_name + ".csv"))
-                df.to_csv(os.path.join(csv_location,folder_name + ".csv"))
+                os.remove(save_path)
+                df.to_csv(save_path)
         else:
-            df.to_csv(os.path.join(csv_location,folder_name + ".csv"))
+            df.to_csv(save_path)
+    elif verbose:
+        # If verbose, prints that csv save was skipped.
+        print(folder_name + ".csv already exists and skip_existing is True. binary_images_to_csv skipped.")
 
     # TODO: handle error if csv already exists? Check if still occurs

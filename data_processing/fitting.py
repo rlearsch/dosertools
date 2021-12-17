@@ -186,6 +186,7 @@ def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> f
     """
     return RtcR0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
+## TODO: ask if this function is doing too much in one function!
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset.
@@ -289,12 +290,18 @@ def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, 
     # If file with given or generated filename does not exist, save, otherwise,
     # check skip_existing to see if generate a warning or remove and rewrite
     # the file.
+    saved = False
     if os.path.exists(full_save_path):
         if not skip_existing:
             os.remove(full_save_path)
             df.to_csv(full_save_path)
+            saved = True
         else:
             warnings.warn("Summary file with given filename already exists and optional_settings skip_existing is True by default. Summary file was NOT saved. Please rerun the function with a new summary_filename specified in optional_settings or with no filename specified.", UserWarning)
     else:
         df.to_csv(full_save_path)
+        saved = True
+    if verbose:
+        if saved:
+            print("Summary file saved successfully with name " + filename_string)
     pass

@@ -16,6 +16,7 @@ import file_handling.folder as folder
 import data_processing.integration as integration
 
 
+# TODO: ask if user would ever need to change these values for other camera setups
 def define_initial_parameters() -> dict:
     """
     Initalizes the parameters dictionary with coefficients for the initial image crop.
@@ -330,12 +331,29 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
-            skip_existing, bool; default True; False to overwrite existing images
-            image_extension, string; default "tif"; image format specified by user
+            skip_existing: bool
+                Determines the behavior when a file already appears exists
+                when a function would generate it. True to skip any existing files.
+                False to overwrite (or delete and then write, where overwriting would
+                generate an error).
+                Default is True.
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+            image_extension: string
+                The extension for images in the video folder. TIFF recommended.
+                Default is "tif". Do not include ".".
         Used in nested functions:
-            save_crop, bool; default False; True to save the intermediate cropped image
-            save_bg_sub, boo; default False; True to save the background-subtracted image
-
+            save_crop: bool
+                True to save intermediate cropped images (i.e. experimental video
+                images cropped but not background-subtracted or binarized).
+                Default is False.
+            save_bg_sub: bool
+                True to save background-subtracted images (i.e. experimental video
+                images cropped and background-subtracted but not binarized).
+                Default is False.
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location
@@ -344,12 +362,17 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     settings = integration.set_defaults(optional_settings)
     skip_existing = settings["skip_existing"]
     image_extension = settings["image_extension"]
+    verbose = settings["verbose"]
+    fname = experimental_video_folder.basename
 
     folders_exist = folder.make_destination_folders(images_location, optional_settings)
     # If all the image folders that would be saved exist and the skip_existing
     # is True, skips loading and saving images completely.
     if not all(folders_exist) or not skip_existing:
-        # TODO: implement image format handling
+        # TODO: test image format handling
+        tic = time.time()
+        if verbose:
+            print("Processing folder: " + fname)
         params_dict = define_initial_parameters()
         if image_extension == "tif" or image_extension == "tiff":
             experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension), plugin='tifffile')
@@ -363,6 +386,12 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
         params_dict["window_top"] = top_border(bg_median)
         export_params(images_location, params_dict)
+        toc = time.time()
+        if verbose:
+            print("Elapsed: "+str(np.round((toc-tic))))
+    else:
+        if verbose:
+            print("Folder " + fname + "skipped because all folders for processing already exist and optional_settings skip_existing is True (by default).")
     pass
 
 def top_border(bg_median: np.ndarray) -> int:

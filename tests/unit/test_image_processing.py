@@ -153,6 +153,7 @@ class TestBackgroundSubtraction:
 def test_tiffs_to_binary():
     # TODO: Tests for tiffs_to_binary
     # TODO: Image format test
+    # TODO: Test verbose mode
     #integration test
 
     #assert save_location exists

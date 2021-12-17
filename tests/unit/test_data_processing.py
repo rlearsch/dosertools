@@ -18,9 +18,14 @@ import data_processing.integration as integration
 import file_handling.folder as folder
 import file_handling.tags as tags
 
-# Assigns folders for fixtures.
-fixtures_folder = os.path.join("tests","fixtures")
-fixtures_fitting = os.path.join(fixtures_folder,"fixtures_fitting")
+@pytest.fixture
+def fixtures_fitting(fixtures_folder):
+    return os.path.join(fixtures_folder,"fixtures_fitting")
+
+@pytest.fixture
+def image_count(videos_folder,fname,timecode):
+    video_folder = os.path.join(videos_folder, fname + timecode)
+    return len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
 class TestClosestIndexForValue:
     """
@@ -309,7 +314,7 @@ class TestCSVToDataFrame:
         assert "fps" in columns
         assert "run" in columns
 
-    def test_correct_values(self,tmp_path):
+    def test_correct_values(self,tmp_path,fixtures_folder):
         # Fails if csv_to_dataframe does not return correct values.
 
         # Constructs sample file.
@@ -364,7 +369,7 @@ class TestGenerateDF:
 
         assert type(dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
-    def test_correct_values(self,tmp_path):
+    def test_correct_values(self,tmp_path,fixtures_fitting):
         # Fails if generate_df does not return correct_values.
 
         # Constructs sample files.
@@ -599,14 +604,14 @@ class TestAddCriticalTime:
             extension.add_critical_time(dataset)
 
 
-def test_find_EC_slope():
+def test_find_EC_slope(fixtures_fitting):
     test_dataset = pd.read_csv(os.path.join(fixtures_fitting,"example_DOS_data.csv"))
     slope, intercept, r_value = fitting.find_EC_slope(test_dataset, 0.1, 0.045)
     assert np.isclose(slope, -347.7499821602085)
     assert np.isclose(intercept, 0.2809024757035168)
     assert np.isclose(r_value,-0.9996926885633579)
 
-def test_annotate_summary_df():
+def test_annotate_summary_df(fixtures_fitting):
     sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
     # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
@@ -623,7 +628,7 @@ def test_annotate_summary_df():
     pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False)
     #pass
 
-def test_make_summary_dataframe():
+def test_make_summary_dataframe(fixtures_fitting):
     test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
     optional_settings = {"fitting_bounds":[0.8, 0.1]}
@@ -678,25 +683,22 @@ class TestVideosToBinaries:
     """
 
     # Sets up sample values.
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    videos_folder = os.path.join(fixtures_folder,"test_sequence",fname,"videos")
     fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
     sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
-    video_folder = os.path.join(videos_folder, fname + "_2109_1534")
-    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
-    def test_saves_binary_files(self,tmp_path):
+    def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count):
         # Fails if videos_to_binaries does not save binary images or if those
         # binary images are incorrect.
+
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_binaries(self.videos_folder, images_folder, self.fname_format, optional_settings)
-        for i in range(0,self.image_count):
-            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
-        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        integration.videos_to_binaries(videos_folder, images_folder, self.fname_format, optional_settings)
+        for i in range(0,image_count):
+            assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
+        target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
@@ -712,18 +714,16 @@ class TestBinariesToCSVs:
     """
 
     short_fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    images_folder = os.path.join(fixtures_folder,"test_sequence")
 
-    def test_saves_csvs(self,tmp_path):
+    def test_saves_csvs(self,tmp_path,fname,test_sequence):
         # Fails if videos_to_binaries does not save csvs or if the csv is
         # incorrect.
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        integration.binaries_to_csvs(self.images_folder, csv_folder, self.short_fname_format)
-        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
-        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        integration.binaries_to_csvs(test_sequence, csv_folder, self.short_fname_format)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
@@ -740,13 +740,9 @@ class TestVideosToCSVs:
         Checks if videos_to_csvs saves csvs and if the test csv is correct.
     """
 
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    videos_folder = os.path.join(fixtures_folder,"test_sequence",fname,"videos")
     fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
-    video_folder = os.path.join(videos_folder, fname + "_2109_1534")
-    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
-    def test_saves_binary_files(self,tmp_path):
+    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder):
         # Fails if videos_to_csvs does not save binary images or if those
         # binary images are incorrect.
         images_folder = tmp_path / "images"
@@ -754,17 +750,17 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
-        for i in range(0,self.image_count):
-            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
-        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
+        for i in range(0,image_count):
+            assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
+        target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-    def test_saves_csvs(self,tmp_path):
+    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname):
         # Fails if videos_to_binaries does not save csvs or if the csv is
         # incorrect.
         images_folder = tmp_path / "images"
@@ -772,10 +768,10 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
-        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
-        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
@@ -791,6 +787,7 @@ class TestSaveSummary:
             assert os.path.isdir(save_location)
             if os.path.isdir(save_location):
                 saved_filename = os.listdir(save_location)[0]
+                # TODO: this test does not check for correct filename
                 file_location = os.path.join(save_location, saved_filename)
             assert os.path.exists(file_location)
 
@@ -808,7 +805,7 @@ def test_derivative_EC_fit():
     assert test4 == -np.exp(1)
 
 
-def test_calculate_elongational_visc():
+def test_calculate_elongational_visc(fixtures_fitting):
     #construct pathological summary dataframe
     summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
     summary_df = pd.DataFrame(summary_dict)
@@ -817,6 +814,7 @@ def test_calculate_elongational_visc():
     optional_settings = {"needle_diameter_mm":1.0}
     df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
+    # TODO: is there a better way to implement this test?
     #this is kind of lazy but it checks that we have the correct order of magnitude
     assert (mean_elongational > 1300 and mean_elongational < 1500)
 
@@ -825,8 +823,8 @@ class TestCSVsToSummaries:
     #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
     #shutil.copytree(csv_seed_fixture, "csv_folder")
 
-    def test_csvs_to_summaries(self, tmp_path):
-        csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+    def test_csvs_to_summaries(self, tmp_path,fixtures_folder):
+        csv_seed_fixture = os.path.join(fixtures_folder,'example_csvs')
         #shutil.copytree(csv_seed_fixture, csv_folder)
         save_folder = tmp_path / "csv_summaries"
         integration.csvs_to_summaries(csv_seed_fixture, save_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c")
@@ -840,8 +838,8 @@ class TestCSVsToSummaries:
             if 'annotated' in filename:
                 file_location = os.path.join(save_folder, filename)
                 test_annotated_df = pd.read_csv(file_location)
-        fixture_annotated_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
-        fixture_summary_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
+        fixture_annotated_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
+        fixture_summary_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
         pandas.testing.assert_frame_equal(fixture_annotated_df,test_annotated_df, check_exact=False, atol=1E-6)
         pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
         #assert they have the correct columns

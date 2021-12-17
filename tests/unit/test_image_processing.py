@@ -18,10 +18,6 @@ def fixtures_binary(fixtures_folder):
     return os.path.join(fixtures_folder,"fixture_binary")
 
 @pytest.fixture
-def timecode():
-    return "_2109_1534"
-
-@pytest.fixture
 def background_video(fname, timecode, videos_folder):
     background_video_location = os.path.join(videos_folder,fname + "_bg" + timecode, "*")
     background_video = skimage.io.imread_collection(background_video_location, plugin='tifffile')
@@ -93,14 +89,14 @@ class TestTiffConversions:
         assert np.all(target_crop == produced_crop)
         assert np.all(target_bg_sub == produced_bg_sub)
 
-    def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, videos_folder, test_sequence, target_params_dict,bg_median):
+    def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, videos_folder, test_sequence, target_params_dict,bg_median,bin_folder):
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location)
 
         experimental_sequence = skimage.io.imread_collection(os.path.join(videos_folder,fname + timecode,"*"), plugin="tifffile")
-        target_converted_sequence = skimage.io.imread_collection(os.path.join(test_sequence,fname,"bin","*"))
+        target_converted_sequence = skimage.io.imread_collection(os.path.join(bin_folder,"*"))
         th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, target_params_dict, save_location, folders_exist)
         produced_converted_sequence_path = save_location / "bin" / '*'
         #convert to string for skimage.io.imread_collection

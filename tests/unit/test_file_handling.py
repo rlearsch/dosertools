@@ -151,7 +151,6 @@ def bg_one_run_folders(example_name1,example_name2):
 
     return bg_one_run_folders
 
-#@pytest.mark.tags
 class TestParseFname:
     """
     Tests parse_fname
@@ -202,8 +201,6 @@ class TestParseFname:
 
 # TODO: produce warnings if fps, run, sampleinfo? not present?
 
-
-#@pytest.mark.tags
 class TestIdentifyTagInFnameFormat:
     """
     Tests identify_tag_in_fname_format.
@@ -244,7 +241,6 @@ class TestIdentifyTagInFnameFormat:
         tag = "none"
         assert tags.identify_tag_in_fname_format(self.fname_format, tag) == []
 
-#@pytest.mark.tags
 class TestRemoveTagFromFname:
     """
     Tests remove_tag_from_fname.
@@ -291,7 +287,6 @@ class TestRemoveTagFromFname:
         with pytest.warns(UserWarning, match="Tag"):
             tags.remove_tag_from_fname(self.fname,self.fname_format,tag)
 
-#@pytest.mark.tags
 class TestCheckFnameFormatForTag:
     """
     Tests check_fname_format_for_tag.
@@ -327,7 +322,6 @@ class TestCheckFnameFormatForTag:
         tag = "vtype"
         assert not tags.check_fname_format_for_tag(self.fname_format, tag)
 
-#@pytest.mark.tags
 class TestGetTagFromFname:
     """
     Tests get_tag_from_fname.
@@ -369,7 +363,6 @@ class TestGetTagFromFname:
         tag = "none"
         assert tags.get_tag_from_fname(self.fname, self.fname_format, tag) == []
 
-#@pytest.mark.tags
 class TestReplaceTagInFname:
     """
     Tests replace_tag_in_fname.
@@ -406,7 +399,6 @@ class TestReplaceTagInFname:
         new_fname = tags.replace_tag_in_fname(self.fname,self.fname_format,tag,"*")
         assert new_fname == "20210929_6M-PEO_fps-25k_1_*_*"
 
-#@pytest.mark.tags
 class TestInsertTagInFname:
     """
     Tests insert_tag_in_fname.
@@ -445,7 +437,6 @@ class TestInsertTagInFname:
         new_fname = tags.insert_tag_in_fname(fname,self.fname_format,tag,"*")
         assert new_fname == "20210929_6M-PEO_fps-25k_1_*_*"
 
-#@pytest.mark.tags
 class TestShortenFnameFormat:
     """
     Tests shorten_fname_format.

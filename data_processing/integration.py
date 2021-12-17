@@ -64,9 +64,15 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         Default is 0.7176 mm (22G needle).
     skip_existing: bool
         Determines the behavior when a file already appears exists
-        when a function would generate it. True to skip any
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
     verbose: bool
-        dafsdaf
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
     image_extension: string
         The extension for images in the video folder. TIFF recommended.
         Default is "tif". Do not include ".".
@@ -165,25 +171,58 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
+        Used in this function:
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
         Used in nested functions:
-            fname_split, default "_"
-            sample_split, default "-"
-            experiment_tag, default "exp"
-            background_tag, default "bg"
-            one_background, default False; True to use one background for
-                a group of experiments only differing by run number
-            save_crop, default False; True to save the intermediate cropped image
-            save_bg_sub, default False; True to save the background-subtracted image
+            experiment_tag: string
+                The tag for identifying experimental videos. May be empty ("").
+                Default is "exp".
+            background_tag: string
+                The tag for identifying background videos. May not be empty.
+                Default is "bg".
+            one_background: bool
+                True to use one background for a group of experiments only differing by
+                run number. False to pair backgrounds and experiments 1:1.
+                Default is False.
+            save_crop: bool
+                True to save intermediate cropped images (i.e. experimental video
+                images cropped but not background-subtracted or binarized).
+                Default is False.
+            save_bg_sub: bool
+                True to save background-subtracted images (i.e. experimental video
+                images cropped and background-subtracted but not binarized).
+                Default is False.
+            skip_existing: bool
+                Determines the behavior when a file already appears exists
+                when a function would generate it. True to skip any existing files.
+                False to overwrite (or delete and then write, where overwriting would
+                generate an error).
+                Default is True.
+            image_extension: string
+                The extension for images in the video folder. TIFF recommended.
+                Default is "tif". Do not include ".".
     """
 
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
+    if verbose:
+        print("Processing " + len(fnames) + " videos.")
     for i in range(0,len(fnames)):
+        if verbose:
+            print("Processing " + (i + 1) + "/" len(fnames) + " video.")
         exp_video = exp_videos[i]
         bg_video = bg_videos[i]
         img_folder = os.path.join(images_folder,fnames[i])
         os.mkdir(img_folder)
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
+    if verbose:
+        print("Finished processing videos into binaries.")
     pass
 
 def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, optional_settings: dict = {}):
@@ -209,16 +248,35 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
             ex. "date_sampleinfo_fps_run"
         optional_settings: dict
             A dictionary of optional settings.
+            Used in this function:
+                verbose: bool
+                    Determines whether processing functions print statements as they
+                    progress through major steps. True to see print statements, False to
+                    hide non-errors/warnings.
+                    Default is False.
             Used in nested functions:
-                fname_split, default "_"
+                fname_split: string
+                    The deliminator for splitting folder/file names, used in fname_format.
+                    Default is "_".
     """
 
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
+
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
+    if verbose:
+        print("Processing " + len(subfolders) + "binary folders.")
+    i = 1
     for subfolder in subfolders:
+        if verbose:
+            print("Processing " + i + "/" len(subfolders) + " binary folder.")
         params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
         ## TODO: deal with missing fps tag
         img_folder = os.path.join(images_folder,subfolder)
         binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"], optional_settings)
+        i = i + 1
+    if verbose:
+        print("Finished processing binaries into csvs of R/R0 versus time.")
     pass
 
 def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
@@ -250,13 +308,41 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     optional_settings: dict
         A dictionary of optional settings.
         Used in nested functions:
-            fname_split, default "_"
-            experiment_tag, default "exp"
-            background_tag, default "bg"
-            one_background, default False; True to use one background for
-                a group of experiments only differing by run number
-            save_crop, default False; True to save the intermediate cropped image
-            save_bg_sub, default False; True to save the background-subtracted image
+            fname_split: string
+                The deliminator for splitting folder/file names, used in fname_format.
+                Default is "_".
+            experiment_tag: string
+                The tag for identifying experimental videos. May be empty ("").
+                Default is "exp".
+            background_tag: string
+                The tag for identifying background videos. May not be empty.
+                Default is "bg".
+            one_background: bool
+                True to use one background for a group of experiments only differing by
+                run number. False to pair backgrounds and experiments 1:1.
+                Default is False.
+            save_crop: bool
+                True to save intermediate cropped images (i.e. experimental video
+                images cropped but not background-subtracted or binarized).
+                Default is False.
+            save_bg_sub: bool
+                True to save background-subtracted images (i.e. experimental video
+                images cropped and background-subtracted but not binarized).
+                Default is False.
+            skip_existing: bool
+                Determines the behavior when a file already appears exists
+                when a function would generate it. True to skip any existing files.
+                False to overwrite (or delete and then write, where overwriting would
+                generate an error).
+                Default is True.
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+            image_extension: string
+                The extension for images in the video folder. TIFF recommended.
+                Default is "tif". Do not include ".".
     """
 
     videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
@@ -287,19 +373,34 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
-        Takes the following optional settings:
-        tc_bounds: [float, float]
-            [start, end]
-            A range of normalized diameter values where accepted values of D(tc)/D0 can reside.
-        fitting_bounds: [float, float]
-            [start, end]
-            These are the R/R0 values we look for to set the bounds for the EC region fitting
-        fname_split : str, optional
-            the deliminator for splitting the name (default is "_")
-        sample_split : str, optional
-            the deliminator for splitting the sampleinfo section
-            of the fname (default is "-")
+        Used in this function:
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+        Used in nested functions:
+            fname_split: string
+                The deliminator for splitting folder/file names, used in fname_format.
+                Default is "_".
+            sample_split: string
+                The deliminator for splitting sampleinfo tag in folder/file names,
+                used in sampleinfo_format.
+                Default is "-".
+            fitting_bounds: 2 element list of floats
+                [start, end]
+                The R/R0 to bound the start and end of fitting of EC region.
+                Default is [0.1, 0.045].
+            tc_bounds: 2 element list of floats
+                [start, end]
+                The R/R0 to bound the start and end for finding the critical time.
+                Default is [0.3,0.07].
     """
+
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
+    if verbose:
+        print("Processing csvs of R/R0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
     df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)

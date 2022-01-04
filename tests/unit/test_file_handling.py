@@ -1,6 +1,5 @@
 import os
 import pytest
-import warnings
 
 import file_handling.folder as folder
 import file_handling.tags as tags

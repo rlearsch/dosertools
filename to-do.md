@@ -2,26 +2,25 @@
 
 ## Next Steps
 * **Video selector**
-    * identify videos that are already processed (needs testing)
-    * Handling if folders/files already exists -- overwrite vs. not overwrite (needs testing)
-    * Let user specify what file type to look for (currently, looks only for .tif) (needs testing)
-    * Verbose mode (needs testing)
+    * identify videos that are already processed (needs testing on actual data)
+    * Handling if folders/files already exists -- overwrite vs. not overwrite (needs testing on actual data)
+    * Let user specify what file type to look for (needs testing with non tiff files)
 * **Integrating into a single script**
-    * Different start/end points
+    * Different start/end points (what additional start/end do we need?)
 * **Error Handling**
     * handle errors from threshold_otsu encountering a non-grayscale image
       * Print out a warning if non-grayscale, identifying the folder and then skip?
-      * Currently, attempting to convert into grayscale
+      * Currently, attempting to convert into grayscale (Needs testing)
     * vet optional settings--validate that entries given make sense
     * handle missing fps tag for binaries_to_csvs
     * handle missing parameters for binary_to_radius_time
-    * Check if existing csv error for binary_images_to_csv still occurs
     * If run, sample, fps missing from folder name
 * **Moonshots**
     * Run different processing method if there is no background video to subtract from
         * try to harvest one from the last frames of the video
         * or, use Li method on experiment video, seems to work better than others when no background subtraction is present
     * Read nozzle diameter off background and compare it to experimental (NEEDED FOR Hydrocarbons)
+      * define_image_parameters take frame only, estimated vs. bg_subtracted needle diameter
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation
@@ -30,18 +29,16 @@
     * Variable, function, module naming cleanup pass
     * Comment cleanup
     * tests
+    * docstrings
+    * define_initial_parameters taking optional_settings
 * Integration tests
 * check for file sorting issues when images exceed 999
   * Write a test that checks this
-* calculate_elongational_visc does a lot more than just calculate the elongational viscosity
-* Check if define_initial_parameters would ever need to change for different camera setups
 * **Tests**
   * Image format
   * Images in non-grayscale
-  * Verbose
   * tiffs_to_binary
-  * skip_existing
-  * save_summary_df filename, skip_existing warning
+  * Tests noted in TODO
 
 
 ## Packaging

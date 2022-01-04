@@ -211,6 +211,10 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
         A dictionary of optional settings.
         Used in this function:
             skip_existing, default True; False to overwrite existing csv
+
+    Returns
+    ------
+    None. Saves file to disk.
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -243,10 +247,15 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
                 # Deletes existing csv to replace it with new csv
                 os.remove(save_path)
                 df.to_csv(save_path)
+                if verbose:
+                    #If verbose, prints that csv overwritten.
+                    print(folder_name + ".csv already exists and skip_existing is False. Existing file overwritten.")
         else:
             df.to_csv(save_path)
+            if verbose:
+                #If verbose, prints that csv overwritten.
+                print(folder_name + ".csv saved.")
     elif verbose:
         # If verbose, prints that csv save was skipped.
         print(folder_name + ".csv already exists and skip_existing is True. binary_images_to_csv skipped.")
-
-    # TODO: handle error if csv already exists? Check if still occurs
+    pass

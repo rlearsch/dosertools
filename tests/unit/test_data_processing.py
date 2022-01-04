@@ -27,6 +27,20 @@ def image_count(videos_folder,fname,timecode):
     video_folder = os.path.join(videos_folder, fname + timecode)
     return len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
+@pytest.fixture
+def long_fname_format():
+    return "sampleinfo_fps_substrate_run_vtype_remove_remove"
+
+@pytest.fixture
+def short_fname_format(long_fname_format):
+    short1 = tags.remove_tag_from_fname(long_fname_format,long_fname_format,"vtype")
+    short2 = tags.remove_tag_from_fname(short1,short1,"remove")
+    return short2
+
+@pytest.fixture
+def sampleinfo_format():
+    return "MW-backbone-pass-concentration"
+
 class TestClosestIndexForValue:
     """
     Tests closest_index_for_value.
@@ -925,17 +939,16 @@ class TestVideosToBinaries:
     """
 
     # Sets up sample values.
-    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
-    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
+    fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
 
-    def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count):
+    def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not save binary images or if those
         # binary images are incorrect.
 
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_binaries(videos_folder, images_folder, self.fname_format, optional_settings)
+        integration.videos_to_binaries(videos_folder, images_folder, long_fname_format, optional_settings)
         for i in range(0,image_count):
             assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
         output_path = os.path.join(images_folder,fname,"bin","*")
@@ -945,14 +958,14 @@ class TestVideosToBinaries:
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-    def test_verbose(self,tmp_path,capfd,videos_folder,bin_folder,fname,image_count):
+    def test_verbose(self,tmp_path,capfd,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not print statements for the stages
         # of video processing when verbose is True.
 
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         optional_settings = {"experiment_tag" : '', "verbose" : True}
-        integration.videos_to_binaries(videos_folder, images_folder, self.fname_format, optional_settings)
+        integration.videos_to_binaries(videos_folder, images_folder, long_fname_format, optional_settings)
 
         # Checks for expected lines in verbose output.
         out, err = capfd.readouterr()
@@ -974,27 +987,25 @@ class TestBinariesToCSVs:
         Tests if binaries_to_csvs produces print statements if verbose is True.
     """
 
-    short_fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
-
-    def test_saves_csvs(self,tmp_path,fname,test_sequence):
+    def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format):
         # Fails if binaries_to_csvs does not save csvs or if the csv is
         # incorrect.
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        integration.binaries_to_csvs(test_sequence, csv_folder, self.short_fname_format)
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format)
         assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-    def test_verbose(self,tmp_path,capfd,test_sequence):
+    def test_verbose(self,tmp_path,capfd,test_sequence,short_fname_format):
         # Fails if binaries_to_csvs does not produce print statements if
         # verbose is True.
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"verbose" : True}
-        integration.binaries_to_csvs(test_sequence, csv_folder, self.short_fname_format, optional_settings)
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format, optional_settings)
 
         out, err = capfd.readouterr()
         print(out)
@@ -1016,9 +1027,9 @@ class TestVideosToCSVs:
         Checks if videos_to_csvs saves csvs and if the test csv is correct.
     """
 
-    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
 
-    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder):
+
+    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder,long_fname_format):
         # Fails if videos_to_csvs does not save binary images or if those
         # binary images are incorrect.
         images_folder = tmp_path / "images"
@@ -1026,7 +1037,7 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
         for i in range(0,image_count):
             assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
         output_path = os.path.join(images_folder,fname,"bin","*")
@@ -1036,7 +1047,7 @@ class TestVideosToCSVs:
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname):
+    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname,long_fname_format):
         # Fails if videos_to_binaries does not save csvs or if the csv is
         # incorrect.
         images_folder = tmp_path / "images"
@@ -1044,7 +1055,7 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
         assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
@@ -1061,11 +1072,11 @@ class TestCSVsToSummaries:
     #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
     #shutil.copytree(csv_seed_fixture, "csv_folder")
 
-    def test_csvs_to_summaries(self, tmp_path,fixtures_folder):
+    def test_csvs_to_summaries(self, tmp_path,fixtures_folder,short_fname_format,sampleinfo_format):
         csv_seed_fixture = os.path.join(fixtures_folder,'example_csvs')
         #shutil.copytree(csv_seed_fixture, csv_folder)
         save_folder = tmp_path / "csv_summaries"
-        integration.csvs_to_summaries(csv_seed_fixture, save_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c")
+        integration.csvs_to_summaries(csv_seed_fixture, save_folder, short_fname_format, sampleinfo_format)
         assert os.path.isdir(save_folder)
         saved_files = os.listdir(save_folder)
         for filename in saved_files:
@@ -1083,13 +1094,13 @@ class TestCSVsToSummaries:
         #TODO: assert they have the correct columns?
         pass
 
-    def test_verbose(self,tmp_path,capfd,fixtures_folder):
+    def test_verbose(self,tmp_path,capfd,fixtures_folder,short_fname_format,sampleinfo_format):
         # Fails if csvs_to_summaries does not print statements when verbose
         # is True.
         csv_seed_fixture = os.path.join(fixtures_folder,'example_csvs')
         save_folder = tmp_path / "csv_summaries"
         optional_settings = {"verbose" : True}
-        integration.csvs_to_summaries(csv_seed_fixture, save_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c", optional_settings)
+        integration.csvs_to_summaries(csv_seed_fixture, save_folder, short_fname_format, sampleinfo_format, optional_settings)
 
         out, err = capfd.readouterr()
         assert "Processing csvs" in out

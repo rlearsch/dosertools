@@ -1,4 +1,4 @@
-,sample,MW,backbone,pass,concentration,run,Rtc/R0,Lambda E (ms),R^2
+,sample,MW,backbone,pass,concentration,run,Dtc/D0,Lambda E (ms),R^2
 0,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,1,0.18848866,6.721469006,0.985410618
 1,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,2,0.212668464,6.815369266,0.986695167
 2,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,3,0.195073892,6.504411869,0.988270251

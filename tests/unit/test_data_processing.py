@@ -627,7 +627,7 @@ def test_find_EC_slope(fixtures_fitting):
     assert np.isclose(r_value,-0.9996926885633579)
 
 def test_annotate_summary_df(fixtures_fitting):
-    sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
+    #sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
     # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
     # it is hard-coded in to not use folder.parse_filename in the test

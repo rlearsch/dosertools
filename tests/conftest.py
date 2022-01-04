@@ -7,7 +7,7 @@ def fixtures_folder():
 
 @pytest.fixture(scope="module")
 def fname():
-    return "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
+    return "6.7M-PAM-20pass-0.021wtpct_fps-25k_Al_2"
 
 @pytest.fixture(scope="module")
 def timecode():

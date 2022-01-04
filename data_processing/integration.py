@@ -86,6 +86,22 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     settings = {}
 
     try:
+        settings["nozzle_row"] = optional_settings["nozzle_row"]
+    except KeyError:
+        settings["nozzle_row"] = 1
+    try:
+        settings["crop_width_coefficient"] = optional_settings["crop_width_coefficient"]
+    except KeyError:
+        settings["crop_width_coefficient"] = 0.02
+    try:
+        settings["crop_height_coefficient"] = optional_settings["crop_height_coefficient"]
+    except KeyError:
+        settings["crop_height_coefficient"] = 2
+    try:
+        settings["crop_nozzle_coef"] = optional_settings["crop_nozzle_coef"]
+    except KeyError:
+        settings["crop_nozzle_coef"] = 0.15
+    try:
         settings["fname_split"] = optional_settings["fname_split"]
     except KeyError:
         settings["fname_split"] = "_"
@@ -445,7 +461,11 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     """
     #### This is just a draft, I have written no tests for it...
     #### ... but it should work, right? Just need some optional breakpoints ###
+<<<<<<< HEAD
     #set_defaults(optional_settings)
+=======
+    set_defaults(optional_settings)
+>>>>>>> begin elimination of define_initial_parameters
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
     pass

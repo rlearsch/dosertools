@@ -26,6 +26,12 @@ def set_defaults(optional_settings: dict = {}) -> dict:
 
     Optional Settings and Defaults
     ------------------------------
+    nozzle_row: int
+        Row to use for determining the nozzle diameter.
+        Default is 1.
+    crop_width_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the buffer
+        on either side of the observed nozzle edges to include in the 
     fname_split: string
         The deliminator for splitting folder/file names, used in fname_format.
         Default is "_".

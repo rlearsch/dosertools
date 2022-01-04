@@ -1,4 +1,4 @@
-,Unnamed: 0,time (s),R/R0,strain rate (1/s),tc (s),t - tc (s),Rtc/R0,sample,MW,backbone,pass,concentration,fps,substrate,run,strain,(e visc / surface tension) (s/m)
+,Unnamed: 0,time (s),D/D0,strain rate (1/s),tc (s),t - tc (s),Dtc/D0,sample,MW,backbone,pass,concentration,fps,substrate,run,strain,(e visc / surface tension) (s/m)
 0,0,0,1.037735849,0,0.00768,-0.00768,0.18848866,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,25000,Al,1,-0.074082543,95.70051419
 1,1,4.00E-05,1.037735849,0,0.00768,-0.00764,0.18848866,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,25000,Al,1,-0.074082543,95.89276127
 2,2,8.00E-05,1.037735849,0,0.00768,-0.0076,0.18848866,6.7M-PAM-0pass-0.021wtpct,6.7M,PAM,0pass,0.021wtpct,25000,Al,1,-0.074082543,96.08539454

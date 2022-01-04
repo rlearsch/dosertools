@@ -169,10 +169,6 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
     diameter_data = []
 
     # Collects needed parameters from params_dict.
-    try:
-        nozzle_row = int(params_dict["nozzle_row"])
-    except KeyError:
-        nozzle_row = 1
     nozzle_diameter = int(params_dict["nozzle_diameter"])
     fps = params_dict["fps"]
 

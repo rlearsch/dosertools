@@ -98,9 +98,9 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     except KeyError:
         settings["crop_height_coefficient"] = 2
     try:
-        settings["crop_nozzle_coef"] = optional_settings["crop_nozzle_coef"]
+        settings["crop_nozzle_coefficient"] = optional_settings["crop_nozzle_coefficient"]
     except KeyError:
-        settings["crop_nozzle_coef"] = 0.15
+        settings["crop_nozzle_coefficient"] = 0.15
     try:
         settings["fname_split"] = optional_settings["fname_split"]
     except KeyError:
@@ -461,11 +461,7 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     """
     #### This is just a draft, I have written no tests for it...
     #### ... but it should work, right? Just need some optional breakpoints ###
-<<<<<<< HEAD
-    #set_defaults(optional_settings)
-=======
-    set_defaults(optional_settings)
->>>>>>> begin elimination of define_initial_parameters
+
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
     pass

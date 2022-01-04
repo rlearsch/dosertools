@@ -23,8 +23,8 @@
       * define_image_parameters take frame only, estimated vs. bg_subtracted needle diameter
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
-    * Refine $\lambda_E$ calculation 
-* **Clean up** 
+    * Refine $\lambda_E$ calculation
+* **Clean up**
     * Add +1 to nozzle diameter calculation and fix associated tests (basically all tests....)
     * Check terminology of Radius (and R/R0) against Diameter (and D/D0)
     * fixtures folder (substantially cleaned)
@@ -32,7 +32,6 @@
     * Comment cleanup
     * tests
     * docstrings
-    * define_initial_parameters taking optional_settings
 * Integration tests
 * check for file sorting issues when images exceed 999
   * Write a test that checks this

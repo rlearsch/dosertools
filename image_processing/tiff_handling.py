@@ -16,31 +16,7 @@ import data_processing.array as dparray
 import file_handling.folder as folder
 import data_processing.integration as integration
 
-
-# TODO: change this to take optional_settings to set values
-def define_initial_parameters() -> dict:
-    """
-    Initalizes the parameters dictionary with coefficients for the initial image crop.
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    params_dict: dict
-        The partial dictionary of parameters
-
-    """
-    params_dict = dict(
-        nozzle_row = 1,
-        crop_width_coefficient = 0.02,
-        crop_height_coefficient = 2,
-        crop_nozzle_coef = 0.15,
-    )
-    return params_dict
-
-def define_image_parameters(video: skimage.io.collection.ImageCollection, params_dict: dict) -> dict:
+def define_image_parameters(video: skimage.io.collection.ImageCollection, optional_settings: dict = {}) -> dict:
 
     """
     From the given video, determines the first-guess for the cropping operation.
@@ -51,8 +27,7 @@ def define_image_parameters(video: skimage.io.collection.ImageCollection, params
     ----------
     video: skimage.io.collection.ImageCollection
          The video containing a clear image of the nozzle, we default to the raw experimental video
-    params_dict: dict
-         The partial dictionary of parameters, to which we will add the crop information
+    optional_settings: dict
 
     Returns
     -------
@@ -60,10 +35,12 @@ def define_image_parameters(video: skimage.io.collection.ImageCollection, params
         Dictionary of parameters with the crop information added
     """
 
-    nozzle_row = params_dict["nozzle_row"]
-    crop_width_coefficient = params_dict["crop_width_coefficient"]
-    crop_nozzle_coef = params_dict["crop_nozzle_coef"]
-    crop_height_coefficient = params_dict["crop_height_coefficient"]
+    settings = integration.set_defaults(optional_settings)
+
+    nozzle_row = settings["nozzle_row"]
+    crop_width_coefficient = settings["crop_width_coefficient"]
+    crop_nozzle_coefficient = settings["crop_nozzle_coefficient"]
+    crop_height_coefficient = settings["crop_height_coefficient"]
 
     first_frame = video[0]
     if len(first_frame.shape) == 3:
@@ -84,7 +61,9 @@ def define_image_parameters(video: skimage.io.collection.ImageCollection, params
     crop_width_start = int(first_non_zero-int(nozzle_diameter*crop_width_coefficient))
     crop_width_end = int(last_non_zero+int(nozzle_diameter*crop_width_coefficient))
     crop_bottom = int(nozzle_diameter*crop_height_coefficient)
-    crop_top = int(nozzle_diameter*crop_nozzle_coef)
+    crop_top = int(nozzle_diameter*crop_nozzle_coefficient)
+
+    params_dict = {}
     params_dict["crop_width_start"] = crop_width_start
     params_dict["crop_width_end"] = crop_width_end
     params_dict["crop_bottom"] = crop_bottom
@@ -156,7 +135,7 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
     [bin_exists, crop_exists, bg_sub_exists] = folders_exist
 
     image = exposure.rescale_intensity(image, in_range='uint12', out_range='uint16')
-    cropped_image = crop_single_image(image, params_dict)
+    cropped_image = crop_single_image(image, params_dict, optional_settings)
     if save_crop:
         if not crop_exists or not skip_existing:
             save_image(cropped_image, image_number, os.path.join(images_location,"crop"),"tiff")
@@ -169,7 +148,7 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
         save_image(binary_image, image_number, os.path.join(images_location,"bin"),"png")
     pass
 
-def produce_background_image(background_video: skimage.io.collection.ImageCollection, params_dict: dict) -> np.ndarray:
+def produce_background_image(background_video: skimage.io.collection.ImageCollection, params_dict: dict, optional_settings: dict = {}) -> np.ndarray:
     """
     Produces the background image from which the experimental video will be subtracted.
 
@@ -186,7 +165,9 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
         The median of the frames in the background.
         We prefer median because it is less sensitive to random noise and the values are likely to be integers
     """
-    nozzle_row = params_dict["nozzle_row"]
+
+    settings = integration.set_defaults(optional_settings)
+    nozzle_row = settings["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
     crop_width_end = params_dict["crop_width_end"]
     crop_bottom = params_dict["crop_bottom"]
@@ -234,7 +215,7 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
         convert_tiff_image(image, bg_median, params_dict, image_number, save_location, folders_exist, optional_settings)
     pass
 
-def crop_single_image(image: np.ndarray, params_dict: dict) -> np.ndarray:
+def crop_single_image(image: np.ndarray, params_dict: dict,optional_settings: dict = {}) -> np.ndarray:
     """
     Crops a single image according to parameters from params_dict
 
@@ -250,7 +231,9 @@ def crop_single_image(image: np.ndarray, params_dict: dict) -> np.ndarray:
     cropped_image: np.ndarray
         The input image, cropped according to values in parameters dictionary
     """
-    nozzle_row = params_dict["nozzle_row"]
+
+    settings = integration.set_defaults(optional_settings)
+    nozzle_row = settings["nozzle_row"]
     crop_width_start = params_dict["crop_width_start"]
     crop_width_end = params_dict["crop_width_end"]
     crop_bottom = params_dict["crop_bottom"]
@@ -373,7 +356,6 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         tic = time.time()
         if verbose:
             print("Processing folder: " + fname)
-        params_dict = define_initial_parameters()
         if image_extension == "tif" or image_extension == "tiff":
             experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension), plugin='tifffile')
             background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*."+image_extension), plugin='tifffile')
@@ -381,8 +363,8 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
             # No plugin used for non-TIFF image formats
             experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension))
             background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*." + image_extension))
-        params_dict = define_image_parameters(experimental_sequence, params_dict)
-        bg_median = produce_background_image(background_video, params_dict)
+        params_dict = define_image_parameters(experimental_sequence, optional_settings)
+        bg_median = produce_background_image(background_video, params_dict, optional_settings)
         convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
         params_dict["window_top"] = top_border(bg_median)
         export_params(images_location, params_dict)

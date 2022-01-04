@@ -41,20 +41,10 @@ def images_list(fixtures_binary):
 def bg_median(fixtures_folder):
     return np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
-## TODO: class for tests for define_initial_parameters, define_image_parameters
-
-def test_define_initial_parameters():
-    "Initial coefficients for first crop iterations"
-    params_dict = th.define_initial_parameters()
-    assert params_dict["nozzle_row"] == 1
-    assert params_dict["crop_width_coefficient"] == 0.02
-    assert params_dict["crop_height_coefficient"] == 2
-    assert params_dict["crop_nozzle_coef"] == 0.15
-
+## TODO: class for tests for define_image_parameters
 
 def test_define_image_parameters(background_video,target_params_dict):
-    params_dict = th.define_initial_parameters()
-    params_dict = th.define_image_parameters(background_video, params_dict)
+    params_dict = th.define_image_parameters(background_video)
     assert target_params_dict == params_dict
 
 # TODO: test save_image
@@ -136,8 +126,7 @@ class TestConvertTiffImage:
 
 # TODO: Class
 def test_produce_background_image(background_video,bg_median):
-    params_dict = th.define_initial_parameters()
-    params_dict = th.define_image_parameters(background_video, params_dict)
+    params_dict = th.define_image_parameters(background_video)
     bg_median_test = th.produce_background_image(background_video, params_dict)
     assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
 

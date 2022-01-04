@@ -1,3 +1,7 @@
 Keys,Values
+crop_width_start,95
+crop_width_end,425
+crop_bottom,638
+crop_top,47
+nozzle_diameter,319
 window_top,120
-nozzle_diameter,317

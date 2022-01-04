@@ -941,7 +941,6 @@ class TestVideosToBinaries:
     # Sets up sample values.
     fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
 
-    @pytest.mark.bin
     def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not save binary images or if those
         # binary images are incorrect.
@@ -988,7 +987,6 @@ class TestBinariesToCSVs:
         Tests if binaries_to_csvs produces print statements if verbose is True.
     """
 
-    @pytest.mark.csv
     def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format):
         # Fails if binaries_to_csvs does not save csvs or if the csv is
         # incorrect.

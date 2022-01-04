@@ -19,20 +19,18 @@
     * Run different processing method if there is no background video to subtract from
         * try to harvest one from the last frames of the video
         * or, use Li method on experiment video, seems to work better than others when no background subtraction is present
-    * Read nozzle diameter off background and compare it to experimental (NEEDED FOR Hydrocarbons)
-      * define_image_parameters take frame only, estimated vs. bg_subtracted needle diameter
+    * Read nozzle diameter off background and compare it to experimental
+      * decide if needed
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation
 * **Clean up**
-    * Add +1 to nozzle diameter calculation and fix associated tests (basically all tests....)
-    * Check terminology of Radius (and R/R0) against Diameter (and D/D0) - DONE
-        * correct fixtures to account for changing all code to use D/D0 instead of R/R0, Dtc instead of Rtc, etc
     * fixtures folder (substantially cleaned)
     * Variable, function, module naming cleanup pass
     * Comment cleanup
     * tests
     * docstrings
+    * Check for remaining TODO items
 * Integration tests
 * check for file sorting issues when images exceed 999
   * Write a test that checks this

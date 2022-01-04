@@ -26,6 +26,22 @@ def set_defaults(optional_settings: dict = {}) -> dict:
 
     Optional Settings and Defaults
     ------------------------------
+    nozzle_row: int
+        Row to use for determining the nozzle diameter.
+        Default is 1.
+    crop_width_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the buffer
+        on either side of the observed nozzle edges to include in the cropped
+        image.
+        Default is 0.02
+    crop_height_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the bottom
+        row that will be included in the cropped image.
+        Default is 2.
+    crop_nozzle_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the top
+        row of the cropped image.
+        Default is 0.15.
     fname_split: string
         The deliminator for splitting folder/file names, used in fname_format.
         Default is "_".
@@ -53,11 +69,11 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         Default is False.
     fitting_bounds: 2 element list of floats
         [start, end]
-        The R/R0 to bound the start and end of fitting of EC region.
+        The D/D0 to bound the start and end of fitting of EC region.
         Default is [0.1, 0.045].
     tc_bounds: 2 element list of floats
         [start, end]
-        The R/R0 to bound the start and end for finding the critical time.
+        The D/D0 to bound the start and end for finding the critical time.
         Default is [0.3,0.07].
     needle_diameter_mm: float
         The needle outer diameter in millimeters.
@@ -85,6 +101,22 @@ def set_defaults(optional_settings: dict = {}) -> dict:
 
     settings = {}
 
+    try:
+        settings["nozzle_row"] = optional_settings["nozzle_row"]
+    except KeyError:
+        settings["nozzle_row"] = 1
+    try:
+        settings["crop_width_coefficient"] = optional_settings["crop_width_coefficient"]
+    except KeyError:
+        settings["crop_width_coefficient"] = 0.02
+    try:
+        settings["crop_height_coefficient"] = optional_settings["crop_height_coefficient"]
+    except KeyError:
+        settings["crop_height_coefficient"] = 2
+    try:
+        settings["crop_nozzle_coefficient"] = optional_settings["crop_nozzle_coefficient"]
+    except KeyError:
+        settings["crop_nozzle_coefficient"] = 0.15
     try:
         settings["fname_split"] = optional_settings["fname_split"]
     except KeyError:
@@ -228,10 +260,10 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
 
 def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, optional_settings: dict = {}):
     """
-    Converts binary image folders into csvs of R/R0 vs. time.
+    Converts binary image folders into csvs of D/D0 vs. time.
 
     Given a folder of folders of binary images, converts each set of binary
-    images into a csv of R/R0 vs. time, retaining information in the filename.
+    images into a csv of D/D0 vs. time, retaining information in the filename.
 
     Parameters
     ----------
@@ -239,7 +271,7 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
             Path to a folder in which the results of image processing were saved
             (i.e. the folders of binary images).
         csv_folder: path-like
-            Path to a folder in which to save the csv containing R/R0 vs. time.
+            Path to a folder in which to save the csv containing D/D0 vs. time.
         short_fname_format: str
             The format of the fname with parameter names separated
             by the deliminator specified by fname_split with only tags present
@@ -277,16 +309,16 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
         binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"], optional_settings)
         i = i + 1
     if verbose:
-        print("Finished processing binaries into csvs of R/R0 versus time.")
+        print("Finished processing binaries into csvs of D/D0 versus time.")
     pass
 
 def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
     """
-    Converts videos in given folder into csvs of R/R0 vs. time.
+    Converts videos in given folder into csvs of D/D0 vs. time.
 
     Matches videos in videos_folder into experimental and background pairs,
     converts those paired videos into background-subtracted binaries,
-    analyzes the resulting binaries to extract R/R0 vs. time, and
+    analyzes the resulting binaries to extract D/D0 vs. time, and
     saves the results to csvs.
 
     Parameters
@@ -297,7 +329,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
         Path to a folder in which to save the results of image processing,
         binaries and optional cropped and background-subtracted images.
     csv_folder: path-like
-        Path to a folder in which to save the csv containing R/R0 vs. time.
+        Path to a folder in which to save the csv containing D/D0 vs. time.
     fname_format: str
         The format of the fname with parameter names separated
         by the deliminator specified by fname_split. Must contain the "vtype"
@@ -359,7 +391,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     Parameters
     ----------
     csv_folder: path-like
-        Path to a folder in which to find the csv containing R/R0 vs. time.
+        Path to a folder in which to find the csv containing D/D0 vs. time.
     summary_save_location: path-like
             Path to a folder in which to save the csv of the summary and the annotated datatset
     fname_format: str
@@ -390,11 +422,11 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
                 Default is "-".
             fitting_bounds: 2 element list of floats
                 [start, end]
-                The R/R0 to bound the start and end of fitting of EC region.
+                The D/D0 to bound the start and end of fitting of EC region.
                 Default is [0.1, 0.045].
             tc_bounds: 2 element list of floats
                 [start, end]
-                The R/R0 to bound the start and end for finding the critical time.
+                The D/D0 to bound the start and end for finding the critical time.
                 Default is [0.3,0.07].
     """
 
@@ -402,7 +434,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     verbose = settings["verbose"]
 
     if verbose:
-        print("Processing csvs of R/R0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
+        print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
     df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
@@ -426,7 +458,7 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
         Path to a folder in which to save the results of image processing,
         binaries and optional cropped and background-subtracted images.
     csv_folder: path-like
-        Path to a folder in which to save the csv containing R/R0 vs. time.
+        Path to a folder in which to save the csv containing D/D0 vs. time.
     summary_save_location: path-like
         Path to a folder in which to save the csv of the summary and the annotated datatset
     fname_format: str
@@ -445,7 +477,7 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     """
     #### This is just a draft, I have written no tests for it...
     #### ... but it should work, right? Just need some optional breakpoints ###
-    #set_defaults(optional_settings)
+
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
     pass

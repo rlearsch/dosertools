@@ -1,4 +1,4 @@
-R/R0,time (s),strain rate (1/s),tc (s),t - tc (s),Rtc/R0,date,sample,molecular weight,backbone,concentration,fps,run
+D/D0,time (s),strain rate (1/s),tc (s),t - tc (s),Dtc/D0,date,sample,molecular weight,backbone,concentration,fps,run
 1,0,2,0.5,-0.5,0.2,20211012,1M-PEO-0.01wtpt,1M,PEO,0.01wtpt,25000,1
 0.9,0.1,11.11111111,0.5,-0.4,0.2,20211012,1M-PEO-0.01wtpt,1M,PEO,0.01wtpt,25000,1
 0.8,0.3,-6.25,0.5,-0.2,0.2,20211012,1M-PEO-0.01wtpt,1M,PEO,0.01wtpt,25000,1

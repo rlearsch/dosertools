@@ -142,9 +142,9 @@ def calculate_min_diameter(image: np.ndarray, window: np.array) -> float:
         min_diameter_avg = np.mean(min_diameters)
     return min_diameter_avg
 
-def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLike], window: np.array, params_dict: dict) -> pd.DataFrame:
+def binaries_to_diameter_time(binary_location: typing.Union[str, bytes, os.PathLike], window: np.array, params_dict: dict) -> pd.DataFrame:
     """
-    Converts binary image series into normalized radius vs. time data
+    Converts binary image series into normalized diameter vs. time data
 
     Parameters
     ----------
@@ -160,8 +160,8 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
 
     Returns
     -------
-    binary_to_radius_time: pd.DataFrame
-        dataframe of time and R/R0 from the binary images
+    binary_to_diameter_time: pd.DataFrame
+        dataframe of time and D/D0 from the binary images
     """
 
     image_list = skimage.io.imread_collection(os.path.join(binary_location,"*"))
@@ -169,10 +169,6 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
     diameter_data = []
 
     # Collects needed parameters from params_dict.
-    try:
-        nozzle_row = int(params_dict["nozzle_row"])
-    except KeyError:
-        nozzle_row = 1
     nozzle_diameter = int(params_dict["nozzle_diameter"])
     fps = params_dict["fps"]
 
@@ -185,8 +181,8 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
         time_data.append(frame_time)
 
     # Constructs DataFrame.
-    # Note that normalized diameter and normalized radius are equivalent.
-    data = {"time (s)" : time_data, "R/R0" : diameter_data}
+    # Note that normalized diameter and normalized diameter are equivalent.
+    data = {"time (s)" : time_data, "D/D0" : diameter_data}
     df = pd.DataFrame(data)
     return df
 
@@ -194,7 +190,7 @@ def binaries_to_radius_time(binary_location: typing.Union[str, bytes, os.PathLik
 
 def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float, optional_settings: dict = {}):
     """
-    Converts from binary images to csv of normalized radius versus time
+    Converts from binary images to csv of normalized diameter versus time
 
     Parameters
     ----------
@@ -240,7 +236,7 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
 
 
         # Converts binaries to DataFrame to csv.
-        df = binaries_to_radius_time(binary_location,window,params_dict)
+        df = binaries_to_diameter_time(binary_location,window,params_dict)
         save_path = os.path.join(csv_location,folder_name + ".csv")
         if os.path.exists(save_path):
             if not skip_existing:

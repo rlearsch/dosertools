@@ -1,6 +1,5 @@
 import os
 import pytest
-import warnings
 
 import file_handling.folder as folder
 import file_handling.tags as tags
@@ -151,7 +150,6 @@ def bg_one_run_folders(example_name1,example_name2):
 
     return bg_one_run_folders
 
-#@pytest.mark.tags
 class TestParseFname:
     """
     Tests parse_fname
@@ -202,8 +200,6 @@ class TestParseFname:
 
 # TODO: produce warnings if fps, run, sampleinfo? not present?
 
-
-#@pytest.mark.tags
 class TestIdentifyTagInFnameFormat:
     """
     Tests identify_tag_in_fname_format.
@@ -244,7 +240,6 @@ class TestIdentifyTagInFnameFormat:
         tag = "none"
         assert tags.identify_tag_in_fname_format(self.fname_format, tag) == []
 
-#@pytest.mark.tags
 class TestRemoveTagFromFname:
     """
     Tests remove_tag_from_fname.
@@ -291,7 +286,6 @@ class TestRemoveTagFromFname:
         with pytest.warns(UserWarning, match="Tag"):
             tags.remove_tag_from_fname(self.fname,self.fname_format,tag)
 
-#@pytest.mark.tags
 class TestCheckFnameFormatForTag:
     """
     Tests check_fname_format_for_tag.
@@ -327,7 +321,6 @@ class TestCheckFnameFormatForTag:
         tag = "vtype"
         assert not tags.check_fname_format_for_tag(self.fname_format, tag)
 
-#@pytest.mark.tags
 class TestGetTagFromFname:
     """
     Tests get_tag_from_fname.
@@ -369,7 +362,6 @@ class TestGetTagFromFname:
         tag = "none"
         assert tags.get_tag_from_fname(self.fname, self.fname_format, tag) == []
 
-#@pytest.mark.tags
 class TestReplaceTagInFname:
     """
     Tests replace_tag_in_fname.
@@ -406,7 +398,6 @@ class TestReplaceTagInFname:
         new_fname = tags.replace_tag_in_fname(self.fname,self.fname_format,tag,"*")
         assert new_fname == "20210929_6M-PEO_fps-25k_1_*_*"
 
-#@pytest.mark.tags
 class TestInsertTagInFname:
     """
     Tests insert_tag_in_fname.
@@ -445,7 +436,6 @@ class TestInsertTagInFname:
         new_fname = tags.insert_tag_in_fname(fname,self.fname_format,tag,"*")
         assert new_fname == "20210929_6M-PEO_fps-25k_1_*_*"
 
-#@pytest.mark.tags
 class TestShortenFnameFormat:
     """
     Tests shorten_fname_format.
@@ -492,50 +482,71 @@ class TestMakeDestinationFolders:
 
     """
 
+    def test_returns_bool_bool_bool(self,tmp_path):
+        folders_exist = folder.make_destination_folders(tmp_path)
+        [bin_exists, crop_exists, bg_sub_exists] = folders_exist
+        assert type(bin_exists) is bool
+        assert type(crop_exists) is bool
+        assert type(bg_sub_exists) is bool
+        assert type(folders_exist) is list
+
+
+
     def test_make_bin_folder(self,tmp_path):
-        # Fails if does not make a new binary folder in the correct location.
-        folder.make_destination_folders(tmp_path)
+        # Fails if does not make a new binary folder in the correct location
+        # or if the bin_exists return is not False.
+        [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path)
         destination = tmp_path / "bin"
         assert os.path.isdir(destination)
+        assert not bin_exists
 
 
     def test_make_crop_folder(self,tmp_path):
-        # Fails if does not make a new crop folder in the correct location.
+        # Fails if does not make a new crop folder in the correct location or
+        # if the crop_exists return is not False.
         optional_settings = {"save_crop" : True}
-        folder.make_destination_folders(tmp_path,optional_settings)
+        [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path,optional_settings)
         destination = tmp_path / "crop"
         assert os.path.isdir(destination)
+        assert not crop_exists
 
     def test_make_bgsub_folder(self,tmp_path):
         # Fails if does not make a new background subtract folder in the
-        # correct location.
+        # correct location or if the bg_sub_exists return is not False.
         optional_settings = {"save_bg_sub" : True}
-        folder.make_destination_folders(tmp_path,optional_settings)
+        [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path,optional_settings)
         destination = tmp_path / "bg_sub"
         assert os.path.isdir(destination)
+        assert not bg_sub_exists
 
     def test_warn_if_bin_exists(self,tmp_path):
-        # Fails if does not warn if binary folder already exists.
+        # Fails if does not warn if binary folder already exists or if the
+        # first bool (bin_exists) is inaccurately False.
         destination = tmp_path / "bin"
         os.mkdir(destination)
         with pytest.warns(UserWarning, match="Binary"):
-            folder.make_destination_folders(tmp_path)
+            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path)
+        assert bin_exists
 
     def test_warn_if_crop_exists(self,tmp_path):
-        # Fails if does not warn if crop folder already exists.
+        # Fails if does not warn if crop folder already exists or if the
+        # second bool (crop_exists) is inaccurately False..
         destination = tmp_path / "crop"
         os.mkdir(destination)
         optional_settings = {"save_crop" : True}
         with pytest.warns(UserWarning, match="Crop"):
-            folder.make_destination_folders(tmp_path, optional_settings)
+            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
+        assert crop_exists
 
     def test_warn_if_bg_sub_exists(self,tmp_path):
-        # Fails if does not warn if bg_sub folder already exists.
+        # Fails if does not warn if bg_sub folder already exists or if the
+        # third bool (bg_sub_exists) is inaccurately False..
         destination = tmp_path / "bg_sub"
         os.mkdir(destination)
         optional_settings = {"save_bg_sub" : True}
         with pytest.warns(UserWarning, match="Background"):
-            folder.make_destination_folders(tmp_path, optional_settings)
+            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
+        assert bg_sub_exists
 
 class TestMakeFolder:
     """

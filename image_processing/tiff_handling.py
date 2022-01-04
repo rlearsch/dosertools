@@ -179,7 +179,7 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
 
     return bg_median
 
-def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
+def convert_tiff_sequence_to_binary(experimental_video: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
     """
     Takes as arguments the skimage image sequence holding the experimental video and the background image to subtract.
 
@@ -187,7 +187,7 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
 
     Parameters
     ----------
-    experimental_sequence: skimage.io.collection.ImageCollection
+    experimental_video: skimage.io.collection.ImageCollection
          The video identified as the experiment video from the researcher
     bg_median: np.ndarray
         The single background image produced from produce_background_image
@@ -210,8 +210,8 @@ def convert_tiff_sequence_to_binary(experimental_sequence: skimage.io.collection
     Image(s) saved locally in save_location
     """
 
-    for image_number in range(0,len(experimental_sequence)):
-        image = experimental_sequence[image_number]
+    for image_number in range(0,len(experimental_video)):
+        image = experimental_video[image_number]
         convert_tiff_image(image, bg_median, params_dict, image_number, save_location, folders_exist, optional_settings)
     pass
 
@@ -357,15 +357,15 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         if verbose:
             print("Processing folder: " + fname)
         if image_extension == "tif" or image_extension == "tiff":
-            experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension), plugin='tifffile')
+            experimental_video = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension), plugin='tifffile')
             background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*."+image_extension), plugin='tifffile')
         else:
             # No plugin used for non-TIFF image formats
-            experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension))
+            experimental_video = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*." + image_extension))
             background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*." + image_extension))
-        params_dict = define_image_parameters(experimental_sequence, optional_settings)
+        params_dict = define_image_parameters(experimental_video, optional_settings)
         bg_median = produce_background_image(background_video, params_dict, optional_settings)
-        convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, folders_exist, optional_settings)
+        convert_tiff_sequence_to_binary(experimental_video, bg_median, params_dict, images_location, folders_exist, optional_settings)
         params_dict["window_top"] = top_border(bg_median)
         export_params(images_location, params_dict)
         toc = time.time()

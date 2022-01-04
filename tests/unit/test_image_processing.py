@@ -313,16 +313,16 @@ class TestCalculateMinDiameter:
             assert round(diameter,4) == diameters[i]
             i = i + 1
 
-class TestBinariesToRadiusTime:
+class TestBinariesToDiameterTime:
     """
-    Test binaries_to_radius_time
+    Test binaries_to_diameter_time
 
     Tests
     -----
     test_returns_df:
-        Checks if binaries_to_radius_time returns a dataframe.
+        Checks if binaries_to_diameter_time returns a dataframe.
     test_returns_correct_values:
-        Checks if binaries_to_radius_time returns correct values for given
+        Checks if binaries_to_diameter_time returns correct values for given
         test sequence
     """
 
@@ -341,13 +341,13 @@ class TestBinariesToRadiusTime:
         return [0,window_top,width,height] # window: [left, top, right, bottom]
 
     def test_returns_df(self,binary_location,window):
-        # Fails if binaries_to_radius_time does not return a dataframe.
-        assert type(binary.binaries_to_radius_time(binary_location,window,self.params_dict)) is pd.DataFrame
+        # Fails if binaries_to_diameter_time does not return a dataframe.
+        assert type(binary.binaries_to_diameter_time(binary_location,window,self.params_dict)) is pd.DataFrame
 
     def test_returns_correct_values(self,fname,test_sequence,binary_location,window):
-        # Fails if binaries_to_radius_time does not return the correct values
+        # Fails if binaries_to_diameter_time does not return the correct values
         # for the given sequence of images.
-        results = binary.binaries_to_radius_time(binary_location,window,self.params_dict)
+        results = binary.binaries_to_diameter_time(binary_location,window,self.params_dict)
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         for column in results.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

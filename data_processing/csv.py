@@ -37,7 +37,7 @@ def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, opt
     csv : string
         path to csv file to import
     tc_bounds : np.array
-        two value array containing the upper and lower bounds in "R/R0" where
+        two value array containing the upper and lower bounds in "D/D0" where
         tc will be found in between
     fname_format : str
         the format of the fname with parameter names separated
@@ -84,7 +84,7 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_form
     Reads in all csvs and process them into a dataframe.
 
     Reads in data from all csvs in csv_location, process each, adding
-    strain rate, critical time, radius at critical time, and parameters from the
+    strain rate, critical time, diameter at critical time, and parameters from the
     filename, and put all data into one dataframe. Loops csv_to_dataframe for
     all csvs in folder.
 
@@ -93,7 +93,7 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_form
     csv_location : path-like
         folder in which csvs to process are stored
     tc_bounds : np.array
-        two value array containing the upper and lower bounds in "R/R0" where
+        two value array containing the upper and lower bounds in "D/D0" where
         tc will be found in between
     fname_format : str
         the format of the fname with parameter names separated

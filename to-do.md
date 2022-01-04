@@ -26,7 +26,8 @@
     * Refine $\lambda_E$ calculation
 * **Clean up**
     * Add +1 to nozzle diameter calculation and fix associated tests (basically all tests....)
-    * Check terminology of Radius (and R/R0) against Diameter (and D/D0)
+    * Check terminology of Radius (and R/R0) against Diameter (and D/D0) - DONE
+        * correct fixtures to account for changing all code to use D/D0 instead of R/R0, Dtc instead of Rtc, etc
     * fixtures folder (substantially cleaned)
     * Variable, function, module naming cleanup pass
     * Comment cleanup

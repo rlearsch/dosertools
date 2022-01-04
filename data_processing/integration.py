@@ -212,10 +212,11 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
     if verbose:
-        print("Processing " + len(fnames) + " videos.")
+        print("Processing " + str(len(fnames)) + " videos.")
     for i in range(0,len(fnames)):
         if verbose:
-            print("Processing " + (i + 1) + "/" len(fnames) + " video.")
+            j = i + 1
+            print("Processing " + str(j) + "/" + str(len(fnames)) + " video.")
         exp_video = exp_videos[i]
         bg_video = bg_videos[i]
         img_folder = os.path.join(images_folder,fnames[i])
@@ -265,11 +266,11 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
 
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     if verbose:
-        print("Processing " + len(subfolders) + "binary folders.")
+        print("Processing " + str(len(subfolders)) + " binary folders.")
     i = 1
     for subfolder in subfolders:
         if verbose:
-            print("Processing " + i + "/" len(subfolders) + " binary folder.")
+            print("Processing " + str(i) + "/" + str(len(subfolders)) + " binary folder.")
         params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
         ## TODO: deal with missing fps tag
         img_folder = os.path.join(images_folder,subfolder)
@@ -399,7 +400,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
 
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
-    
+
     if verbose:
         print("Processing csvs of R/R0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
@@ -407,7 +408,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)
-    fitting.save_summary_df(summary_df, summary_save_location)
+    fitting.save_summary_df(summary_df, summary_save_location,optional_settings)
     processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     fitting.save_processed_df(processed_df, summary_save_location, optional_settings)
     pass

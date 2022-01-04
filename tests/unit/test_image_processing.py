@@ -41,6 +41,8 @@ def images_list(fixtures_binary):
 def bg_median(fixtures_folder):
     return np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
+## TODO: class for tests for define_initial_parameters, define_image_parameters
+
 def test_define_initial_parameters():
     "Initial coefficients for first crop iterations"
     params_dict = th.define_initial_parameters()
@@ -55,7 +57,12 @@ def test_define_image_parameters(background_video,target_params_dict):
     params_dict = th.define_image_parameters(background_video, params_dict)
     assert target_params_dict == params_dict
 
-class TestTiffConversions:
+# TODO: test save_image
+
+class TestConvertTiffImage:
+    """
+    """
+    # TODO: docstring, comments
 
     image_number = 261
     optional_settings = {"save_crop" : True, "save_bg_sub" : True}
@@ -65,7 +72,7 @@ class TestTiffConversions:
         image_location = os.path.join(videos_folder,fname + timecode, fname + timecode + "000261.tif")
         return skimage.io.imread(image_location)
 
-    def test_convert_tiff_image_saves_intermediate_files(self, tmp_path, image, target_params_dict, bg_median):
+    def test_saves_all_files(self, tmp_path, image, target_params_dict, bg_median):
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
         th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
@@ -73,7 +80,7 @@ class TestTiffConversions:
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
 
-    def test_convert_tiff_image_converts_intermediate_files(self, tmp_path, image, target_params_dict, bg_median, fixtures_folder):
+    def test_saves_correct_files(self, tmp_path, image, target_params_dict, bg_median, fixtures_folder):
         #assert saved file matches
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
@@ -89,6 +96,56 @@ class TestTiffConversions:
         assert np.all(target_crop == produced_crop)
         assert np.all(target_bg_sub == produced_bg_sub)
 
+    def test_skips_if_exists(self,tmp_path, image, target_params_dict, bg_median):
+        #
+
+        save_location = tmp_path
+
+        # Creates all folders
+        folder.make_destination_folders(save_location, self.optional_settings)
+        # Reports folders already exist
+        folders_exist = [True, True, True]
+
+        th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
+        assert not os.path.exists(os.path.join(save_location,"crop","261.tiff"))
+        assert not os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
+        assert not os.path.exists(os.path.join(save_location,"bin","261.png"))
+
+        # Represents case where binary is saved, but intermediates were not
+        folders_exist = [True, False, False]
+        th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
+        assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
+        assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
+        assert not os.path.exists(os.path.join(save_location,"bin","261.png"))
+
+    def test_overwrites_if_exists(self,tmp_path, image, target_params_dict, bg_median):
+        save_location = tmp_path
+
+        # Creates all folders
+        folder.make_destination_folders(save_location, self.optional_settings)
+        # Reports folders already exist
+        folders_exist = [True, True, True]
+
+        optional_settings = self.optional_settings
+        optional_settings["skip_existing"] = False
+
+        th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, optional_settings)
+        assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
+        assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
+        assert os.path.exists(os.path.join(save_location,"bin","261.png"))
+
+# TODO: Class
+def test_produce_background_image(background_video,bg_median):
+    params_dict = th.define_initial_parameters()
+    params_dict = th.define_image_parameters(background_video, params_dict)
+    bg_median_test = th.produce_background_image(background_video, params_dict)
+    assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
+
+class TestConvertTiffSequenceToBinary:
+    """
+    """
+    # TODO: docstring
+
     def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, videos_folder, test_sequence, target_params_dict,bg_median,bin_folder):
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
@@ -103,13 +160,6 @@ class TestTiffConversions:
         produced_converted_sequence = skimage.io.imread_collection(str(produced_converted_sequence_path))
         for i in range(0,len(target_converted_sequence)):
             assert (np.all(target_converted_sequence[i] == produced_converted_sequence[i]))
-
-
-def test_produce_background_image(background_video,bg_median):
-    params_dict = th.define_initial_parameters()
-    params_dict = th.define_image_parameters(background_video, params_dict)
-    bg_median_test = th.produce_background_image(background_video, params_dict)
-    assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
 
 class TestBackgroundSubtraction:
     """
@@ -154,11 +204,10 @@ def test_tiffs_to_binary():
     # TODO: Tests for tiffs_to_binary
     # TODO: Image format test
     # TODO: Test verbose mode
-    #integration test
+    # TODO: Test skip_existing
 
     #assert save_location exists
     #assert produced video matches test_sequence
-    # Test skip existing
     pass
 
 class TestTopBorder:
@@ -210,6 +259,8 @@ class TestExportParams:
         for key in self.params_dict:
             value = test_params[test_params["Keys"] == str(key)]["Values"].iloc[0]
             assert str(self.params_dict[key]) == str(value)
+
+## TODO: test add_saved_params_to_dict
 
 class TestBottomBorder:
     """
@@ -318,11 +369,21 @@ class TestBinaryImagesToCSV:
 
     Tests
     -----
+    test_saves_csv:
+        Tests if binary_images_to_csv saves a csv.
     test_saves_correct_csv:
-        checks if saves csv and if that csv contains the expected data for
-        a given test sequence
+        Tests if binary_images_to_csv saves a csv and if that csv contains the
+        expected data for a given test sequence.
+    test_skips_if_exists:
+        Tests if binary_images_to_csv skips saving if a file already existing
+        and skip_existing is True (default).
+    test_overwrites_if_exists:
+        Tests if binary_images_to_csv overwrites existing file if skip_existing
+        is False.
+    test_verbose:
+        Tests if binary_images_to_csv produces print statements if verbose
+        is True.
     """
-
 
     fps = 25000
 
@@ -340,7 +401,7 @@ class TestBinaryImagesToCSV:
 
     def test_saves_correct_csv(self,tmp_path,fname,images_location):
         # Fails if binary_images_to_csv does not save a csv or does not save the
-        # correct values
+        # correct values.
         csv_path = tmp_path / "csv"
         os.mkdir(csv_path)
         binary.binary_images_to_csv(images_location,csv_path,self.fps)
@@ -349,4 +410,50 @@ class TestBinaryImagesToCSV:
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-    # TODO: test cases for csv existing!
+    def test_skips_if_exists(self,tmp_path,fname,images_location):
+        # Fails if binary_images_to_csv does not skip an existing file when
+        # skip_existing is True.
+        csv_path = tmp_path / "csv"
+        os.mkdir(csv_path)
+        file = csv_path / (fname + ".csv")
+        file.touch()
+        binary.binary_images_to_csv(images_location,csv_path,self.fps)
+        assert os.stat(file).st_size == 0
+
+    def test_overwrites_if_exists(self,tmp_path,fname,images_location):
+        # Fails if binary_images_to_csv does not overwrite an existing file when
+        # skip_existing is False.
+        optional_settings = {"skip_existing" : False}
+        csv_path = tmp_path / "csv"
+        os.mkdir(csv_path)
+        file = csv_path / (fname + ".csv")
+        file.touch()
+        binary.binary_images_to_csv(images_location,csv_path,self.fps,optional_settings)
+        test_data = pd.read_csv(os.path.join(images_location,"csv",fname +".csv"))
+        results = pd.read_csv(os.path.join(csv_path,fname + ".csv"))
+        for column in test_data.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
+
+    def test_verbose(self,tmp_path,capfd,images_location):
+        # Fails if binary_images_to_csv does not print statements when verbose
+        # is True.
+        csv_path = tmp_path / "csv"
+        os.mkdir(csv_path)
+
+        optional_settings = {"verbose" : True}
+
+        # Case 1: File does not yet exist, is successfully saved
+        binary.binary_images_to_csv(images_location,csv_path,self.fps,optional_settings)
+        out, err = capfd.readouterr()
+        assert ".csv saved" in out
+
+        # Case 2: File already exists, skip_existing is True.
+        binary.binary_images_to_csv(images_location,csv_path,self.fps,optional_settings)
+        out, err = capfd.readouterr()
+        assert ".csv already exists and skip_existing is True" in out
+
+        # Case 3: File already exists, skip_existing is False.
+        optional_settings["skip_existing"] = False
+        binary.binary_images_to_csv(images_location,csv_path,self.fps,optional_settings)
+        out, err = capfd.readouterr()
+        assert ".csv already exists and skip_existing is False" in out

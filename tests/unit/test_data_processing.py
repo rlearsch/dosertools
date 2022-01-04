@@ -956,8 +956,6 @@ class TestVideosToBinaries:
         output_sequence = skimage.io.imread_collection(str(output_path))
         target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
-        print(output_sequence[0].shape)
-        print(target_sequence[0].shape)
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 

@@ -56,7 +56,7 @@ def define_image_parameters(video: skimage.io.collection.ImageCollection, option
     non_zero_indicies = np.nonzero(binary_otsu[nozzle_row,:])
     first_non_zero = non_zero_indicies[0][0]
     last_non_zero = non_zero_indicies[0][-1]
-    nozzle_diameter = last_non_zero - first_non_zero #pix
+    nozzle_diameter = last_non_zero - first_non_zero + 1 #pix
 
     crop_width_start = int(first_non_zero-int(nozzle_diameter*crop_width_coefficient))
     crop_width_end = int(last_non_zero+int(nozzle_diameter*crop_width_coefficient))

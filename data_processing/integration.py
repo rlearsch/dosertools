@@ -31,7 +31,17 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         Default is 1.
     crop_width_coefficient: float
         Multiplied by the calculated nozzle_diameter to determine the buffer
-        on either side of the observed nozzle edges to include in the 
+        on either side of the observed nozzle edges to include in the cropped
+        image.
+        Default is 0.02
+    crop_height_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the bottom
+        row that will be included in the cropped image.
+        Default is 2.
+    crop_nozzle_coefficient: float
+        Multiplied by the calculated nozzle_diameter to determine the top
+        row of the cropped image.
+        Default is 0.15.
     fname_split: string
         The deliminator for splitting folder/file names, used in fname_format.
         Default is "_".

@@ -23,22 +23,22 @@ def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing
     Parameters
     ----------
     run_dataset: pd.DataFrame
-        dataset of a single DOS run containing at least R/R0, time,
+        dataset of a single DOS run containing at least D/D0, time,
     start: float
-        value of R/R0 to start fitting the EC region from
+        value of D/D0 to start fitting the EC region from
     end: float
-        value of R/R0 to end fitting the EC region with
+        value of D/D0 to end fitting the EC region with
 
     Returns
     -------
     slope, intercept, r_value: floats
         slope is the slope of the semilog-transformed version of the dataset. It corresponds to the decaying exponential in the linear-linear version of the data
     """
-    start_index = dparray.closest_index_for_value(run_dataset, "R/R0", start)
-    end_index = dparray.closest_index_for_value(run_dataset, "R/R0", end)
+    start_index = dparray.closest_index_for_value(run_dataset, "D/D0", start)
+    end_index = dparray.closest_index_for_value(run_dataset, "D/D0", end)
     dataset_EC = run_dataset[start_index:end_index]
-    log_radius = np.log(dataset_EC['R/R0'])
-    slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_radius)
+    log_diameter = np.log(dataset_EC['D/D0'])
+    slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_diameter)
     return slope, intercept, r_value
 
 def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.DataFrame:
@@ -61,7 +61,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
 
     lambdaE_df = pd.DataFrame(fitting_results_list)
     # Constructs column headers for the summary dataframe
-    constant_fitting_header = ("-b","Intercept", "R","run","Rtc/R0")
+    constant_fitting_header = ("-b","Intercept", "R","run","Dtc/D0")
     df_header = {}
     keys_list = header_params.keys()
     keys_list = list(keys_list)
@@ -84,7 +84,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     Parameters
     ----------
     df : pd.DataFrame
-        Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
+        Contains D/D0, time, t - tc, strain rate, D(tc)/D0, etc for multiple runs and samples
         generated from data_processing.csv.generate_df
     sampleinfo_format : str
         the format of the sampleinfo section of the filename
@@ -93,7 +93,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     Takes the following optional settings:
         fitting_bounds: [float, float]
             [start, end]
-            These are the R/R0 values we look for to set the bounds for the EC region fitting
+            These are the D/D0 values we look for to set the bounds for the EC region fitting
 
 
     Returns
@@ -120,24 +120,24 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
         for run in run_values:
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
-            R_tc_R0 = run_dataset.loc[0, "Rtc/R0"]
-            fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, R_tc_R0]
+            Dtc_D0 = run_dataset.loc[0, "Dtc/D0"]
+            fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
             fitting_results_list.append(fitting_results_temp)
     #### TODO: Clean up the dataframe column names ###
     summary_df = annotate_summary_df(fitting_results_list, header_params)
     return summary_df
 
-def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> float:
+def derivative_EC_fit(Dtc_D0: float, lambdaE: float, time: float, tc: float) -> float:
     """
     Calculates the derivative of the elasto-capillary region.
 
-    R(t)/R0 = R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
-    R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
+    D(t)/D0 = D(tc)/D0 * (exp(-(t - tc)/(3*LambdaE)))
+    D'(t)/D0 = (-1/(3*LambdaE)) * D(tc)/D0 * (exp(-(t - tc)/(3*LambdaE)))
 
     Parameters
     ----------
-    RtcR0: float
-        The normalized radius at which the transition to EC behavior occurs
+    Dtc_D0: float
+        The normalized diameter at which the transition to EC behavior occurs
 
     LambdaE: float
         The relaxation time of the polymer solution
@@ -151,10 +151,10 @@ def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> f
 
     Returns
     -------
-    R'(t)/R0: float
+    D'(t)/D0: float
 
     """
-    return RtcR0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
+    return Dtc_D0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:
     """
@@ -163,10 +163,10 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
     Parameters
     ----------
     df : pd.DataFrame
-        Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
+        Contains D/D0, time, t - tc, strain rate, D(tc)/D0, etc for multiple runs and samples
         generated from data_processing.csv.generate_df
     summary_df : pd.DataFrame
-        Contains relaxation time, R(t_c)/R0, and sample info for all runs and samples
+        Contains relaxation time, D(t_c)/D0, and sample info for all runs and samples
         generated from data_procescing.fitting.make_summary_dataframe
     optional_settings: dict
         A dictionary of optional settings.
@@ -185,7 +185,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
     # (could also just read the value of time at position 1?)
     #timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
 
-    #get mean relaxation time and R(tc)/R0 from summary_df for current sample
+    #get mean relaxation time and D(tc)/D0 from summary_df for current sample
     #Calculate strain and elongational viscosity / surface tension
     #Append them to the dataframe
 
@@ -196,13 +196,13 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
     mean_summary_df = summary_df.groupby("sample").mean()
     for sample in summary_df["sample"].unique():
         #subset_sample = summary_df[summary_df["sample"] == str(sample)]
-        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"]
+        Dtc_D0_mean = mean_summary_df.loc[sample, "Dtc/D0"]
         lambdaE_mean = mean_summary_df.loc[sample, "Lambda E (ms)"]
-        #calculate elongational viscosity from original DOS data and mean values of Rtc and lambdaE
+        #calculate elongational viscosity from original DOS data and mean values of Dtc/D0 and lambdaE
         for run in df[df["sample"] == sample]["run"].unique():
             dataset = df[df["sample"]==str(sample)]
             dataset = dataset[dataset["run"] == run]
-            dataset['strain'] = -2*np.log(dataset['R/R0'])
+            dataset['strain'] = -2*np.log(dataset['D/D0'])
             dataset=dataset.reset_index(drop=True)
 
             for value in range(0,len(dataset)):
@@ -210,7 +210,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
                 t_minus_tc_ms = t_minus_tc*1000
                 # NOTE: Because we prefer the needle diameter to give the length scale,
                 # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
-                e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diameter_mm))
+                e_visc_sigma = -1*(1/((derivative_EC_fit(Dtc_D0_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diameter_mm))
                 # e visc / surface tension [=] -1/D'(t) = [1/(mm/ms)] = [1/(m/s)] = [s/m]
                 dataset.at[value, "(e visc / surface tension) (s/m)"] = e_visc_sigma
             df_w_visc_list.append(dataset)
@@ -221,12 +221,12 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
     """
     Saves the summary dataset from a large processed batch of videos.
 
-    The summary dataset includes only the fluid properties, not the 'raw' radius vs time data.
+    The summary dataset includes only the fluid properties, not the 'raw' diameter vs time data.
 
     Parameters
     ----------
     summary_df : pd.DataFrame
-        Contains LambdaE, R(tc)/R0, and sample info for multiple runs and samples
+        Contains LambdaE, D(tc)/D0, and sample info for multiple runs and samples
     save_location: path-like
         path to folder in which to save the csv
     filename: string
@@ -301,7 +301,7 @@ def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, 
     """
     Saves the processed dataset from a batch of videos.
 
-    The summary dataset includes the fluid properties, the 'raw' radius vs time data, and the sampleinfo from the filename.
+    The summary dataset includes the fluid properties, the 'raw' diameter vs time data, and the sampleinfo from the filename.
 
     Parameters
     ----------

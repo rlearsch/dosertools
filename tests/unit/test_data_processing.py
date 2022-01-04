@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
-import shutil
+#import shutil
 import json
 import fnmatch
 import skimage.io
@@ -18,9 +18,28 @@ import data_processing.integration as integration
 import file_handling.folder as folder
 import file_handling.tags as tags
 
-# Assigns folders for fixtures.
-fixtures_folder = os.path.join("tests","fixtures")
-fixtures_fitting = os.path.join(fixtures_folder,"fixtures_fitting")
+@pytest.fixture
+def fixtures_fitting(fixtures_folder):
+    return os.path.join(fixtures_folder,"fixtures_fitting")
+
+@pytest.fixture
+def image_count(videos_folder,fname,timecode):
+    video_folder = os.path.join(videos_folder, fname + timecode)
+    return len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+
+@pytest.fixture
+def long_fname_format():
+    return "sampleinfo_fps_substrate_run_vtype_remove_remove"
+
+@pytest.fixture
+def short_fname_format(long_fname_format):
+    short1 = tags.remove_tag_from_fname(long_fname_format,long_fname_format,"vtype")
+    short2 = tags.remove_tag_from_fname(short1,short1,"remove")
+    return short2
+
+@pytest.fixture
+def sampleinfo_format():
+    return "MW-backbone-pass-concentration"
 
 class TestClosestIndexForValue:
     """
@@ -309,7 +328,7 @@ class TestCSVToDataFrame:
         assert "fps" in columns
         assert "run" in columns
 
-    def test_correct_values(self,tmp_path):
+    def test_correct_values(self,tmp_path,fixtures_folder):
         # Fails if csv_to_dataframe does not return correct values.
 
         # Constructs sample file.
@@ -364,7 +383,7 @@ class TestGenerateDF:
 
         assert type(dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
 
-    def test_correct_values(self,tmp_path):
+    def test_correct_values(self,tmp_path,fixtures_fitting):
         # Fails if generate_df does not return correct_values.
 
         # Constructs sample files.
@@ -598,15 +617,16 @@ class TestAddCriticalTime:
         with pytest.raises(KeyError,match="column strain"):
             extension.add_critical_time(dataset)
 
+## TODO: make classes/docstrings for find_EC_slope, annotate_summary_df, make_summary_dataframe, derivative_EC_fit, calculate_elongational_visc
 
-def test_find_EC_slope():
+def test_find_EC_slope(fixtures_fitting):
     test_dataset = pd.read_csv(os.path.join(fixtures_fitting,"example_DOS_data.csv"))
     slope, intercept, r_value = fitting.find_EC_slope(test_dataset, 0.1, 0.045)
     assert np.isclose(slope, -347.7499821602085)
     assert np.isclose(intercept, 0.2809024757035168)
     assert np.isclose(r_value,-0.9996926885633579)
 
-def test_annotate_summary_df():
+def test_annotate_summary_df(fixtures_fitting):
     sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
     # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
@@ -623,7 +643,7 @@ def test_annotate_summary_df():
     pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False)
     #pass
 
-def test_make_summary_dataframe():
+def test_make_summary_dataframe(fixtures_fitting):
     test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
     find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
     optional_settings = {"fitting_bounds":[0.8, 0.1]}
@@ -633,6 +653,244 @@ def test_make_summary_dataframe():
     pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
     ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
     pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+
+def test_derivative_EC_fit():
+    """
+
+    """
+    test1 = fitting.derivative_EC_fit(0, 1/3, 5, 1)
+    assert test1 == 0
+    test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
+    assert test2 == -1
+    test3 = fitting.derivative_EC_fit(3, 1, 3, 3)
+    assert test3 == -1
+    test4 = fitting.derivative_EC_fit(3,1,-3,0)
+    assert test4 == -np.exp(1)
+
+
+def test_calculate_elongational_visc(fixtures_fitting):
+    #construct pathological summary dataframe
+    summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
+    summary_df = pd.DataFrame(summary_dict)
+    summary_df["sample"] = "1M-PEO-0.01wtpt"
+    df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
+    optional_settings = {"needle_diameter_mm":1.0}
+    df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
+    mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
+    # TODO: is there a better way to implement this test?
+    #this is kind of lazy but it checks that we have the correct order of magnitude
+    assert (mean_elongational > 1300 and mean_elongational < 1500)
+
+class TestSaveSummaryDF:
+    """
+    Tests save_summary_df.
+
+    Tests
+    -----
+    test_saves_csv_default_name:
+        Tests if save_summary_df saves a csv with no filename set in
+        optional_settings.
+    test_saves_csv_set_filename:
+        Tests if save_summary_df saves a csv with two variants on filenames
+        (with and without .csv) set in optional_settings.
+    test_warns_if_exists:
+        Tests if save_summary_df produces a warning if skip_existing is True
+        and the destination file already exists.
+    test_overwrites_if_exists:
+        Tests if save_summary_df overwrites an existing file if skip_existing
+        is False and the destination file already exists.
+    test_verbose:
+        Tests if save_summary_df prints a statement confirming the file was
+        saved.
+    """
+
+    def test_saves_csv_default_name(self,tmp_path):
+        # Fails if save_summary_df does not save a csv with the default
+        # filename.
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename_string = fitting.save_summary_df(df, save_location)
+        saved_files = os.listdir(save_location)
+        assert len(saved_files) is 1
+        assert str(saved_files[0]) == filename_string
+        assert "_DOS-summary.csv" in filename_string
+
+    def test_saves_csv_set_filename(self,tmp_path):
+        # Fails if save_summary_df does not save a csv for each of two cases:
+        # optional_settings has a summary_filename with and without ".csv"
+        save_location = tmp_path
+        df = pd.DataFrame()
+
+        # Filename contains .csv
+        filename = "summary.csv"
+        resulting_filename = "summary_DOS-summary.csv"
+        optional_settings = {"summary_filename" : filename}
+        filename_string = fitting.save_summary_df(df, save_location, optional_settings)
+        assert os.path.exists(os.path.join(save_location, resulting_filename))
+        assert filename_string == resulting_filename
+
+        # Filename does not contain .csv
+        filename = "summary_no_csv"
+        optional_settings = {"summary_filename" : filename}
+        filename_string = fitting.save_summary_df(df, save_location, optional_settings)
+        assert os.path.exists(os.path.join(save_location, filename + "_DOS-summary.csv"))
+        assert filename_string == (filename + "_DOS-summary.csv")
+
+    def test_warns_if_exists(self,tmp_path):
+        # Fails if save_summary_df does not produce a warning if the file
+        # already exists and skip_existing is True (default).
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename = "summary.csv"
+        resulting_filename = "summary_DOS-summary.csv"
+        optional_settings = {"summary_filename" : filename}
+
+        # Creates file that will conflict
+        file = tmp_path / resulting_filename
+        file.touch()
+
+        with pytest.warns(UserWarning, match="Summary"):
+            filename_string = fitting.save_summary_df(df, save_location, optional_settings)
+
+    def test_overwrites_if_exists(self,tmp_path):
+        # Fails if save_summary_df does not overwrite an existing file and
+        # skip_existing is False.
+        save_location = tmp_path
+        column = "column"
+        df = pd.DataFrame([-1,0,1,2],columns=[column])
+        filename = "summary.csv"
+        resulting_filename = "summary_DOS-summary.csv"
+        optional_settings = {"summary_filename" : filename, "skip_existing" : False}
+
+        # Creates file that will conflict
+        file = tmp_path / resulting_filename
+        file.touch()
+
+        fitting.save_summary_df(df, save_location, optional_settings)
+
+        assert os.path.exists(file)
+        saved_df = pd.read_csv(file)
+        print(saved_df)
+        assert pd.Series.eq(saved_df[column],df[column]).all()
+
+    def test_verbose(self,tmp_path,capfd):
+        # Fails if save_summary_df does not print a statement when a file is
+        # successfully saved.
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename = "summary.csv"
+        optional_settings = {"summary_filename" : filename, "verbose" : True}
+
+        fitting.save_summary_df(df, save_location, optional_settings)
+
+        out, err = capfd.readouterr()
+        assert "Summary file saved successfully" in out
+
+
+class TestSaveProcessedDF:
+    """
+    Tests save_processed_df.
+
+    Tests
+    -----
+    test_saves_csv_default_name:
+        Tests if save_processed_df saves a csv with no filename set in
+        optional_settings.
+    test_saves_csv_set_filename:
+        Tests if save_processed_df saves a csv with two variants on filenames
+        (with and without .csv) set in optional_settings.
+    test_warns_if_exists:
+        Tests if save_processed_df produces a warning if skip_existing is True
+        and the destination file already exists.
+    test_overwrites_if_exists:
+        Tests if save_processed_df overwrites an existing file if skip_existing
+        is False and the destination file already exists.
+    test_verbose:
+        Tests if save_processed_df prints a statement confirming the file was
+        saved.
+    """
+
+    def test_saves_csv_default_name(self,tmp_path):
+        # Fails if save_processed_df does not save a csv with the default
+        # filename.
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename_string = fitting.save_processed_df(df, save_location)
+        saved_files = os.listdir(save_location)
+        assert len(saved_files) is 1
+        assert str(saved_files[0]) == filename_string
+        assert "_DOS-annotated.csv" in filename_string
+
+    def test_saves_csv_set_filename(self,tmp_path):
+        # Fails if save_processed_df does not save a csv for each of two cases:
+        # optional_settings has a summary_filename with and without ".csv"
+        save_location = tmp_path
+        df = pd.DataFrame()
+
+        # Filename contains .csv
+        filename = "processed.csv"
+        resulting_filename = "processed_DOS-annotated.csv"
+        optional_settings = {"summary_filename" : filename}
+        filename_string = fitting.save_processed_df(df, save_location, optional_settings)
+        assert os.path.exists(os.path.join(save_location, resulting_filename))
+        assert filename_string == resulting_filename
+
+        # Filename does not contain .csv
+        filename = "processed_no_csv"
+        optional_settings = {"summary_filename" : filename}
+        filename_string = fitting.save_processed_df(df, save_location, optional_settings)
+        assert os.path.exists(os.path.join(save_location, filename + "_DOS-annotated.csv"))
+        assert filename_string == (filename + "_DOS-annotated.csv")
+
+    def test_warns_if_exists(self,tmp_path):
+        # Fails if save_processed_df does not produce a warning if the file
+        # already exists and skip_existing is True (default).
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename = "processed.csv"
+        resulting_filename = "processed_DOS-annotated.csv"
+        optional_settings = {"summary_filename" : filename}
+
+        # Creates file that will conflict
+        file = tmp_path / resulting_filename
+        file.touch()
+
+        with pytest.warns(UserWarning, match="Annotated"):
+            filename_string = fitting.save_processed_df(df, save_location, optional_settings)
+
+    def test_overwrites_if_exists(self,tmp_path):
+        # Fails if save_processed_df does not overwrite an existing file and
+        # skip_existing is False.
+        save_location = tmp_path
+        column = "column"
+        df = pd.DataFrame([-1,0,1,2],columns=[column])
+        filename = "processed.csv"
+        resulting_filename = "processed_DOS-annotated.csv"
+        optional_settings = {"summary_filename" : filename, "skip_existing" : False}
+
+        # Creates file that will conflict
+        file = tmp_path / resulting_filename
+        file.touch()
+
+        fitting.save_processed_df(df, save_location, optional_settings)
+
+        assert os.path.exists(file)
+        saved_df = pd.read_csv(file)
+        print(saved_df)
+        assert pd.Series.eq(saved_df[column],df[column]).all()
+
+    def test_verbose(self,tmp_path,capfd):
+        # Fails if save_processed_df does not print a statement when a file is
+        # successfully saved.
+        save_location = tmp_path
+        df = pd.DataFrame()
+        filename = "processed.csv"
+        optional_settings = {"summary_filename" : filename, "verbose" : True}
+
+        fitting.save_processed_df(df, save_location, optional_settings)
+
+        out, err = capfd.readouterr()
+        assert "Annotated file saved successfully" in out
 
 class TestSetDefaults:
     """
@@ -673,33 +931,49 @@ class TestVideosToBinaries:
     Tests
     -----
     test_saves_binary_files:
-        Checks if videos_to_binaries saves binary images and if those binary
+        Tests if videos_to_binaries saves binary images and if those binary
         images are correct.
+    test_verbose:
+        Tests if videos_to_binaries produces print statements if verbose is
+        True.
     """
 
     # Sets up sample values.
-    videos_folder = fixtures_folder
-    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
-    sampleinfo_format = "experimenter-MW-backbone-pass-concentration"
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
-    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
+    fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
 
-    def test_saves_binary_files(self,tmp_path):
+    def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not save binary images or if those
         # binary images are incorrect.
+
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_binaries(self.videos_folder, images_folder, self.fname_format, optional_settings)
-        for i in range(0,self.image_count):
-            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
-        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        integration.videos_to_binaries(videos_folder, images_folder, long_fname_format, optional_settings)
+        for i in range(0,image_count):
+            assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
+        target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
+
+    def test_verbose(self,tmp_path,capfd,videos_folder,bin_folder,fname,image_count,long_fname_format):
+        # Fails if videos_to_binaries does not print statements for the stages
+        # of video processing when verbose is True.
+
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        optional_settings = {"experiment_tag" : '', "verbose" : True}
+        integration.videos_to_binaries(videos_folder, images_folder, long_fname_format, optional_settings)
+
+        # Checks for expected lines in verbose output.
+        out, err = capfd.readouterr()
+        assert "Processing 1 videos" in out
+        assert "Processing 1/1" in out
+        assert "Processing folder" in out
+        assert "Elapsed" in out
+        assert "Finished processing" in out
 
 class TestBinariesToCSVs:
     """
@@ -708,24 +982,37 @@ class TestBinariesToCSVs:
     Tests
     -----
     test_saves_csvs:
-        Checks if binaries_to_csvs saves csvs and if the test csv is correct.
+        Tests if binaries_to_csvs saves csvs and if the test csv is correct.
+    test_verbose:
+        Tests if binaries_to_csvs produces print statements if verbose is True.
     """
 
-    short_fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run"
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    images_folder = os.path.join(fixtures_folder,"test_sequence")
-
-    def test_saves_csvs(self,tmp_path):
-        # Fails if videos_to_binaries does not save csvs or if the csv is
+    def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format):
+        # Fails if binaries_to_csvs does not save csvs or if the csv is
         # incorrect.
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        integration.binaries_to_csvs(self.images_folder, csv_folder, self.short_fname_format)
-        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
-        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
+
+    def test_verbose(self,tmp_path,capfd,test_sequence,short_fname_format):
+        # Fails if binaries_to_csvs does not produce print statements if
+        # verbose is True.
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        optional_settings = {"verbose" : True}
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format, optional_settings)
+
+        out, err = capfd.readouterr()
+        print(out)
+        assert "Processing 1 binary folders" in out
+        assert "Processing 1/1 binary folder" in out
+        assert ".csv saved" in out
+        assert "Finished processing" in out
 
 class TestVideosToCSVs:
     """
@@ -740,13 +1027,9 @@ class TestVideosToCSVs:
         Checks if videos_to_csvs saves csvs and if the test csv is correct.
     """
 
-    videos_folder = fixtures_folder
-    fname_format = "date_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
-    fname = "2021-09-22_RCL-6.7M-PAM-20pass-0.021wtpct_22G_shutter-50k_fps-25k_DOS-Al_2"
-    video_folder = os.path.join(fixtures_folder, fname + "_2109_1534")
-    image_count = len(fnmatch.filter(os.listdir(video_folder),"*.tif"))
 
-    def test_saves_binary_files(self,tmp_path):
+
+    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder,long_fname_format):
         # Fails if videos_to_csvs does not save binary images or if those
         # binary images are incorrect.
         images_folder = tmp_path / "images"
@@ -754,17 +1037,17 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
-        for i in range(0,self.image_count):
-            assert os.path.exists(os.path.join(images_folder, self.fname, "bin", f"{i:03}." + "png"))
-        output_path = os.path.join(images_folder,self.fname,"bin","*")
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
+        for i in range(0,image_count):
+            assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,fname,"bin","*")
         output_sequence = skimage.io.imread_collection(str(output_path))
-        target_path = os.path.join(fixtures_folder, "test_sequence",self.fname,"bin","*")
+        target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-    def test_saves_csvs(self,tmp_path):
+    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname,long_fname_format):
         # Fails if videos_to_binaries does not save csvs or if the csv is
         # incorrect.
         images_folder = tmp_path / "images"
@@ -772,64 +1055,28 @@ class TestVideosToCSVs:
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(self.videos_folder, images_folder, csv_folder, self.fname_format, optional_settings)
-        assert os.path.exists(os.path.join(csv_folder,self.fname + ".csv"))
-        test_data = pd.read_csv(os.path.join(fixtures_folder,"test_sequence",self.fname,"csv",self.fname + ".csv"))
-        results = pd.read_csv(os.path.join(csv_folder,self.fname + ".csv"))
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-class TestSaveSummary:
-    date_and_time = datetime.now()
-    date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
-    # produce dummy dataframe that is empty
-    dummy_df = pd.DataFrame(0, index = range(2), columns = range(2))
-    def test_save_summary_df(self, tmp_path):
-            # Checks that file exists in save_directory, with correct filename (based on date)
-            save_location = tmp_path
-            fitting.save_summary_df(self.dummy_df, save_location)
-            assert os.path.isdir(save_location)
-            if os.path.isdir(save_location):
-                saved_filename = os.listdir(save_location)[0]
-                file_location = os.path.join(save_location, saved_filename)
-            assert os.path.exists(file_location)
-
-def test_derivative_EC_fit():
-    """
-
-    """
-    test1 = fitting.derivative_EC_fit(0, 1/3, 5, 1)
-    assert test1 == 0
-    test2 = fitting.derivative_EC_fit(1, 1/3, 0, 0)
-    assert test2 == -1
-    test3 = fitting.derivative_EC_fit(3, 1, 3, 3)
-    assert test3 == -1
-    test4 = fitting.derivative_EC_fit(3,1,-3,0)
-    assert test4 == -np.exp(1)
-
-
-def test_calculate_elongational_visc():
-    #construct pathological summary dataframe
-    summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
-    summary_df = pd.DataFrame(summary_dict)
-    summary_df["sample"] = "1M-PEO-0.01wtpt"
-    df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
-    optional_settings = {"needle_diameter_mm":1.0}
-    df_with_elongational_visc = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
-    mean_elongational = df_with_elongational_visc["(e visc / surface tension) (s/m)"].mean()
-    #this is kind of lazy but it checks that we have the correct order of magnitude
-    assert (mean_elongational > 1300 and mean_elongational < 1500)
-
 class TestCSVsToSummaries:
+    """
+    """
+    ### TODO: docstring,comments
+
+
     #csv_folder = tmp_path / "csv_seeds"
     #csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
     #shutil.copytree(csv_seed_fixture, "csv_folder")
-    
-    def test_csvs_to_summaries(self, tmp_path):
-        csv_seed_fixture = os.path.join('tests','fixtures','example_csvs')
+
+    def test_csvs_to_summaries(self, tmp_path,fixtures_folder,short_fname_format,sampleinfo_format):
+        csv_seed_fixture = os.path.join(fixtures_folder,'example_csvs')
         #shutil.copytree(csv_seed_fixture, csv_folder)
         save_folder = tmp_path / "csv_summaries"
-        integration.csvs_to_summaries(csv_seed_fixture, save_folder, "date_sampleinfo_needle_shutter_fps_substrate_run", "name-MW-polymer-pass-c")
+        integration.csvs_to_summaries(csv_seed_fixture, save_folder, short_fname_format, sampleinfo_format)
         assert os.path.isdir(save_folder)
         saved_files = os.listdir(save_folder)
         for filename in saved_files:
@@ -840,9 +1087,27 @@ class TestCSVsToSummaries:
             if 'annotated' in filename:
                 file_location = os.path.join(save_folder, filename)
                 test_annotated_df = pd.read_csv(file_location)
-        fixture_annotated_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
-        fixture_summary_df = pd.read_csv(os.path.join('tests','fixtures','example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
+        fixture_annotated_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
+        fixture_summary_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
         pandas.testing.assert_frame_equal(fixture_annotated_df,test_annotated_df, check_exact=False, atol=1E-6)
         pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
-        #assert they have the correct columns
+        #TODO: assert they have the correct columns?
         pass
+
+    def test_verbose(self,tmp_path,capfd,fixtures_folder,short_fname_format,sampleinfo_format):
+        # Fails if csvs_to_summaries does not print statements when verbose
+        # is True.
+        csv_seed_fixture = os.path.join(fixtures_folder,'example_csvs')
+        save_folder = tmp_path / "csv_summaries"
+        optional_settings = {"verbose" : True}
+        integration.csvs_to_summaries(csv_seed_fixture, save_folder, short_fname_format, sampleinfo_format, optional_settings)
+
+        out, err = capfd.readouterr()
+        assert "Processing csvs" in out
+        assert "Summary" in out
+        assert "Annotated" in out
+
+
+# TODO: Remove shutil
+
+# TODO: TestVideosToSummaries

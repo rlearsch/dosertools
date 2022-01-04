@@ -941,6 +941,7 @@ class TestVideosToBinaries:
     # Sets up sample values.
     fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
 
+    @pytest.mark.bin
     def test_saves_binary_files(self,tmp_path,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not save binary images or if those
         # binary images are incorrect.
@@ -955,6 +956,8 @@ class TestVideosToBinaries:
         output_sequence = skimage.io.imread_collection(str(output_path))
         target_path = os.path.join(bin_folder,"*")
         target_sequence = skimage.io.imread_collection(str(target_path))
+        print(output_sequence[0].shape)
+        print(target_sequence[0].shape)
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 

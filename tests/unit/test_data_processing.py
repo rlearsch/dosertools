@@ -277,7 +277,7 @@ class TestCSVToDataFrame:
     """
 
     # Sets up sample data.
-    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
     fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
     fname_format = "date_sampleinfo_fps_run"
@@ -313,10 +313,10 @@ class TestCSVToDataFrame:
 
         # Checks standard columns for every dataset.
         assert "time (s)" in columns
-        assert "R/R0" in columns
+        assert "D/D0" in columns
         assert "strain rate (1/s)" in columns
         assert "tc (s)" in columns
-        assert "Rtc/R0" in columns
+        assert "Dtc/D0" in columns
         assert "t - tc (s)" in columns
 
         # Checks columns from filename.
@@ -366,7 +366,7 @@ class TestGenerateDF:
     """
 
     # Sets up sample data.
-    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
     fname_base = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k"
     fname_format = "date_sampleinfo_fps_run"
@@ -419,14 +419,14 @@ class TestTruncateData:
         Checks if truncates_data correctly truncates the dataset at the end of
         the longest block of zeroes.
     test_error_if_missing_columns:
-        Checks if truncate_data throws "KeyError" if "R/R0" missing.
+        Checks if truncate_data throws "KeyError" if "D/D0" missing.
     """
 
     # Sets up sample data.
-    data = {"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
-    truncated_before = pd.DataFrame({"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]})
-    truncated_after = pd.DataFrame({"R/R0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2]})
+    truncated_before = pd.DataFrame({"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]})
+    truncated_after = pd.DataFrame({"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2]})
 
     def test_returns_df(self):
         # Fails if truncate_data does not return a dataframe.
@@ -436,8 +436,8 @@ class TestTruncateData:
         # Fails if truncate_data does not truncate at expected location
         # (before the longest block of zeroes).
         result = extension.truncate_data(self.dataset)
-        # Checks R/R0.
-        assert pd.Series.eq(result["R/R0"],self.truncated_before["R/R0"]).all()
+        # Checks D/D0.
+        assert pd.Series.eq(result["D/D0"],self.truncated_before["D/D0"]).all()
         # Checks time (s).
         assert pd.Series.eq(result["time (s)"],self.truncated_before["time (s)"]).all()
 
@@ -445,17 +445,17 @@ class TestTruncateData:
         # Fails if truncate_data does not truncate at expected location
         # (at the end of the longest block of zeroes).
         result = extension.truncate_data(self.dataset, False)
-        # Checks R/R0.
-        assert pd.Series.eq(result["R/R0"],self.truncated_after["R/R0"]).all()
+        # Checks D/D0.
+        assert pd.Series.eq(result["D/D0"],self.truncated_after["D/D0"]).all()
         # Checks time (s).
         assert pd.Series.eq(result["time (s)"],self.truncated_after["time (s)"]).all()
 
 
     def test_error_if_missing_columns(self):
-        # Fails if truncate_data does not throw KeyError if missing "R/R0".
+        # Fails if truncate_data does not throw KeyError if missing "D/D0".
         data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
-        with pytest.raises(KeyError,match="column R/R0"):
+        with pytest.raises(KeyError,match="column D/D0"):
             extension.truncate_data(dataset)
 
 class TestAddStrainRate:
@@ -475,21 +475,21 @@ class TestAddStrainRate:
         Checks if add_strain_rate correctly removes infinities and NaN from
         dataset when produced by calculating strain rate.
     test_error_if_missing_columns:
-        Checks if add_strain_rate throws KeyError if missing R/R0 or time(s).
+        Checks if add_strain_rate throws KeyError if missing D/D0 or time(s).
     """
 
     # Sets up sample data.
-    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5]}
+    data = {"D/D0":[1,0.9,0.8,0.5,0.2,0.1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5]}
     dataset = pd.DataFrame(data)
     # Constructs strain rate from data.
     sr = [0,0,0,0,0,0]
-    for i in range(0,len(data["R/R0"])):
+    for i in range(0,len(data["D/D0"])):
         if i == 0:
             sr[i] = 2 # from output of add_strain_rate since boundary
         elif i == 5:
             sr[i] = 20 # from output of add_strain_rate since boundary
         else:
-            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
+            sr[i] = -2*(data["D/D0"][i+1]-data["D/D0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["D/D0"][i]
     strain_rate = pd.DataFrame(sr,columns=["strain rate (1/s)"])
 
     def test_returns_df(self):
@@ -500,7 +500,7 @@ class TestAddStrainRate:
         # Fails if output does not contain correct columns.
         columns = extension.add_strain_rate(self.dataset).columns
         assert "time (s)" in columns
-        assert "R/R0" in columns
+        assert "D/D0" in columns
         assert "strain rate (1/s)" in columns
 
     def test_correct_strain_rate(self):
@@ -512,25 +512,25 @@ class TestAddStrainRate:
 
     def test_remove_infinity(self):
         # Fails if add_strain_rate does not remove -infinity, infinity, NaN.
-        data = {"R/R0":[1,1,1,0,0,0,1,1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
+        data = {"D/D0":[1,1,1,0,0,0,1,1],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
-        data_drop = {"R/R0":[1,1,1,1,1], "time (s)":[0,0.1,0.2,0.6,0.7], "strain rate (1/s)":[0.0,0.0,10.0,-10.0,0.0]}
+        data_drop = {"D/D0":[1,1,1,1,1], "time (s)":[0,0.1,0.2,0.6,0.7], "strain rate (1/s)":[0.0,0.0,10.0,-10.0,0.0]}
         dataset_drop = pd.DataFrame(data_drop)
         output = extension.add_strain_rate(dataset)
         # Rounds in order to account for floating point math errors.
         assert pd.DataFrame.equals(round(output,2),round(dataset_drop,2))
 
     def test_error_if_missing_columns(self):
-        # Fails if add_strain_rate does not raise KeyError if "R/R0"
+        # Fails if add_strain_rate does not raise KeyError if "D/D0"
         # or "time(s)" are missing.
 
-        # Tests if "R/R0" missing.
+        # Tests if "D/D0" missing.
         data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]}
         dataset = pd.DataFrame(data)
-        with pytest.raises(KeyError,match="column R/R0"):
+        with pytest.raises(KeyError,match="column D/D0"):
             extension.add_strain_rate(dataset)
         # Tests if "time (s)" missing.
-        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1]}
+        data = {"D/D0":[1,0.9,0.8,0.5,0.2,0.1]}
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="column time"):
             extension.add_strain_rate(dataset)
@@ -548,25 +548,25 @@ class TestAddCriticalTime:
     test_correct_values:
         Checks if add_critical_time returns the correct values.
     test_error_if_missing_columns:
-        Checks if add_critical_time throws KeyError if missing "R/R0",
+        Checks if add_critical_time throws KeyError if missing "D/D0",
         "time (s)", or "strain rate (1/s)".
     """
 
     # Sets up sample data.
-    data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
+    data = {"D/D0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
     dataset = pd.DataFrame(data)
     sr = [0,0,0,0,0,0,0]
-    for i in range(0,len(data["R/R0"])):
+    for i in range(0,len(data["D/D0"])):
         if i == 0:
             sr[i] = 2 # from output of add_strain_rate since boundary
         elif i == 6:
             sr[i] = 180 # from output of add_strain_rate since boundary
         else:
-            sr[i] = -2*(data["R/R0"][i+1]-data["R/R0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["R/R0"][i]
+            sr[i] = -2*(data["D/D0"][i+1]-data["D/D0"][i-1])/(2*(data["time (s)"][i+1]-data["time (s)"][i]))/data["D/D0"][i]
     dataset["strain rate (1/s)"] = sr
 
     tc = 0.4
-    Rtc = 0.2
+    Dtc_D0 = 0.2
 
     def test_returns_df(self):
         # Fails if add_critical_time does not return a DataFrame.
@@ -576,43 +576,43 @@ class TestAddCriticalTime:
         # Fails if output does not contain correct columns.
         columns = extension.add_critical_time(self.dataset).columns
         assert "time (s)" in columns
-        assert "R/R0" in columns
+        assert "D/D0" in columns
         assert "strain rate (1/s)" in columns
         assert "tc (s)" in columns
-        assert "Rtc/R0" in columns
+        assert "Dtc/D0" in columns
         assert "t - tc (s)" in columns
 
     def test_correct_values(self):
-        # Fails if tc, Rtc, or t-tc are wrong.
+        # Fails if tc, Dtc_D0, or t-tc are wrong.
         result = extension.add_critical_time(self.dataset)
 
         # Checks tc.
         assert result["tc (s)"][0] == self.tc
 
-        # Checks Rtc/R0.
-        assert result["Rtc/R0"][0] == self.Rtc
+        # Checks Dtc/D0.
+        assert result["Dtc/D0"][0] == self.Dtc_D0
 
         # Checks t - tc (s).
         assert pd.Series.eq(result["t - tc (s)"],(self.dataset["time (s)"] -  self.tc)).all()
 
     def test_error_if_missing_columns(self):
-        # Fails if add_critical_time does not raise KeyError if "R/R0",
+        # Fails if add_critical_time does not raise KeyError if "D/D0",
         # "time(s)", or "strain rate (1/s)" are missing.
 
-        # Tests if "R/R0" missing.
+        # Tests if "D/D0" missing.
         data = {"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
-        with pytest.raises(KeyError,match="column R/R0"):
+        with pytest.raises(KeyError,match="column D/D0"):
             extension.add_critical_time(dataset)
         # Tests if "time (s)" missing.
-        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01]}
+        data = {"D/D0":[1,0.9,0.8,0.5,0.2,0.1,0.01]}
         dataset = pd.DataFrame(data)
         dataset["strain rate (1/s)"] = self.sr
         with pytest.raises(KeyError,match="column time"):
             extension.add_critical_time(dataset)
         # Tests if "strain rate (1/s)" missing.
-        data = {"R/R0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
+        data = {"D/D0":[1,0.9,0.8,0.5,0.2,0.1,0.01],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6]}
         dataset = pd.DataFrame(data)
         with pytest.raises(KeyError,match="column strain"):
             extension.add_critical_time(dataset)
@@ -627,7 +627,7 @@ def test_find_EC_slope(fixtures_fitting):
     assert np.isclose(r_value,-0.9996926885633579)
 
 def test_annotate_summary_df(fixtures_fitting):
-    sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
+    #sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
     # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
     # it is hard-coded in to not use folder.parse_filename in the test
@@ -670,7 +670,7 @@ def test_derivative_EC_fit():
 
 def test_calculate_elongational_visc(fixtures_fitting):
     #construct pathological summary dataframe
-    summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Rtc/R0":[0.9, 1.0, 1.1]}
+    summary_dict = {"Lambda E (ms)": [0, 500, 1000], "Dtc/D0":[0.9, 1.0, 1.1]}
     summary_df = pd.DataFrame(summary_dict)
     summary_df["sample"] = "1M-PEO-0.01wtpt"
     df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))

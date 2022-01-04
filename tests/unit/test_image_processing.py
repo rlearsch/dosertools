@@ -24,6 +24,12 @@ def background_video(fname, timecode, videos_folder):
     return background_video
 
 @pytest.fixture
+def experimental_video(fname, timecode, videos_folder):
+    experimental_video_location = os.path.join(videos_folder,fname + timecode, "*")
+    experimental_video = skimage.io.imread_collection(experimental_video_location, plugin='tifffile')
+    return experimental_video
+
+@pytest.fixture
 def target_params_dict(fixtures_folder):
     with open(os.path.join(fixtures_folder,"params.json")) as f:
         return json.load(f)
@@ -41,20 +47,10 @@ def images_list(fixtures_binary):
 def bg_median(fixtures_folder):
     return np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
-## TODO: class for tests for define_initial_parameters, define_image_parameters
+## TODO: class for tests for define_image_parameters
 
-def test_define_initial_parameters():
-    "Initial coefficients for first crop iterations"
-    params_dict = th.define_initial_parameters()
-    assert params_dict["nozzle_row"] == 1
-    assert params_dict["crop_width_coefficient"] == 0.02
-    assert params_dict["crop_height_coefficient"] == 2
-    assert params_dict["crop_nozzle_coef"] == 0.15
-
-
-def test_define_image_parameters(background_video,target_params_dict):
-    params_dict = th.define_initial_parameters()
-    params_dict = th.define_image_parameters(background_video, params_dict)
+def test_define_image_parameters(experimental_video,target_params_dict):
+    params_dict = th.define_image_parameters(experimental_video)
     assert target_params_dict == params_dict
 
 # TODO: test save_image
@@ -83,6 +79,7 @@ class TestConvertTiffImage:
     def test_saves_correct_files(self, tmp_path, image, target_params_dict, bg_median, fixtures_folder):
         #assert saved file matches
         save_location = tmp_path
+        #save_location = os.path.join(fixtures_folder,"new")
         folders_exist = folder.make_destination_folders(save_location, self.optional_settings)
 
         th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
@@ -134,27 +131,34 @@ class TestConvertTiffImage:
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
 
-# TODO: Class
-def test_produce_background_image(background_video,bg_median):
-    params_dict = th.define_initial_parameters()
-    params_dict = th.define_image_parameters(background_video, params_dict)
-    bg_median_test = th.produce_background_image(background_video, params_dict)
-    assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
+class TestProduceBackgroundImage:
+    """
+    Tests produce_background_image.
+
+    Tests
+    -----
+
+
+    """
+
+    # TODO: docstring, comments
+
+    def test_produces_correct_background(self,target_params_dict,background_video,bg_median):
+        bg_median_test = th.produce_background_image(background_video, target_params_dict)
+        assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
 
 class TestConvertTiffSequenceToBinary:
     """
     """
-    # TODO: docstring
+    # TODO: docstring, comments
 
-    def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, videos_folder, test_sequence, target_params_dict,bg_median,bin_folder):
+    def test_convert_tiff_sequence_to_binary(self, tmp_path, fname, timecode, experimental_video, test_sequence, target_params_dict,bg_median,bin_folder):
         """This loops through an image sequence and performs convert_tiff_image on each image in the video
         """
         save_location = tmp_path
         folders_exist = folder.make_destination_folders(save_location)
-
-        experimental_sequence = skimage.io.imread_collection(os.path.join(videos_folder,fname + timecode,"*"), plugin="tifffile")
         target_converted_sequence = skimage.io.imread_collection(os.path.join(bin_folder,"*"))
-        th.convert_tiff_sequence_to_binary(experimental_sequence, bg_median, target_params_dict, save_location, folders_exist)
+        th.convert_tiff_sequence_to_binary(experimental_video, bg_median, target_params_dict, save_location, folders_exist)
         produced_converted_sequence_path = save_location / "bin" / '*'
         #convert to string for skimage.io.imread_collection
         produced_converted_sequence = skimage.io.imread_collection(str(produced_converted_sequence_path))
@@ -324,20 +328,21 @@ class TestCalculateMinDiameter:
             assert round(diameter,4) == diameters[i]
             i = i + 1
 
-class TestBinariesToRadiusTime:
+class TestBinariesToDiameterTime:
     """
-    Test binaries_to_radius_time
+    Test binaries_to_diameter_time
 
     Tests
     -----
     test_returns_df:
-        Checks if binaries_to_radius_time returns a dataframe.
+        Checks if binaries_to_diameter_time returns a dataframe.
     test_returns_correct_values:
-        Checks if binaries_to_radius_time returns correct values for given
+        Checks if binaries_to_diameter_time returns correct values for given
         test sequence
     """
 
-    params_dict = {"fps": 25000, "nozzle_diameter": 317}
+    # TODO: make this into a fixture based on target_params_dict
+    params_dict = {"fps": 25000, "nozzle_diameter": 319}
 
     @pytest.fixture
     def binary_location(self,fname,fixtures_folder):
@@ -352,13 +357,13 @@ class TestBinariesToRadiusTime:
         return [0,window_top,width,height] # window: [left, top, right, bottom]
 
     def test_returns_df(self,binary_location,window):
-        # Fails if binaries_to_radius_time does not return a dataframe.
-        assert type(binary.binaries_to_radius_time(binary_location,window,self.params_dict)) is pd.DataFrame
+        # Fails if binaries_to_diameter_time does not return a dataframe.
+        assert type(binary.binaries_to_diameter_time(binary_location,window,self.params_dict)) is pd.DataFrame
 
     def test_returns_correct_values(self,fname,test_sequence,binary_location,window):
-        # Fails if binaries_to_radius_time does not return the correct values
+        # Fails if binaries_to_diameter_time does not return the correct values
         # for the given sequence of images.
-        results = binary.binaries_to_radius_time(binary_location,window,self.params_dict)
+        results = binary.binaries_to_diameter_time(binary_location,window,self.params_dict)
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         for column in results.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()

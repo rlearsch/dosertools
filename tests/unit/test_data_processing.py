@@ -988,6 +988,7 @@ class TestBinariesToCSVs:
         Tests if binaries_to_csvs produces print statements if verbose is True.
     """
 
+    @pytest.mark.csv
     def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format):
         # Fails if binaries_to_csvs does not save csvs or if the csv is
         # incorrect.

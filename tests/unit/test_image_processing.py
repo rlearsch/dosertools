@@ -341,7 +341,8 @@ class TestBinariesToDiameterTime:
         test sequence
     """
 
-    params_dict = {"fps": 25000, "nozzle_diameter": 317}
+    # TODO: make this into a fixture based on target_params_dict
+    params_dict = {"fps": 25000, "nozzle_diameter": 319}
 
     @pytest.fixture
     def binary_location(self,fname,fixtures_folder):

@@ -6,13 +6,15 @@ import glob
 import file_handling.tags as tags
 import data_processing.integration as integration
 
-def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
+def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}) -> typing.Tuple[bool,bool,bool]:
     """
     Creates destination folders for binary files (crop and bg_sub optional)
 
     Creates the folder save_location if it does not yet exist, then within
     save_location makes the folder 'bin' (additionally 'crop' and 'bg_sub' if
-    those arguments are True). Warns if any of the folders already exist
+    those optional settings are True). Warns if any of the folders already
+    exist. Returns True for folders that exist or do not need to be created
+    because of optional_settings.
 
     Parameters
     ----------
@@ -25,11 +27,25 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
     save_bg_sub: bool, optional
         True if user wants to save intermediate background-subtracted images
         (default: False).
+
+    Returns
+    -------
+    bin_exists: bool
+        True if binary folder already exists, False if does not exist
+    crop_exists: bool
+        True if save_crop is True or crop folder already exists, False
+        otherwise
+    bg_sub_exists: bool
+        True if save_bg_sub is True or bg_sub folder already exists, False
+        otherwise
     """
 
     settings = integration.set_defaults(optional_settings)
     save_crop = settings["save_crop"]
     save_bg_sub = settings["save_bg_sub"]
+    bin_exists = False
+    crop_exists = False
+    bg_sub_exists = False
 
     if not os.path.isdir(save_location):
         # Makes outer save_location folder if it does not exist.
@@ -38,18 +54,27 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
     # Makes binary folder.
     if not make_folder(save_location,"bin"):
         warnings.warn("Binary folder already exists in" + str(save_location), UserWarning)
+        bin_exists = True
 
     # Makes crop folder.
     if save_crop:
         if not make_folder(save_location,"crop"):
             warnings.warn("Crop folder already exists" + str(save_location), UserWarning)
+            crop_exists = True
+    else:
+        # If not save_crop, returns True .
+        crop_exists = True
 
     # Makes background subtraction folder.
     if save_bg_sub:
         if not make_folder(save_location,"bg_sub"):
             warnings.warn("Background Subtraction folder already exists" + str(save_location), UserWarning)
+            bg_sub_exists = True
+    else:
+        # If not save_bg_sub, returns True.
+        bg_sub_exists = True
 
-    pass
+    return [bin_exists, crop_exists, bg_sub_exists]
 
 def make_folder(save_location: typing.Union[str, bytes, os.PathLike],folder_tag: str) -> bool:
     """

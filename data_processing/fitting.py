@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import typing
 import datetime
+import warnings
 
 from scipy.optimize import curve_fit
 from scipy.optimize import fsolve
@@ -14,7 +15,7 @@ import file_handling.folder as folder
 import file_handling.tags as tags
 import data_processing.integration as integration
 
- 
+
 def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
     """
     Finds the exponential decay of the EC region for a single dataset. Also returns the intercept and r value of the fit
@@ -56,8 +57,10 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df : pd.DataFrame
         dataframe containing lambdaE relaxation time for each run from the input df
     """
+    ## TODO: address issue raised in docstring
+
     lambdaE_df = pd.DataFrame(fitting_results_list)
-    # Construct column headers for the summary dataframe #
+    # Constructs column headers for the summary dataframe
     constant_fitting_header = ("-b","Intercept", "R","run","Rtc/R0")
     df_header = {}
     keys_list = header_params.keys()
@@ -66,7 +69,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
         df_header[i] = keys_list[i]
     for i in range(len(header_params), (len(header_params) + len(constant_fitting_header))):
         df_header[i] = constant_fitting_header[i - len(header_params)]
-        
+
     lambdaE_df = lambdaE_df.rename(columns=df_header)
     lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
     lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
@@ -83,9 +86,6 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     df : pd.DataFrame
         Contains R/R0, time, t - tc, strain rate, R(tc)/R0, etc for multiple runs and samples
         generated from data_processing.csv.generate_df
-    fitting_bounds: list, optional
-        [start, end]
-        These are the R/R0 values we look for to set the bounds for the EC region fitting
     sampleinfo_format : str
         the format of the sampleinfo section of the filename
         separated by the deliminator specified by sample_split
@@ -101,20 +101,20 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     summary_df : pd.DataFrame
         dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info
     """
-    # Initalize parameters and empty list #
+    # Initalizes parameters and empty list
     settings = integration.set_defaults(optional_settings)
     fitting_bounds = settings["fitting_bounds"]
     start = fitting_bounds[0]
     end = fitting_bounds[1]
-    
+
     fitting_results_list = []
-    
+
 
     samples = df["sample"].unique()
     for sample in samples:
-        # Grab sample info from "sample" field #
+        # Grabs sample info from "sample" field
         header_params = tags.parse_fname(sample,"sampleinfo",sampleinfo_format,optional_settings)
-        # Select individual sample from df
+        # Selects individual sample from df
         sample_dataset = df[(df["sample"] == sample)]
         run_values = sample_dataset['run'].unique()
         for run in run_values:
@@ -123,76 +123,43 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
             R_tc_R0 = run_dataset.loc[0, "Rtc/R0"]
             fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, R_tc_R0]
             fitting_results_list.append(fitting_results_temp)
-    #### Clean up the dataframe column names ###
+    #### TODO: Clean up the dataframe column names ###
     summary_df = annotate_summary_df(fitting_results_list, header_params)
     return summary_df
 
-def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
-    """
-    Saves the summary dataset from a large processed batch of videos.
-    
-    The summary dataset includes only the fluid properties, not the 'raw' radius vs time data.
-    
-    Parameters
-    ----------
-    summary_df : pd.DataFrame
-        Contains LambdaE, R(tc)/R0, and sample info for multiple runs and samples
-    save_location: path-like
-        path to folder in which to save the csv
-    filename: string
-        Currently not used, but this will be the name to give to the summary dataset csv
-    
-    Returns
-    -------
-    None. Saves file to disk.
-    """
-    
-    # right now, I'm not sure what information the computer will have about the files it's processing
-    # because of this, I'm going to use the current date and time to name this summary csv
-    # I anticipate we can come up with a better filename convention at a later time
-    # thus, the filename arguemnt is present, but unused in the function
-    
-    date_and_time = datetime.datetime.now()
-    #I don't want colons or periods in my filename string
-    date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
-    filename_string = date_time_string + '_DOS-summary.csv'
-    full_save_path = os.path.join(save_location,filename_string)
-    summary_df.to_csv(full_save_path)
-    pass
-
 def derivative_EC_fit(RtcR0: float, lambdaE: float, time: float, tc: float) -> float:
     """
-    The derivative of the elasto-capillary region.
-    
+    Calculates the derivative of the elasto-capillary region.
+
     R(t)/R0 = R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
     R'(t)/R0 = (-1/(3*LambdaE)) * R(tc)/R0 * (exp(-(t - tc)/(3*LambdaE)))
-    
+
     Parameters
     ----------
     RtcR0: float
         The normalized radius at which the transition to EC behavior occurs
-    
+
     LambdaE: float
         The relaxation time of the polymer solution
-        
+
     time: float
         the moment in time to evaluate the derivative
-    
+
     tc: float
-        the critical time for the experiment, this number is purely emperical 
+        the critical time for the experiment, this number is purely emperical
         (it depends entirely on when in the process the video starts)
-    
+
     Returns
     -------
     R'(t)/R0: float
-    
+
     """
     return RtcR0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
-def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict ={}) -> pd.DataFrame:
+def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:
     """
-    Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset. 
-     
+    Calculates the quantity (elongational viscosity / surface tension) for each moment in the DOS dataset.
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -207,29 +174,29 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
         needle_diameter_mm: float
             diameter of the needle used for the experiment, in milimeters
             Default value of 0.7176 mm is used for 22G needles
-    
+
     Returns
     ------
     dataset_w_visc : pd.DataFrame
         Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)
     """
-    
-    # calculate timestep from the first two rows of data 
+
+    # calculate timestep from the first two rows of data
     # (could also just read the value of time at position 1?)
     #timestep_s = df.loc[1, "time (s)"] - df.loc[0, "time (s)"] #units of seconds
-    
+
     #get mean relaxation time and R(tc)/R0 from summary_df for current sample
     #Calculate strain and elongational viscosity / surface tension
     #Append them to the dataframe
-    
+
     settings = integration.set_defaults(optional_settings)
     needle_diameter_mm = settings["needle_diameter_mm"]
-    
+
     df_w_visc_list = []
     mean_summary_df = summary_df.groupby("sample").mean()
     for sample in summary_df["sample"].unique():
         #subset_sample = summary_df[summary_df["sample"] == str(sample)]
-        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"] 
+        Rtc_mean = mean_summary_df.loc[sample, "Rtc/R0"]
         lambdaE_mean = mean_summary_df.loc[sample, "Lambda E (ms)"]
         #calculate elongational viscosity from original DOS data and mean values of Rtc and lambdaE
         for run in df[df["sample"] == sample]["run"].unique():
@@ -237,11 +204,11 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
             dataset = dataset[dataset["run"] == run]
             dataset['strain'] = -2*np.log(dataset['R/R0'])
             dataset=dataset.reset_index(drop=True)
-            
+
             for value in range(0,len(dataset)):
                 t_minus_tc = dataset.at[value, "t - tc (s)"]
                 t_minus_tc_ms = t_minus_tc*1000
-                # NOTE: Because we prefer the needle diameter to give the length scale, 
+                # NOTE: Because we prefer the needle diameter to give the length scale,
                 # if you use radius, you need to multiply a factor of 2 into the denominator of the following equation
                 e_visc_sigma = -1*(1/((derivative_EC_fit(Rtc_mean,lambdaE_mean,t_minus_tc_ms,0))*needle_diameter_mm))
                 # e visc / surface tension [=] -1/D'(t) = [1/(mm/ms)] = [1/(m/s)] = [s/m]
@@ -250,35 +217,147 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
     dataset_w_visc = pd.concat(df_w_visc_list)
     return dataset_w_visc
 
-def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], filename:str ='optional right now'):
+def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
     """
-    Saves the processed dataset from a large batch of videos.
-    
-    The summary dataset includes the fluid properties, the 'raw' radius vs time data, and the sampleinfo from the filename.
-    
+    Saves the summary dataset from a large processed batch of videos.
+
+    The summary dataset includes only the fluid properties, not the 'raw' radius vs time data.
+
     Parameters
     ----------
-    df : pd.DataFrame
-        Raw dataset with calculated columns for strain rate, strain, etc, and parsed sampleinfo columns
+    summary_df : pd.DataFrame
+        Contains LambdaE, R(tc)/R0, and sample info for multiple runs and samples
     save_location: path-like
         path to folder in which to save the csv
     filename: string
         Currently not used, but this will be the name to give to the summary dataset csv
-    
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            skip_existing: bool
+                Determines the behavior when a file already appears exists
+                when a function would generate it. True to skip any existing files.
+                False to overwrite (or delete and then write, where overwriting would
+                generate an error).
+                Default is True.
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+            summary_filename: string
+                The base filename (no extension) for saving the summary csvs. If not
+                provided, will be generated automatically based on the current date
+                and time.
+                Default is "" to trigger automatic generation.
+
     Returns
     -------
-    None. Saves file to disk.
+    filename_string: string
+        Filename at which the summary dataframe was saved.
+    Saves file to disk.
     """
-    
-    # right now, I'm not sure what information the computer will have about the files it's processing
-    # because of this, I'm going to use the current date and time to name this summary csv
-    # I anticipate we can come up with a better filename convention at a later time
-    # thus, the filename arguemnt is present, but unused in the function
-    
+
+    settings = integration.set_defaults(optional_settings)
+    skip_existing = settings["skip_existing"]
+    filename = settings["summary_filename"]
+    verbose = settings["verbose"]
+
     date_and_time = datetime.datetime.now()
-    #I don't want colons or periods in my filename string
-    date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
-    filename_string = date_time_string + '_DOS-annotated.csv'
+    # No colons or periods in filename string.
+    if filename == '':
+        date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
+        filename_string = date_time_string + '_DOS-summary.csv'
+    else:
+        if '_DOS-summary.csv' in filename:
+            filename_string = filename
+        elif '.csv' in filename:
+            filename_string = filename.replace('.csv','') + '_DOS-summary.csv'
+        else:
+            filename_string = filename + '_DOS-summary.csv'
     full_save_path = os.path.join(save_location,filename_string)
-    df.to_csv(full_save_path)
-    pass
+
+    # If file with given or generated filename does not exist, saves, otherwise,
+    # checks skip_existing to see if generates a warning or removes and rewrites
+    # the file.
+    saved = False
+    if os.path.exists(full_save_path):
+        if not skip_existing:
+            os.remove(full_save_path)
+            summary_df.to_csv(full_save_path)
+            saved = True
+        else:
+            warnings.warn("Summary file with given filename already exists and optional_settings skip_existing is True by default. Summary file was NOT saved. Please rerun the function with a new summary_filename specified in optional_settings or with no filename specified.", UserWarning)
+    else:
+        summary_df.to_csv(full_save_path)
+        saved = True
+    if verbose:
+        if saved:
+            print("Summary file saved successfully with name " + filename_string)
+
+    return filename_string
+
+def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
+    """
+    Saves the processed dataset from a batch of videos.
+
+    The summary dataset includes the fluid properties, the 'raw' radius vs time data, and the sampleinfo from the filename.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Raw dataset with calculated columns for strain rate, strain, etc, and parsed sampleinfo columns.
+    save_location: path-like
+        Path to folder in which to save the csv.
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            summary_filename: string, default: '', if not empty, replaces the
+                default filename generated by this function
+            skip_existing, default True; False to overwrite existing csv
+
+    Returns
+    -------
+    filename_string: string
+        Filename at which the annotated dataframe was saved.
+    Saves file to disk.
+    """
+
+    settings = integration.set_defaults(optional_settings)
+    skip_existing = settings["skip_existing"]
+    filename = settings["summary_filename"]
+    verbose = settings["verbose"]
+
+    date_and_time = datetime.datetime.now()
+    # No colons or periods in filename string.
+    if filename == '':
+        date_time_string = str(date_and_time.date()) + '_'+str(date_and_time.hour)+'-'+str(date_and_time.minute)+'-'+str(date_and_time.second)
+        filename_string = date_time_string + '_DOS-annotated.csv'
+    else:
+        if '_DOS-annotated.csv' in filename:
+            filename_string = filename
+        elif '.csv' in filename:
+            filename_string = filename.replace('.csv','') + '_DOS-annotated.csv'
+        else:
+            filename_string = filename + '_DOS-annotated.csv'
+    full_save_path = os.path.join(save_location,filename_string)
+
+    # If file with given or generated filename does not exist, save, otherwise,
+    # check skip_existing to see if generate a warning or remove and rewrite
+    # the file.
+    saved = False
+    if os.path.exists(full_save_path):
+        if not skip_existing:
+            os.remove(full_save_path)
+            df.to_csv(full_save_path)
+            saved = True
+        else:
+            warnings.warn("Annotated file with given filename already exists and optional_settings skip_existing is True by default. Annotated file was NOT saved. Please rerun the function with a new summary_filename specified in optional_settings or with no filename specified.", UserWarning)
+    else:
+        df.to_csv(full_save_path)
+        saved = True
+    if verbose:
+        if saved:
+            print("Annotated file saved successfully with name " + filename_string)
+
+    return filename_string

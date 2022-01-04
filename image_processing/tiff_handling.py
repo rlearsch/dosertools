@@ -39,16 +39,16 @@ def define_initial_parameters() -> dict:
     return params_dict
 
 
-def define_image_parameters(background_video: skimage.io.collection.ImageCollection, params_dict: dict) -> dict:
+def define_image_parameters(video: skimage.io.collection.ImageCollection, params_dict: dict) -> dict:
     """
-    From the background video, determines the first-guess for the cropping operation.
+    From the given video, determines the first-guess for the cropping operation.
 
     Based on the nozzle width and safety factors crop_width_coefficient, crop_height_coefficient, etc.
 
     Parameters
     ----------
-    background_video: skimage.io.collection.ImageCollection
-         The video identified as the background video from the researcher
+    video: skimage.io.collection.ImageCollection
+         The video containing a clear image of the nozzle, we default to the raw experimental video
     params_dict: dict
          The partial dictionary of parameters, to which we will add the crop information
 
@@ -63,7 +63,7 @@ def define_image_parameters(background_video: skimage.io.collection.ImageCollect
     crop_nozzle_coef = params_dict["crop_nozzle_coef"]
     crop_height_coefficient = params_dict["crop_height_coefficient"]
 
-    first_frame = background_video[0]
+    first_frame = video[0]
     thresh_otsu = threshold_otsu(first_frame)
     binary_otsu = first_frame < thresh_otsu
     binary_otsu = np.array(binary_otsu)*255
@@ -325,7 +325,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     experimental_sequence = skimage.io.imread_collection(os.path.join(experimental_video_folder,"*.tif"), plugin='tifffile')
     background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*.tif"), plugin='tifffile')
     folder.make_destination_folders(images_location, optional_settings)
-    params_dict = define_image_parameters(background_video, params_dict)
+    params_dict = define_image_parameters(experimental_sequence, params_dict)
     bg_median = produce_background_image(background_video, params_dict)
     convert_tiff_sequence_to_binary(experimental_sequence, bg_median, params_dict, images_location, optional_settings)
     params_dict["window_top"] = top_border(bg_median)

@@ -22,6 +22,8 @@
     * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation 
 * **Clean up** 
+    * Add +1 to nozzle diameter calculation and fix associated tests (basically all tests....)
+    * Check terminology of Radius (and R/R0) against Diameter (and D/D0)
     * fixtures folder
     * Variable, function, module naming cleanup pass
     * Comment cleanup

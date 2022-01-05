@@ -42,6 +42,7 @@
   * Image format
   * Images in non-grayscale
   * tiffs_to_binary
+  * videos_to_summaries
   * Tests noted in TODO
 
 

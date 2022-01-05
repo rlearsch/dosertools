@@ -1,6 +1,11 @@
 # Current Status, Suggestions for improvement, Outstanding questions
 
 ## Next Steps
+* Fix folder creation error
+* fix fname_format error in videos to summaries
+* elasped time unit
+* verbose folder name cut off
+
 * **Video selector**
     * identify videos that are already processed (needs testing on actual data)
     * Handling if folders/files already exists -- overwrite vs. not overwrite (needs testing on actual data)
@@ -24,6 +29,7 @@
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation
+    * Save an error log if crash occurs
 * **Clean up**
     * fixtures folder (substantially cleaned)
     * Variable, function, module naming cleanup pass

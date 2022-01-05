@@ -252,7 +252,8 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         exp_video = exp_videos[i]
         bg_video = bg_videos[i]
         img_folder = os.path.join(images_folder,fnames[i])
-        os.mkdir(img_folder)
+        if not os.path.isdir(img_folder):
+            os.mkdir(img_folder)
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
     if verbose:
         print("Finished processing videos into binaries.")

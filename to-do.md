@@ -1,8 +1,6 @@
 # Current Status, Suggestions for improvement, Outstanding questions
 
 ## Next Steps
-* Fix folder creation error
-* fix fname_format error in videos to summaries
 * elasped time unit
 * verbose folder name cut off
 

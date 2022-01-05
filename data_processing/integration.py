@@ -297,6 +297,9 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
 
+    if not os.path.isdir(csv_folder):
+        os.mkdir(csv_folder)
+
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     if verbose:
         print("Processing " + str(len(subfolders)) + " binary folders.")
@@ -385,7 +388,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     pass
 
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
@@ -480,5 +483,6 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     #### ... but it should work, right? Just need some optional breakpoints ###
 
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
-    csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
+    short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
+    csvs_to_summaries(csv_folder, summary_save_location, short_fname_format, sampleinfo_format, optional_settings)
     pass

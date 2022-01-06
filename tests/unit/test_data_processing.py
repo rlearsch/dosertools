@@ -643,16 +643,31 @@ def test_annotate_summary_df(fixtures_fitting):
     pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False)
     #pass
 
-def test_make_summary_dataframe(fixtures_fitting):
-    test_generated_df = pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
-    find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c')
-    optional_settings = {"fitting_bounds":[0.8, 0.1]}
-    find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(test_generated_df, 'MW-Polymer-c',optional_settings)
-    target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
-    target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
-    pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
-    ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
-    pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+class TestMakeSummaryDataframe:
+    """
+    """
+    # TODO: docstring, comments
+    @pytest.fixture
+    def generated_df(self,fixtures_fitting):
+        return pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
+
+    def test_default_bounds(self, fixtures_fitting, generated_df):
+        find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-c')
+        target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
+        ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
+        pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+
+    def test_modified_bounds(self, fixtures_fitting, generated_df):
+        optional_settings = {"fitting_bounds":[0.8, 0.1]}
+        find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-c',optional_settings)
+        target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
+        pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
+
+    def test_verbose(self,capfd,generated_df):
+        optional_settings = {"verbose" : True}
+        fitting.make_summary_dataframe(generated_df, 'MW-Polymer-c', optional_settings)
+        out, err = capfd.readouterr()
+        assert "Fitting Sample" in out
 
 def test_derivative_EC_fit():
     """

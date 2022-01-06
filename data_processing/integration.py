@@ -252,7 +252,8 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         exp_video = exp_videos[i]
         bg_video = bg_videos[i]
         img_folder = os.path.join(images_folder,fnames[i])
-        os.mkdir(img_folder)
+        if not os.path.isdir(img_folder):
+            os.mkdir(img_folder)
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
     if verbose:
         print("Finished processing videos into binaries.")
@@ -295,6 +296,9 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
 
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
+
+    if not os.path.isdir(csv_folder):
+        os.mkdir(csv_folder)
 
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     if verbose:
@@ -384,7 +388,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     pass
 
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
@@ -436,7 +440,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
+    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)
@@ -479,5 +483,6 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     #### ... but it should work, right? Just need some optional breakpoints ###
 
     videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
-    csvs_to_summaries(csv_folder, summary_save_location, fname_format, sampleinfo_format, optional_settings)
+    short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
+    csvs_to_summaries(csv_folder, summary_save_location, short_fname_format, sampleinfo_format, optional_settings)
     pass

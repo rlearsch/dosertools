@@ -104,6 +104,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     # Initalizes parameters and empty list
     settings = integration.set_defaults(optional_settings)
     fitting_bounds = settings["fitting_bounds"]
+    verbose = settings["verbose"]
     start = fitting_bounds[0]
     end = fitting_bounds[1]
 
@@ -118,6 +119,8 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
         sample_dataset = df[(df["sample"] == sample)]
         run_values = sample_dataset['run'].unique()
         for run in run_values:
+            if verbose:
+                print("Fitting Sample: " + str(sample) + " Run: " + str(run))
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
             Dtc_D0 = run_dataset.loc[0, "Dtc/D0"]

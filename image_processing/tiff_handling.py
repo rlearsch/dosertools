@@ -346,7 +346,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     skip_existing = settings["skip_existing"]
     image_extension = settings["image_extension"]
     verbose = settings["verbose"]
-    fname = os.path.dirname(experimental_video_folder)
+    fname = os.path.basename(experimental_video_folder)
 
     folders_exist = folder.make_destination_folders(images_location, optional_settings)
     # If all the image folders that would be saved exist and the skip_existing
@@ -370,7 +370,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         export_params(images_location, params_dict)
         toc = time.time()
         if verbose:
-            print("Elapsed: "+str(np.round((toc-tic))))
+            print("Elapsed: " + str(np.round((toc-tic))) + " seconds")
     else:
         if verbose:
             print("Folder " + fname + "skipped because all folders for processing already exist and optional_settings skip_existing is True (by default).")

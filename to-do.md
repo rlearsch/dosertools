@@ -1,6 +1,9 @@
 # Current Status, Suggestions for improvement, Outstanding questions
 
 ## Next Steps
+* elasped time unit
+* verbose folder name cut off
+
 * **Video selector**
     * identify videos that are already processed (needs testing on actual data)
     * Handling if folders/files already exists -- overwrite vs. not overwrite (needs testing on actual data)
@@ -24,6 +27,7 @@
     * Rob's/JAK's "frame shifting" idea to dial in t_c
     * Find $\eta_E$ plateau value with functional form
     * Refine $\lambda_E$ calculation
+    * Save an error log if crash occurs
 * **Clean up**
     * fixtures folder (substantially cleaned)
     * Variable, function, module naming cleanup pass
@@ -38,6 +42,7 @@
   * Image format
   * Images in non-grayscale
   * tiffs_to_binary
+  * videos_to_summaries
   * Tests noted in TODO
 
 

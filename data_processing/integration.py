@@ -440,7 +440,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
+    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)

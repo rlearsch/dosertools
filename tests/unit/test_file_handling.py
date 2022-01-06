@@ -519,34 +519,34 @@ class TestMakeDestinationFolders:
         assert os.path.isdir(destination)
         assert not bg_sub_exists
 
-    def test_warn_if_bin_exists(self,tmp_path):
-        # Fails if does not warn if binary folder already exists or if the
-        # first bool (bin_exists) is inaccurately False.
-        destination = tmp_path / "bin"
-        os.mkdir(destination)
-        with pytest.warns(UserWarning, match="Binary"):
-            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path)
-        assert bin_exists
-
-    def test_warn_if_crop_exists(self,tmp_path):
-        # Fails if does not warn if crop folder already exists or if the
-        # second bool (crop_exists) is inaccurately False..
-        destination = tmp_path / "crop"
-        os.mkdir(destination)
-        optional_settings = {"save_crop" : True}
-        with pytest.warns(UserWarning, match="Crop"):
-            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
-        assert crop_exists
-
-    def test_warn_if_bg_sub_exists(self,tmp_path):
-        # Fails if does not warn if bg_sub folder already exists or if the
-        # third bool (bg_sub_exists) is inaccurately False..
-        destination = tmp_path / "bg_sub"
-        os.mkdir(destination)
-        optional_settings = {"save_bg_sub" : True}
-        with pytest.warns(UserWarning, match="Background"):
-            [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
-        assert bg_sub_exists
+    # def test_warn_if_bin_exists(self,tmp_path):
+    #     # Fails if does not warn if binary folder already exists or if the
+    #     # first bool (bin_exists) is inaccurately False.
+    #     destination = tmp_path / "bin"
+    #     os.mkdir(destination)
+    #     with pytest.warns(UserWarning, match="Binary"):
+    #         [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path)
+    #     assert bin_exists
+    #
+    # def test_warn_if_crop_exists(self,tmp_path):
+    #     # Fails if does not warn if crop folder already exists or if the
+    #     # second bool (crop_exists) is inaccurately False..
+    #     destination = tmp_path / "crop"
+    #     os.mkdir(destination)
+    #     optional_settings = {"save_crop" : True}
+    #     with pytest.warns(UserWarning, match="Crop"):
+    #         [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
+    #     assert crop_exists
+    #
+    # def test_warn_if_bg_sub_exists(self,tmp_path):
+    #     # Fails if does not warn if bg_sub folder already exists or if the
+    #     # third bool (bg_sub_exists) is inaccurately False..
+    #     destination = tmp_path / "bg_sub"
+    #     os.mkdir(destination)
+    #     optional_settings = {"save_bg_sub" : True}
+    #     with pytest.warns(UserWarning, match="Background"):
+    #         [bin_exists, crop_exists, bg_sub_exists] = folder.make_destination_folders(tmp_path, optional_settings)
+    #     assert bg_sub_exists
 
 class TestMakeFolder:
     """

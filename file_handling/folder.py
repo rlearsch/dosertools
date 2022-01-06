@@ -41,6 +41,7 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
     """
 
     settings = integration.set_defaults(optional_settings)
+    skip_existing = settings["skip_existing"]
     save_crop = settings["save_crop"]
     save_bg_sub = settings["save_bg_sub"]
     bin_exists = False
@@ -53,13 +54,13 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
 
     # Makes binary folder.
     if not make_folder(save_location,"bin"):
-        warnings.warn("Binary folder already exists in" + str(save_location), UserWarning)
+        #warnings.warn("Binary folder already exists in" + str(save_location), UserWarning)
         bin_exists = True
 
     # Makes crop folder.
     if save_crop:
         if not make_folder(save_location,"crop"):
-            warnings.warn("Crop folder already exists" + str(save_location), UserWarning)
+            #warnings.warn("Crop folder already exists" + str(save_location), UserWarning)
             crop_exists = True
     else:
         # If not save_crop, returns True .
@@ -68,7 +69,7 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
     # Makes background subtraction folder.
     if save_bg_sub:
         if not make_folder(save_location,"bg_sub"):
-            warnings.warn("Background Subtraction folder already exists" + str(save_location), UserWarning)
+            #warnings.warn("Background Subtraction folder already exists" + str(save_location), UserWarning)
             bg_sub_exists = True
     else:
         # If not save_bg_sub, returns True.

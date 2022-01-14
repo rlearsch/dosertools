@@ -1,0 +1,7 @@
+=============
+File Handling
+=============
+
+.. automodule:: dostools.file_handling
+   :members:
+   :undoc-members:

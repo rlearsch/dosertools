@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dostools.file_handling.tags &#8212; dostools 2022 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for dostools.file_handling.tags</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">data_processing.integration</span> <span class="k">as</span> <span class="nn">integration</span>
+
+<div class="viewcode-block" id="parse_fname"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.parse_fname">[docs]</a><span class="k">def</span> <span class="nf">parse_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampleinfo_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses folder/file names into a dictonary of parameters using supplied format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname: str</span>
+<span class="sd">        The name of the file/folder to parse.</span>
+<span class="sd">        ex. &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    sampleinfo_format: str</span>
+<span class="sd">        The format of the sampleinfo section of the fname</span>
+<span class="sd">        separated by the deliminator specified by sample_split.</span>
+<span class="sd">    optional_settings: dict</span>
+<span class="sd">        A dictionary of optional settings.</span>
+<span class="sd">        Used in this function:</span>
+<span class="sd">            fname_split, default &quot;_&quot;</span>
+<span class="sd">            sample_split, default &quot;-&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    parse_fname: dict</span>
+<span class="sd">        Dictionary of parameters from fname.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="n">fname_split</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;fname_split&quot;</span><span class="p">]</span>
+    <span class="n">sample_split</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sample_split&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Split fname and format into components.</span>
+    <span class="n">name_split</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">tag_split</span> <span class="o">=</span> <span class="n">fname_format</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+
+    <span class="c1"># Initialize dictionary for outputting parameters from the fname.</span>
+    <span class="n">params_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Index in the fname_format</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_split</span><span class="p">:</span>
+        <span class="c1"># Entry in the folder name corresponding to the tag from the fname_format.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">name_split</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;fps&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="c1"># Checks if fps is formated with k to represent 1000.</span>
+            <span class="k">if</span> <span class="s2">&quot;k&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="c1"># Takes numeric part of fps and multiply by 1000 if k was used,</span>
+                <span class="c1"># i.e. 25k becomes 25000.</span>
+                <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()))</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Takes numeric part of fps only.</span>
+                <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()))</span>
+            <span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;fps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps</span>  <span class="c1"># Sets entry in parameter dictionary.</span>
+        <span class="k">elif</span> <span class="s2">&quot;run&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="c1"># Looks for run number.</span>
+            <span class="c1"># Takes numeric part of run only and sets entry in parameter dictionary.</span>
+            <span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()))</span>
+        <span class="k">elif</span> <span class="s2">&quot;sampleinfo&quot;</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="c1"># Puts full sampleinfo in sample column.</span>
+            <span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="c1"># Splits sampleinfo using the sample_split deliminator.</span>
+            <span class="n">sampleinfo_split</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sample_split</span><span class="p">)</span>
+            <span class="c1"># Splits sampleinfo_format into sample tags.</span>
+            <span class="n">sample_tag_split</span> <span class="o">=</span> <span class="n">sampleinfo_format</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sample_split</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Index in the sampleinfo tag.</span>
+            <span class="k">for</span> <span class="n">sample_tag</span> <span class="ow">in</span> <span class="n">sample_tag_split</span><span class="p">:</span>
+                <span class="c1"># Entry within sampleinfo coresponding to the sample_tag</span>
+                <span class="c1"># from the sampleinfo_format.</span>
+                <span class="n">sample_value</span> <span class="o">=</span> <span class="n">sampleinfo_split</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="c1"># Sets entry in parameter dictionary.</span>
+                <span class="n">params_dict</span><span class="p">[</span><span class="n">sample_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_value</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params_dict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># Sets entry in parameter dictionary.</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">params_dict</span></div>
+
+<div class="viewcode-block" id="identify_tag_in_fname_format"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.identify_tag_in_fname_format">[docs]</a><span class="k">def</span> <span class="nf">identify_tag_in_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identifies indices of a tag in a given fname_format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to identify in fname_format.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    identify_tag_in_fname_format: list of integers</span>
+<span class="sd">        Indices of given tag in fname_format. Empty if tag not present.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tag_split</span> <span class="o">=</span> <span class="n">fname_format</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">tag_lower</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tag_split</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">tag_given</span> <span class="ow">in</span> <span class="n">tag_lower</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tag_given</span> <span class="o">==</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">indices</span></div>
+
+<div class="viewcode-block" id="remove_tag_from_fname"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.remove_tag_from_fname">[docs]</a><span class="k">def</span> <span class="nf">remove_tag_from_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes given tag from a folder/file name.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname: str</span>
+<span class="sd">        The name of the file/folder to remove a tag from.</span>
+<span class="sd">        ex. &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to remove from fname.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    remove_tag_from_fname: str</span>
+<span class="sd">        Inputted fname with every occurence of given tag removed.</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    Returns a warning if the given tag is not present.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    fname:          &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format:   &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag:            &quot;run&quot;</span>
+<span class="sd">    result:         &quot;20210929_6M-PEO_fps-25k&quot;</span>
+
+<span class="sd">    fname:          &quot;20210929_6M-PEO_fps-25k_1_2503_2354&quot;</span>
+<span class="sd">    fname_format:   &quot;date_sampleinfo_fps_run_remove_remove&quot;</span>
+<span class="sd">    tag:            &quot;remove&quot;</span>
+<span class="sd">    result:         &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+
+<span class="sd">    fname:          &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format:   &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag:            &quot;remove&quot;</span>
+<span class="sd">    result:         &quot;20210929_6M-PEO_fps-25k_1&quot; and warning</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">identify_tag_in_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">name_split</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">name_split</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">new_fname</span> <span class="o">=</span> <span class="n">fname_split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_split</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">indices</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Tag&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;is not present in the format&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_fname</span></div>
+
+<div class="viewcode-block" id="check_fname_format_for_tag"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.check_fname_format_for_tag">[docs]</a><span class="k">def</span> <span class="nf">check_fname_format_for_tag</span><span class="p">(</span><span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if given tag is in a given fname_format string.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of a fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to check for in fname_format.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    check_fname_format_for_tag: bool</span>
+<span class="sd">        Returns True if fname_format contains tag, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tag_split</span> <span class="o">=</span> <span class="n">fname_format</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">tag_lower</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tag_split</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_lower</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="get_tag_from_fname"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.get_tag_from_fname">[docs]</a><span class="k">def</span> <span class="nf">get_tag_from_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns value(s) of given tag in fname.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname: str</span>
+<span class="sd">        The name of the file/folder to get values of a tag from.</span>
+<span class="sd">        ex. &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to get values for from fname.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    get_tag_from_fname: list of strings</span>
+<span class="sd">        List of values in fname corresponding to each occurence of given tag</span>
+<span class="sd">        in fname_format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">identify_tag_in_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">name_split</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_split</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">values</span></div>
+
+<div class="viewcode-block" id="replace_tag_in_fname"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.replace_tag_in_fname">[docs]</a><span class="k">def</span> <span class="nf">replace_tag_in_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace value(s) of given tag in fname with given value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname: str</span>
+<span class="sd">        The name of the file/folder to replace values in.</span>
+<span class="sd">        ex. &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to replace in fname.</span>
+<span class="sd">    value: str</span>
+<span class="sd">        String to use to replace value of given tag in fname.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    replace_tag_in_fname: string</span>
+<span class="sd">        Inputted fname with every occurence of the given tag replaced with given</span>
+<span class="sd">        value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">identify_tag_in_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">name_split</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">name_split</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">new_fname</span> <span class="o">=</span> <span class="n">fname_split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_split</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_fname</span></div>
+
+<div class="viewcode-block" id="insert_tag_in_fname"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.insert_tag_in_fname">[docs]</a><span class="k">def</span> <span class="nf">insert_tag_in_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Insert tag into fname with given value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname: str</span>
+<span class="sd">        The name of the file/folder to insert value in.</span>
+<span class="sd">        ex. &quot;20210929_6M-PEO_fps-25k_1&quot;</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tag: str</span>
+<span class="sd">        Tag to insert in fname.</span>
+<span class="sd">    value: str</span>
+<span class="sd">        String to insert at location of given tag in fname.</span>
+<span class="sd">    fname_split: str, optional</span>
+<span class="sd">        The deliminator for splitting the fname (default is &quot;_&quot;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    insert_tag_from_fname: list of strings</span>
+<span class="sd">        Inputted tag with given value inserted at location of given tag in</span>
+<span class="sd">        fname_format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">identify_tag_in_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">fname_split</span><span class="p">)</span>
+    <span class="n">name_split</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+        <span class="n">name_split</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="c1"># Intentionally not adapting to name_split&#39;s changing length in the</span>
+        <span class="c1"># case of multiple insertions.</span>
+    <span class="n">new_fname</span> <span class="o">=</span> <span class="n">fname_split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_split</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_fname</span></div>
+
+<div class="viewcode-block" id="shorten_fname_format"><a class="viewcode-back" href="../../../dostools.file_handling.html#dostools.file_handling.tags.shorten_fname_format">[docs]</a><span class="k">def</span> <span class="nf">shorten_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shortens the fname_format to remove the &quot;vtype&quot; and &quot;remove&quot; tags.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    optional_settings: dict</span>
+<span class="sd">        A dictionary of optional settings.</span>
+<span class="sd">        Used in this function:</span>
+<span class="sd">            fname_split, default &quot;_&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    shorten_fname_format: str</span>
+<span class="sd">        fname_format with &quot;vtype&quot; and &quot;remove&quot; tags removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="n">fname_split</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;fname_split&quot;</span><span class="p">]</span>
+
+    <span class="n">new_format</span> <span class="o">=</span> <span class="n">remove_tag_from_fname</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span><span class="n">fname_format</span><span class="p">,</span><span class="s2">&quot;vtype&quot;</span><span class="p">,</span><span class="n">fname_split</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_fname_format_for_tag</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span><span class="s2">&quot;remove&quot;</span><span class="p">,</span><span class="n">fname_split</span><span class="p">):</span>
+        <span class="n">new_format</span> <span class="o">=</span> <span class="n">remove_tag_from_fname</span><span class="p">(</span><span class="n">new_format</span><span class="p">,</span><span class="n">new_format</span><span class="p">,</span><span class="s2">&quot;remove&quot;</span><span class="p">,</span><span class="n">fname_split</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_format</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dostools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Rob Learsch and Red Lhota.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

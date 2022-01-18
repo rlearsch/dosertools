@@ -1,5 +1,7 @@
 import typing
 import os
+import multiprocessing
+import multiprocessing.pool
 
 import image_processing.tiff_handling as th
 import image_processing.binary as binary
@@ -97,6 +99,10 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         provided, will be generated automatically based on the current date
         and time.
         Default is "" to trigger automatic generation.
+    cpu_count: int
+        How many cores to use for multithreading/multiprocessing. If nothing
+        provided, default will be the maximum number of cores returned from
+        os.cpu_count()
     """
 
     settings = {}
@@ -173,7 +179,10 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["summary_filename"] = optional_settings["summary_filename"]
     except KeyError:
         settings["summary_filename"] = ""
-
+    try:
+        settings["cpu_count"] = optional_settings["cpu_count"]
+    except KeyError:
+        settings["cpu_count"] = os.cpu_count()
     return settings
 
 
@@ -238,25 +247,41 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
                 The extension for images in the video folder. TIFF recommended.
                 Default is "tif". Do not include ".".
     """
-
-    settings = set_defaults(optional_settings)
-    verbose = settings["verbose"]
-
-    fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
-    if verbose:
-        print("Processing " + str(len(fnames)) + " videos.")
-    for i in range(0,len(fnames)):
-        if verbose:
-            j = i + 1
-            print("Processing " + str(j) + "/" + str(len(fnames)) + " video.")
-        exp_video = exp_videos[i]
-        bg_video = bg_videos[i]
-        img_folder = os.path.join(images_folder,fnames[i])
+    def verbose_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings):
+        j = file_number + 1
+        print("Processing " + str(j) + "/" + str(len(fnames)) + " video.")
+        exp_video = exp_videos[file_number]
+        bg_video = bg_videos[file_number]
+        img_folder = os.path.join(images_folder,fnames[file_number])
         if not os.path.isdir(img_folder):
             os.mkdir(img_folder)
         th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
+
+    def quiet_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings):
+        exp_video = exp_videos[file_number]
+        bg_video = bg_videos[file_number]
+        img_folder = os.path.join(images_folder,fnames[file_number])
+        if not os.path.isdir(img_folder):
+            os.mkdir(img_folder)
+        th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
+    
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
+    cpu_count = settings["cpu_count"]
+    pool = multiprocessing.pool.ThreadPool(cpu_count)
+
+    fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
+
+    vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings) for file_number in range(0,len(fnames)))
     if verbose:
+        print("Processing " + str(len(fnames)) + " videos.")
+        pool.starmap(verbose_vid_to_bin, vid_to_bin_arguments)
+        pool.close()
         print("Finished processing videos into binaries.")
+    else:
+        pool.starmap(quiet_vid_to_bin, vid_to_bin_arguments)
+        pool.close()
+
     pass
 
 def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, optional_settings: dict = {}):
@@ -296,9 +321,6 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
 
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
-
-    if not os.path.isdir(csv_folder):
-        os.mkdir(csv_folder)
 
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     if verbose:
@@ -388,7 +410,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     pass
 
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
@@ -440,7 +462,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
+    df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)
@@ -482,7 +504,8 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     #### This is just a draft, I have written no tests for it...
     #### ... but it should work, right? Just need some optional breakpoints ###
 
-    videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, sampleinfo_format, optional_settings)
+    videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, optional_settings)
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, short_fname_format, sampleinfo_format, optional_settings)
     pass
+

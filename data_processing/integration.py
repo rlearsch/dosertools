@@ -268,7 +268,7 @@ def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg
     th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
     if verbose:
         toc = time.time()
-        print("Video " + str(j)+ " processed to binary.")
+        print("Video " + str(j)+ " processed to binary." +" (" +str(j) + "/" + str(len(fnames))+")")
         print("Time elapsed (videos to binaries): " + str(np.round((toc-tic))) + " seconds")
     pass
     

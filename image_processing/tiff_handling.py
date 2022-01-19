@@ -337,6 +337,9 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
                 True to save background-subtracted images (i.e. experimental video
                 images cropped and background-subtracted but not binarized).
                 Default is False.
+#    tic: time
+#        Used to measure time elapsed. The time at tic is the time 
+#        processing started. 
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location
@@ -353,7 +356,6 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     # is True, skips loading and saving images completely.
     if not all(folders_exist) or not skip_existing:
         # TODO: test image format handling
-        tic = time.time()
         if verbose:
             print("Processing folder: " + fname)
         if image_extension == "tif" or image_extension == "tiff":
@@ -369,8 +371,8 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         params_dict["window_top"] = top_border(bg_median)
         export_params(images_location, params_dict)
         toc = time.time()
-        if verbose:
-            print("Elapsed: " + str(np.round((toc-tic))) + " seconds")
+        #if verbose:
+        #    print("Total time elapsed: " + str(np.round((toc-tic))) + " seconds")
     else:
         if verbose:
             print("Folder " + fname + "skipped because all folders for processing already exist and optional_settings skip_existing is True (by default).")

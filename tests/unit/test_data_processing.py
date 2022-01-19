@@ -4,10 +4,10 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
-#import shutil
 import json
 import fnmatch
 import skimage.io
+import multiprocessing
 
 import data_processing.array as dparray
 import data_processing.csv as dpcsv
@@ -989,10 +989,11 @@ class TestVideosToBinaries:
         # Checks for expected lines in verbose output.
         out, err = capfd.readouterr()
         assert "Processing 1 videos" in out
-        assert "Processing 1/1" in out
-        assert "Processing folder" in out
-        assert "Elapsed" in out
         assert "Finished processing" in out
+        ### move to test of multiprocess_vid_to_bin ###
+        #assert "Processing 1/1" in out
+        #assert "Processing folder" in out
+        #assert "Elapsed" in out
 
 class TestBinariesToCSVs:
     """
@@ -1028,10 +1029,11 @@ class TestBinariesToCSVs:
 
         out, err = capfd.readouterr()
         print(out)
-        assert "Processing 1 binary folders" in out
-        assert "Processing 1/1 binary folder" in out
-        assert ".csv saved" in out
-        assert "Finished processing" in out
+        assert "Processing 1 binary folder" in out
+        assert "Finished processing binaries into csvs of D/D0 versus time." in out
+        # move to test of multiprocess_binaries_to_csvs
+        #assert "Time elapsed (binaries to csv):" in out
+        #assert "(1/1)" in out
 
 class TestVideosToCSVs:
     """

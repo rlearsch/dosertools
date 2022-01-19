@@ -188,7 +188,8 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["cpu_count"] = os.cpu_count()
     return settings
 
-def multiprocess_vid_to_bin(file_number: int, fnames, exp_videos, bg_videos, images_folder, optional_settings, tic):
+def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg_videos: list, images_folder: typing.Union[str, bytes, os.PathLike], tic: float, optional_settings: dict = {}):
+    
     """
     Converts videos in given folder into binary images.
 
@@ -201,21 +202,22 @@ def multiprocess_vid_to_bin(file_number: int, fnames, exp_videos, bg_videos, ima
 
     Parameters
     ----------
-    videos_folder: path-like
-        Path to a folder of experimental and background video folders.
+    file_number: int
+        Index to keep track of which folder or video we are processing
+    fnames: list of strings
+        List of base folder names for each matched pair of experimental and
+        background folders.
+    exp_videos: list of paths
+        List of paths to experimental video folders that were matched with
+        backgrounds.
+    bg_videos: list of paths
+        List of paths to background video folders matched with exp_videos.
     images_folder: path-like
         Path to a folder in which to save the results of image processing,
         binaries and optional cropped and background-subtracted images.
-    fname_format: str
-        The format of the fname with parameter names separated
-        by the deliminator specified by fname_split. Must contain the "vtype"
-        tag corresponding to experiment vs. background. Can contain "remove" to
-        remove information that is not relevant or is different between the
-        experimental and background video names and would prevent matching.
-        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
-    sampleinfo_format: str
-        The format of the sampleinfo section of the fname
-        separated by the deliminator specified by sample_split.
+    tic: float
+        Stores the time that the processing began at. Used in verbose mode
+        to determine how long processing takes. 
     optional_settings: dict
         A dictionary of optional settings.
         Used in this function:
@@ -270,8 +272,52 @@ def multiprocess_vid_to_bin(file_number: int, fnames, exp_videos, bg_videos, ima
         print("Time elapsed (videos to binaries): " + str(np.round((toc-tic))) + " seconds")
     pass
     
-def multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, optional_settings, tic):
+def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, tic: float, optional_settings: dict = {}):
+    """
+    Converts binary image folders into csvs of D/D0 vs. time.
+
+    Given a folder of folders of binary images, converts each set of binary
+    images into a csv of D/D0 vs. time, retaining information in the filename.
     
+    For multiprocessing to work properly, the function that invokes the pool
+    of processors and the function that uses them need to be defined separately.
+    Thus, this function is here, and is called in binaries_to_csvs.
+    
+    Parameters
+    ----------
+    subfolder_index: int
+        Index to keep track of which folder we are currently processing
+    subfolders: list of folders
+        List of folders that contain the binaries that this function
+        is reading to produce Diameter and time data
+    images_folder: path-like
+        Path to a folder in which the results of image processing were saved
+        (i.e. the folders of binary images).
+    csv_folder: path-like
+        Path to a folder in which to save the csv containing D/D0 vs. time.
+    short_fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split with only tags present
+        in the names of the folders in images_folder. Should have "vtype"
+        and "remove" tags removed compared to videos_to_binaries.
+        Must contain "fps" tag.
+        ex. "date_sampleinfo_fps_run"
+    tic: float
+        Stores the time that the processing began at. Used in verbose mode
+        to determine how long processing takes
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+        Used in nested functions:
+            fname_split: string
+                The deliminator for splitting folder/file names, used in fname_format.
+                Default is "_".
+    """
     
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
@@ -362,7 +408,7 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
 
-    vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings, tic) for file_number in range(0,len(fnames)))
+    vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, tic, optional_settings) for file_number in range(0,len(fnames)))
     tic = time.time()
     if verbose:
         print("Processing " + str(len(fnames)) + " videos.")
@@ -409,24 +455,24 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
                     The deliminator for splitting folder/file names, used in fname_format.
                     Default is "_".
     """
-
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
-
+    cpu_count = settings["cpu_count"]
+    pool = multiprocessing.Pool(cpu_count)
+    
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
+    bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings) for subfolder_index in range(0,len(subfolders)))
+    tic = time.time()
+    
     if verbose:
         print("Processing " + str(len(subfolders)) + " binary folders.")
-    i = 1
-    for subfolder in subfolders:
-        if verbose:
-            print("Processing " + str(i) + "/" + str(len(subfolders)) + " binary folder.")
-        params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
-        ## TODO: deal with missing fps tag
-        img_folder = os.path.join(images_folder,subfolder)
-        binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"], optional_settings)
-        i = i + 1
-    if verbose:
+        pool.starmap(multiprocess_binaries_to_csvs, bin_to_csv_arguments)
+        pool.close()
         print("Finished processing binaries into csvs of D/D0 versus time.")
+    else:
+        pool.starmap(multiprocess_binaries_to_csvs, bin_to_csv_arguments)
+        pool.close()
+
     pass
 
 def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):

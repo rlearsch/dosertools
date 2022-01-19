@@ -1,7 +1,10 @@
 import typing
 import os
+import time
 import multiprocessing
 import multiprocessing.pool
+
+import numpy as np
 
 import image_processing.tiff_handling as th
 import image_processing.binary as binary
@@ -185,13 +188,16 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["cpu_count"] = os.cpu_count()
     return settings
 
-
-def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
+def multiprocess_vid_to_bin(file_number: int, fnames, exp_videos, bg_videos, images_folder, optional_settings, tic):
     """
     Converts videos in given folder into binary images.
 
     Matches videos in videos_folder into experimental and background pairs, and
     converts those paired videos into background-subtracted binaries.
+    
+    For multiprocessing to work properly, the function that invokes the pool
+    of processors and the function that uses them need to be defined separately.
+    Thus, this function is here, and is called in videos_to_binaries.
 
     Parameters
     ----------
@@ -247,24 +253,89 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
                 The extension for images in the video folder. TIFF recommended.
                 Default is "tif". Do not include ".".
     """
-    def verbose_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings):
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
+    if verbose:
         j = file_number + 1
-        print("Processing " + str(j) + "/" + str(len(fnames)) + " video.")
-        exp_video = exp_videos[file_number]
-        bg_video = bg_videos[file_number]
-        img_folder = os.path.join(images_folder,fnames[file_number])
-        if not os.path.isdir(img_folder):
-            os.mkdir(img_folder)
-        th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
-
-    def quiet_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings):
-        exp_video = exp_videos[file_number]
-        bg_video = bg_videos[file_number]
-        img_folder = os.path.join(images_folder,fnames[file_number])
-        if not os.path.isdir(img_folder):
-            os.mkdir(img_folder)
-        th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
+        print("Processing video " + str(j) + "/" + str(len(fnames)) + ".")
+    exp_video = exp_videos[file_number]
+    bg_video = bg_videos[file_number]
+    img_folder = os.path.join(images_folder,fnames[file_number])
+    if not os.path.isdir(img_folder):
+        os.mkdir(img_folder)
+    th.tiffs_to_binary(exp_video,bg_video,img_folder,optional_settings)
+    if verbose:
+        toc = time.time()
+        print("Video " + str(j)+ " processed to binary.")
+        print("Total time elapsed: " + str(np.round((toc-tic))) + " seconds")
+    pass
     
+    
+def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
+    """
+    Converts videos in given folder into binary images.
+
+    Matches videos in videos_folder into experimental and background pairs, and
+    converts those paired videos into background-subtracted binaries.
+
+    Parameters
+    ----------
+    videos_folder: path-like
+        Path to a folder of experimental and background video folders.
+    images_folder: path-like
+        Path to a folder in which to save the results of image processing,
+        binaries and optional cropped and background-subtracted images.
+    fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split. Must contain the "vtype"
+        tag corresponding to experiment vs. background. Can contain "remove" to
+        remove information that is not relevant or is different between the
+        experimental and background video names and would prevent matching.
+        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
+    sampleinfo_format: str
+        The format of the sampleinfo section of the fname
+        separated by the deliminator specified by sample_split.
+    optional_settings: dict
+        A dictionary of optional settings.
+        Used in this function:
+            verbose: bool
+                Determines whether processing functions print statements as they
+                progress through major steps. True to see print statements, False to
+                hide non-errors/warnings.
+                Default is False.
+            cpu_count: int
+                How many cores to use for multithreading/multiprocessing. If nothing
+                provided, default will be the maximum number of cores returned from
+                os.cpu_count()        
+        Used in nested functions:
+            experiment_tag: string
+                The tag for identifying experimental videos. May be empty ("").
+                Default is "exp".
+            background_tag: string
+                The tag for identifying background videos. May not be empty.
+                Default is "bg".
+            one_background: bool
+                True to use one background for a group of experiments only differing by
+                run number. False to pair backgrounds and experiments 1:1.
+                Default is False.
+            save_crop: bool
+                True to save intermediate cropped images (i.e. experimental video
+                images cropped but not background-subtracted or binarized).
+                Default is False.
+            save_bg_sub: bool
+                True to save background-subtracted images (i.e. experimental video
+                images cropped and background-subtracted but not binarized).
+                Default is False.
+            skip_existing: bool
+                Determines the behavior when a file already appears exists
+                when a function would generate it. True to skip any existing files.
+                False to overwrite (or delete and then write, where overwriting would
+                generate an error).
+                Default is True.
+            image_extension: string
+                The extension for images in the video folder. TIFF recommended.
+                Default is "tif". Do not include ".".
+    """  
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     cpu_count = settings["cpu_count"]
@@ -272,14 +343,15 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
 
-    vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings) for file_number in range(0,len(fnames)))
+    vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, optional_settings, tic) for file_number in range(0,len(fnames)))
+    tic = time.time()
     if verbose:
         print("Processing " + str(len(fnames)) + " videos.")
-        pool.starmap(verbose_vid_to_bin, vid_to_bin_arguments)
+        pool.starmap(multiprocess_vid_to_bin, vid_to_bin_arguments)
         pool.close()
         print("Finished processing videos into binaries.")
     else:
-        pool.starmap(quiet_vid_to_bin, vid_to_bin_arguments)
+        pool.starmap(multiprocess_vid_to_bin, vid_to_bin_arguments)
         pool.close()
 
     pass

@@ -972,7 +972,11 @@ class TestVideosToBinaries:
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
-
+### 
+# If we keep multiprocessing, this test needs to be re-written. 
+# Verbose outputs have been moved and slightly rewritten to represent parallel processing. 
+# test_verbose fails as it is written now
+### 
     def test_verbose(self,tmp_path,capfd,videos_folder,bin_folder,fname,image_count,long_fname_format):
         # Fails if videos_to_binaries does not print statements for the stages
         # of video processing when verbose is True.

@@ -267,10 +267,29 @@ def multiprocess_vid_to_bin(file_number: int, fnames, exp_videos, bg_videos, ima
     if verbose:
         toc = time.time()
         print("Video " + str(j)+ " processed to binary.")
-        print("Total time elapsed: " + str(np.round((toc-tic))) + " seconds")
+        print("Time elapsed (videos to binaries): " + str(np.round((toc-tic))) + " seconds")
     pass
     
+def multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, optional_settings, tic):
     
+    
+    settings = set_defaults(optional_settings)
+    verbose = settings["verbose"]
+    subfolder = subfolders[subfolder_index]
+    if verbose:
+        print("Processing binary folder " + str(subfolder)+" ("+str(subfolder_index+1) + "/" + str(len(subfolders))+")")
+        #print("Processing binary folder " + str(subfolder))
+    params_dict = tags.parse_fname(subfolder,short_fname_format,"",optional_settings)
+    ## TODO: deal with missing fps tag
+    img_folder = os.path.join(images_folder,subfolder)
+    binary.binary_images_to_csv(img_folder,csv_folder,params_dict["fps"], optional_settings)
+    if verbose:
+        toc = time.time()
+        print("Binary video " + str(subfolder)+ " processed to csv." +" (" +str(subfolder_index+1) + "/" + str(len(subfolders))+")")
+        print("Time elapsed (binaries to csv): " + str(np.round((toc-tic))) + " seconds")
+    pass
+
+
 def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
     """
     Converts videos in given folder into binary images.

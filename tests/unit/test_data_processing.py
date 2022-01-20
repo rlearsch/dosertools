@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
+import time
 import json
 import fnmatch
 import skimage.io
@@ -995,6 +996,44 @@ class TestVideosToBinaries:
         #assert "Processing folder" in out
         #assert "Elapsed" in out
 
+class TestMultiprocessingBinToCSVs:
+    def test_multiprocessing_output(self, tmp_path,test_sequence, fname, short_fname_format):
+        images_folder = os.path.join(test_sequence, fname)
+        subfolders = [os.path.join(images_folder,"bin")]
+        subfolder_index = 0
+
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        
+        optional_settings = {"verbose" : False}
+    
+        tic = time.time()
+        integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
+        for column in test_data.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
+    
+    def test_verbose(self,tmp_path,capfd, test_sequence, fname, short_fname_format):
+        images_folder = os.path.join(test_sequence, fname)
+        subfolders = [os.path.join(images_folder,"bin")]
+
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        
+        optional_settings = {"verbose" : True}
+        subfolder_index = 0
+        
+        tic = time.time()
+        integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
+
+        out, err = capfd.readouterr()
+        print(out)
+        assert "Binary video" in out
+        assert "(1/1)" in out
+        assert "Time elapsed (binaries to csv):" in out
+
 class TestBinariesToCSVs:
     """
     Tests binaries_to_csvs
@@ -1031,10 +1070,29 @@ class TestBinariesToCSVs:
         print(out)
         assert "Processing 1 binary folder" in out
         assert "Finished processing binaries into csvs of D/D0 versus time." in out
-        # move to test of multiprocess_binaries_to_csvs
-        #assert "Time elapsed (binaries to csv):" in out
-        #assert "(1/1)" in out
-
+        
+    def test_multithreaded_faster(self,tmp_path,capfd,test_sequence,short_fname_format):
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        optional_settings = {"verbose" : False}
+        
+        tic = time.time()
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format, optional_settings)
+        toc = time.time()
+        time_max_cores = (toc-tic)
+        
+        optional_settings = {"verbose": False, "cpu_count" : 1}
+        csv_folder = tmp_path / "csv_2"
+        os.mkdir(csv_folder)
+        
+        tic = time.time()
+        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format, optional_settings)
+        toc = time.time()
+        time_1_core = (toc-tic)  
+        assert time_1_core >= time_max_cores
+        # We are only processing one set of binaries images, 
+        # The gains from multiprocessing may be small
+        
 class TestVideosToCSVs:
     """
     Tests videos_to_csvs.

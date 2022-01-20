@@ -547,7 +547,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
     pass
 
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
@@ -557,13 +557,11 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
         Path to a folder in which to find the csv containing D/D0 vs. time.
     summary_save_location: path-like
             Path to a folder in which to save the csv of the summary and the annotated datatset
-    fname_format: str
+    short_fname_format: str
         The format of the fname with parameter names separated
-        by the deliminator specified by fname_split. Must contain the "vtype"
-        tag corresponding to experiment vs. background. Can contain "remove" to
-        remove information that is not relevant or is different between the
-        experimental and background video names and would prevent matching.
-        ex. "date_sampleinfo_fps_run_vtype_remove_remove"
+        by the deliminator specified by fname_split. Format should not have "vtype" and "remove"
+        tags--csvs will not have those formatting tags still attached.
+        ex. "date_sampleinfo_fps_run"
     sampleinfo_format: str
         The format of the sampleinfo section of the fname
         separated by the deliminator specified by sample_split.
@@ -599,7 +597,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, fname_format, sampleinfo_format, optional_settings)
+    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_save_location):
         os.mkdir(summary_save_location)

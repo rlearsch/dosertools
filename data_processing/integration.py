@@ -404,7 +404,7 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     cpu_count = settings["cpu_count"]
-    pool = multiprocessing.pool.ThreadPool(cpu_count)
+    pool = multiprocessing.Pool(cpu_count)
 
     fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, fname_format, optional_settings)
 

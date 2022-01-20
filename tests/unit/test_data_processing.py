@@ -4,10 +4,11 @@ import pytest
 import numpy as np
 from datetime import datetime
 import os
-#import shutil
+import time
 import json
 import fnmatch
 import skimage.io
+import multiprocessing
 
 import data_processing.array as dparray
 import data_processing.csv as dpcsv
@@ -938,6 +939,54 @@ class TestSetDefaults:
         optional_settings = {"one_background" : True}
         settings = integration.set_defaults(optional_settings)
         assert settings["fname_split"] == "_"
+        
+class TestMultiprocessingVideoToBinary:
+    """
+    Tests
+    -----
+    test_saves_binary_files:
+        Tests if videos_to_binaries saves binary images and if those binary
+        images are correct.
+    test_verbose:
+        Tests if videos_to_binaries produces print statements if verbose is
+        True.
+    """
+    fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
+    def test_multiprocessing_output(self, tmp_path,test_sequence, videos_folder, fname, short_fname_format, image_count, bin_folder):
+        optional_settings = {"verbose" : False, "experiment_tag" : ''}
+
+        fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, self.fname_format, optional_settings)
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        tic = time.time()
+        file_number = 0
+        integration.multiprocess_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, tic, optional_settings)
+
+        for i in range(0,image_count):
+            assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
+        output_path = os.path.join(images_folder,fname,"bin","*")
+        output_sequence = skimage.io.imread_collection(str(output_path))
+        target_path = os.path.join(bin_folder,"*")
+        target_sequence = skimage.io.imread_collection(str(target_path))
+        for i in range(0,len(output_sequence)):
+            assert (np.all(target_sequence[i] == output_sequence[i]))
+    
+    def test_verbose(self,tmp_path,capfd, test_sequence, fname, short_fname_format, videos_folder):
+        
+        optional_settings = {"verbose" : True, "experiment_tag" : ''}
+
+        fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, self.fname_format, optional_settings)
+        images_folder = tmp_path / "images"
+        os.mkdir(images_folder)
+        file_number = 0
+        tic = time.time()
+        integration.multiprocess_vid_to_bin(file_number, fnames, exp_videos, bg_videos, images_folder, tic, optional_settings)
+
+        out, err = capfd.readouterr()
+        print(out)
+        assert "Processing video 1/1" in out
+        assert "Processing folder" in out
+        assert "Time elapsed (videos to binaries)" in out
 
 class TestVideosToBinaries:
     """
@@ -985,10 +1034,45 @@ class TestVideosToBinaries:
         # Checks for expected lines in verbose output.
         out, err = capfd.readouterr()
         assert "Processing 1 videos" in out
-        assert "Processing 1/1" in out
-        assert "Processing folder" in out
-        assert "Elapsed" in out
         assert "Finished processing" in out
+
+class TestMultiprocessingBinToCSVs:
+    def test_multiprocessing_output(self, tmp_path,test_sequence, fname, short_fname_format):
+
+        images_folder = test_sequence
+        subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
+        subfolder_index = 0
+
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        
+        optional_settings = {"verbose" : False}
+    
+        tic = time.time()
+        integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
+        assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
+        test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
+        results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
+        for column in test_data.columns:
+            assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
+    
+    def test_verbose(self,tmp_path,capfd, test_sequence, fname, short_fname_format):
+        images_folder = test_sequence
+        subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
+        subfolder_index = 0
+        
+        csv_folder = tmp_path / "csv"
+        os.mkdir(csv_folder)
+        
+        optional_settings = {"verbose" : True}        
+        tic = time.time()
+        integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
+
+        out, err = capfd.readouterr()
+        print(out)
+        assert "Binary video" in out
+        assert "(1/1)" in out
+        assert "Time elapsed (binaries to csv):" in out
 
 class TestBinariesToCSVs:
     """
@@ -1024,11 +1108,10 @@ class TestBinariesToCSVs:
 
         out, err = capfd.readouterr()
         print(out)
-        assert "Processing 1 binary folders" in out
-        assert "Processing 1/1 binary folder" in out
-        assert ".csv saved" in out
-        assert "Finished processing" in out
-
+        assert "Processing 1 binary folder" in out
+        assert "Finished processing binaries into csvs of D/D0 versus time." in out
+        
+        
 class TestVideosToCSVs:
     """
     Tests videos_to_csvs.
@@ -1122,7 +1205,28 @@ class TestCSVsToSummaries:
         assert "Summary" in out
         assert "Annotated" in out
 
+def test_multiprocessing_faster_than_1_core():
+    """
+    Fails if multiprocessing is not correctly sharing tasks.   
+    
+    """
+    sleep_inputs = ((0.5, 0.5, 0.5, 0.5, 0.5))
+    pool = multiprocessing.Pool(os.cpu_count())
+    tic = time.time()
+    # 5 separate pauses of 0.5 s
+    pool.map(time.sleep, sleep_inputs)
+    pool.close()
+    toc = time.time()
+    time_max_cores = (toc-tic)
 
-# TODO: Remove shutil
+    pool = multiprocessing.Pool(1)
+    tic = time.time()
+    # 5 separate pauses of 0.5 s
+    pool.map(time.sleep, sleep_inputs)
+    pool.close()
+    toc = time.time()
+    time_1_core = (toc-tic)
 
+    assert time_1_core >= time_max_cores
+    
 # TODO: TestVideosToSummaries

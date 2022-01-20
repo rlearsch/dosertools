@@ -941,7 +941,16 @@ class TestSetDefaults:
         assert settings["fname_split"] == "_"
         
 class TestMultiprocessingVideoToBinary:
-    
+    """
+    Tests
+    -----
+    test_saves_binary_files:
+        Tests if videos_to_binaries saves binary images and if those binary
+        images are correct.
+    test_verbose:
+        Tests if videos_to_binaries produces print statements if verbose is
+        True.
+    """
     fname_format = "sampleinfo_fps_substrate_run_vtype_remove_remove"
     def test_multiprocessing_output(self, tmp_path,test_sequence, videos_folder, fname, short_fname_format, image_count, bin_folder):
         optional_settings = {"verbose" : False, "experiment_tag" : ''}
@@ -978,30 +987,7 @@ class TestMultiprocessingVideoToBinary:
         assert "Processing video 1/1" in out
         assert "Processing folder" in out
         assert "Time elapsed (videos to binaries)" in out
-#    def test_multi_video_to_binary_faster(self, tmp_path,test_sequence,videos_folder):
-#        optional_settings = {}
-#        fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, self.fname_format, optional_settings)
-#        vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, tic, optional_settings) for file_number in (0,0,0,0,0,0))
-#        images_folder = tmp_path / "images_max_cores"
 
-#        pool = multiprocessing.Pool(os.cpu_count())
-#        tic = time.time()
-#        pool.starmap(integration.multiprocess_vid_to_bin, vid_to_bin_arguments)
-#        pool.close()
-#        toc = time.time()
-#        time_max_cores = (toc-tic)
-#        
-#        #optional_settings = {"verbose": False, "cpu_count" : 1}
-#        images_folder = tmp_path / "images_1_core"
-#        os.mkdir(csv_folder)
-#        pool = multiprocessing.Pool(1)
-
-#        tic = time.time()
-#        pool.starmap(integration.multiprocess_vid_to_bin, vid_to_bin_arguments)
-#        pool.close()
-#        toc = time.time()
-#        time_1_core = (toc-tic)  
-#        assert time_1_core >= time_max_cores
 class TestVideosToBinaries:
     """
     Tests videos_to_binaries.
@@ -1125,31 +1111,6 @@ class TestBinariesToCSVs:
         assert "Processing 1 binary folder" in out
         assert "Finished processing binaries into csvs of D/D0 versus time." in out
         
-#    def test_multithreaded_faster(self,tmp_path,capfd,test_sequence,short_fname_format):
-#        csv_folder = tmp_path / "csv"
-#        os.mkdir(csv_folder)
-#        optional_settings = {"verbose" : False}
-#        vid_to_bin_arguments = ((file_number, fnames, exp_videos, bg_videos, images_folder, tic, optional_settings) for file_number in (0,0,0,0,0,0))
-#        pool = multiprocessing.Pool(os.cpu_count())
-#        tic = time.time()
-#        pool.starmap(integration.multiprocess_vid_to_bin, vid_to_bin_arguments)
-#        pool.close()
-#        toc = time.time()
-#        time_max_cores = (toc-tic)
-#        
-#        optional_settings = {"verbose": False, "cpu_count" : 1}
-#        csv_folder = tmp_path / "csv_2"
-#        os.mkdir(csv_folder)
-#        pool = multiprocessing.Pool(1)
-#
-#        tic = time.time()
-#        pool.starmap(integration.multiprocess_vid_to_bin, vid_to_bin_arguments)
-#        pool.close()
-#        toc = time.time()
-#        time_1_core = (toc-tic)  
-#        assert time_1_core >= time_max_cores
-#        # We are only processing one set of binaries images, 
-#        # The gains from multiprocessing may be small
         
 class TestVideosToCSVs:
     """
@@ -1244,7 +1205,28 @@ class TestCSVsToSummaries:
         assert "Summary" in out
         assert "Annotated" in out
 
+def test_multiprocessing_faster_than_1_core():
+    """
+    Fails if multiprocessing is not correctly sharing tasks.   
+    
+    """
+    sleep_inputs = ((0.5, 0.5, 0.5, 0.5, 0.5))
+    pool = multiprocessing.Pool(os.cpu_count())
+    tic = time.time()
+    # 5 separate pauses of 0.5 s
+    pool.map(time.sleep, sleep_inputs)
+    pool.close()
+    toc = time.time()
+    time_max_cores = (toc-tic)
 
-# TODO: Remove shutil
+    pool = multiprocessing.Pool(1)
+    tic = time.time()
+    # 5 separate pauses of 0.5 s
+    pool.map(time.sleep, sleep_inputs)
+    pool.close()
+    toc = time.time()
+    time_1_core = (toc-tic)
 
+    assert time_1_core > time_max_cores
+    
 # TODO: TestVideosToSummaries

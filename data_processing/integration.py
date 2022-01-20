@@ -460,7 +460,7 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
     cpu_count = settings["cpu_count"]
     pool = multiprocessing.Pool(cpu_count)
     
-    if not os.isdir(csv_folder):
+    if not os.path.isdir(csv_folder):
         os.mkdir(csv_folder)
     
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]

@@ -1227,6 +1227,6 @@ def test_multiprocessing_faster_than_1_core():
     toc = time.time()
     time_1_core = (toc-tic)
 
-    assert time_1_core > time_max_cores
+    assert time_1_core >= time_max_cores
     
 # TODO: TestVideosToSummaries

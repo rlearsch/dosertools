@@ -77,104 +77,122 @@ nozzle_row: int
 ```
 Row to use for determining the nozzle diameter.\
 Default is 1.
->    crop_width_coefficient: float
-> 
+```bash
+crop_width_coefficient: float
+```
 Multiplied by the calculated nozzle_diameter to determine the buffer
 on either side of the observed nozzle edges to include in the cropped.\
 Default is 0.02
->    crop_height_coefficient: float
-        
+```bash
+crop_height_coefficient: float
+```      
 Multiplied by the calculated nozzle_diameter to determine the bottom
         row that will be included in the cropped image.
         Default is 2.
     
-> crop_nozzle_coefficient: float
-> 
+```bash
+crop_nozzle_coefficient: float
+```
 Multiplied by the calculated nozzle_diameter to determine the top
         row of the cropped image.\
         Default is 0.15.
     
-> fname_split: string
->
+```bash
+fname_split: string
+```
 The deliminator for splitting folder/file names, used in fname_format.\
         Default is "_".
     
-> sample_split: string
-> 
+```bash
+sample_split: string
+```
 The deliminator for splitting sampleinfo tag in folder/file names,
         used in sampleinfo_format.\
         Default is "-".
     
-> experiment_tag: string
-> 
+```bash
+experiment_tag: string
+```
   The tag for identifying experimental videos. May be empty ("").\
         Default is "exp".
     
-> background_tag: string
-> 
+```bash
+background_tag: string
+```
   The tag for identifying background videos. May not be empty.\
         Default is "bg".
     
-> one_background: bool
->
+```bash
+one_background: bool
+```
  True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.\
         Default is False.
     
-> save_crop: bool
-> 
+```bash
+save_crop: bool
+```
   True to save intermediate cropped images (i.e. experimental video
         images cropped but not background-subtracted or binarized). We view this as a troubleshooting method.\
         Default is False.
     
-> save_bg_sub: bool
-> 
+```bash
+save_bg_sub: bool
+```
   True to save background-subtracted images (i.e. experimental video
         images cropped and background-subtracted but not binarized). We view this as a troubleshooting method.\
         Default is False.
     
-> fitting_bounds: 2 element list of floats
-> 
+```bash
+fitting_bounds: 2 element list of floats
+```
   [start, end].\
         The D/D0 to bound the start and end of fitting of EC region.\
         Default is [0.1, 0.045].
     
-> tc_bounds: 2 element list of floats
-> 
+```bash
+tc_bounds: 2 element list of floats
+```
   [start, end].\
         The D/D0 to bound the start and end for finding the critical time.\
         Default is [0.3,0.07].
     
-> needle_diameter_mm: float
-> 
+```bash
+needle_diameter_mm: float
+```
   The needle outer diameter in millimeters.\
         Default is 0.7176 mm (22G needle).
-> skip_existing: bool
->
+```bash
+skip_existing: bool
+```
  Determines the behavior when a file already appears exists
         when a function would generate it. True to skip any existing files.
         False to overwrite (or delete and then write, where overwriting would
         generate an error).\
         Default is True.
     
-> verbose: bool
-> 
+```bash
+verbose: bool
+```
   Determines whether processing functions print statements as they
         progress through major steps. True to see print statements, False to
         hide non-errors/warnings.\
         Default is False.
-> image_extension: string
->
+```bash
+image_extension: string
+```
  The extension for images in the video folder. TIFF recommended.\
         Default is "tif". Do not include ".".\
-> summary_filename: string
-> 
+```bash
+summary_filename: string
+```
   The base filename (no extension) for saving the summary csvs. If not
         provided, will be generated automatically based on the current date
         and time.\
         Default is "" to trigger automatic generation.
-> cpu_count: int
-> 
+```bash
+cpu_count: int
+```
   How many cores to use for multithreading/multiprocessing. If nothing
         provided, default will be the maximum number of cores.\
         Default is os.cpu_count().

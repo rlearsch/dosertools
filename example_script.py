@@ -23,7 +23,8 @@ if __name__ == '__main__':
     videos_folder = "C:\\Users\\rlearsch\\Documents\\Photron\\PFV4\\PCOD_Samples_subset_multi"
     # See documentation (data_processing\integration.py, docstring for set_defaults)
     # for information about the optional settings
-    optional_settings = {"crop_height_coefficient" : 3, "verbose" : True}
+    optional_settings = {"crop_height_coefficient": 3, "verbose": True}
+
     # See documentation for how to use fname_format and sampleinfo_format
     # one example is below
     # folder name: 2021-03-16_RWL_0.3M-PEO-2.17wtpct-H2O_22G_shutter-60k_fps-40k_DOS-Al_5_1830_42
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     # sample info: 0.3M-PEO-2.17wtpct-H2O
     # follows this pattern, delineated by '-':
     # (molecular weight)-(polymer backbone)-(concentration)-(solvent)
-    # following these patterns when defining the variables fname_format and sampleinfo_format
+    # follow these patterns when defining the variables fname_format and sampleinfo_format
     fname_format = "date_experimenter_sampleinfo_needle_shutter_fps_substrate_run_vtype_remove_remove"
     sampleinfo_format = "MW-backbone-concentration-solvent"
 
@@ -41,6 +42,7 @@ if __name__ == '__main__':
     csv_folder = os.path.join(videos_folder, "csvs") # Path to where to save the csvs
     summary_folder = os.path.join(videos_folder, "summary") # Path to where to save the summary csvs
     ## End user edittable settings ##
+    #######################################
     ## under normal use circumstances ##
     ## do not modify code below this comment block ##
 

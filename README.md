@@ -13,20 +13,17 @@ rlearsch (at) caltech (dot) edu
 
 ## Installation
 
-<!--Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
-```bash
-pip install foobar
-```
--->
-
-dostools comes bundled with a pipfile which creates the python environment it needs to run. You will need to install
+dostools comes bundled with a pipfile which creates the python environment it needs to run. 
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pipenv. 
+You will need to install
 pipenv if your installation of python doesn't have it. You can do this by typing 
-> pip install pipenv
-
+```bash
+pip install pipenv
+````
 in your terminal, followed by 
-> pipenv install
-> 
+```bash
+pipenv install
+```
  in the terminal from your dostools directory. 
 
 See the file named "example-and-settings.md" and "example_script.py" for more information 

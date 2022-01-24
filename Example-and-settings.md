@@ -1,14 +1,14 @@
 # First time setup
 dostools comes bundled with a pipfile which creates the python environment it needs to run. You will need to install
 pipenv if your installation of python doesn't have it. You can do this by typing 
-> pip install pipenv
-
-in your terminal. 
-
-Once pipenv is installed, you can install the computational environment required for dostools by running
-> pipenv install
-
-from your dostools directory. 
+```bash
+pip install pipenv
+````
+in your terminal, followed by 
+```bash
+pipenv install
+```
+ in the terminal from your dostools directory.  
 
 # example_scripy.py
 Once this is set up, make your own copy of example_scripy.py and modify the values within. 
@@ -65,14 +65,16 @@ organize our data. You are of course welcome to change the values of these varia
 
 # Running the script
 After you've modified the important variables, you can run the script. Do this by executing
-> pipenv run python example_script.py 
-> 
+```bash
+pipenv run python example_script.py 
+```
 in the terminal from the dostools directory. 
 
 # Optional settings
 
-> nozzle_row: int 
->  
+```bash
+nozzle_row: int 
+```
 Row to use for determining the nozzle diameter.\
 Default is 1.
 >    crop_width_coefficient: float

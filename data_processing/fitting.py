@@ -124,8 +124,11 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
             Dtc_D0 = run_dataset.loc[0, "Dtc/D0"]
-            fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
-            fitting_results_list.append(fitting_results_temp)
+            try:
+                fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
+                fitting_results_list.append(fitting_results_temp)
+            except ValueError:
+                print("Error in fitting csv of Sample: " + str(sample) + " Run: " + str(run))
     #### TODO: Clean up the dataframe column names ###
     summary_df = annotate_summary_df(fitting_results_list, header_params)
     return summary_df

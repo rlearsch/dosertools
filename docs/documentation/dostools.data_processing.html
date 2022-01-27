@@ -659,12 +659,10 @@ Default is “_”.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>csv_folder</strong> (<em>path-like</em>) – Path to a folder in which to find the csv containing D/D0 vs. time.</p></li>
 <li><p><strong>summary_save_location</strong> (<em>path-like</em>) – Path to a folder in which to save the csv of the summary and the annotated datatset</p></li>
-<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
-by the deliminator specified by fname_split. Must contain the “vtype”
-tag corresponding to experiment vs. background. Can contain “remove” to
-remove information that is not relevant or is different between the
-experimental and background video names and would prevent matching.
-ex. “date_sampleinfo_fps_run_vtype_remove_remove”</p></li>
+<li><p><strong>short_fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split. Format should not have “vtype” and “remove”
+tags–csvs will not have those formatting tags still attached.
+ex. “date_sampleinfo_fps_run”</p></li>
 <li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname
 separated by the deliminator specified by sample_split.</p></li>
 <li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
@@ -694,6 +692,128 @@ Default is [0.1, 0.045].</p>
 <dt>tc_bounds: 2 element list of floats</dt><dd><p>[start, end]
 The D/D0 to bound the start and end for finding the critical time.
 Default is [0.3,0.07].</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.data_processing.integration.multiprocess_binaries_to_csvs">
+<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_binaries_to_csvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subfolder_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_binaries_to_csvs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_binaries_to_csvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts binary image folders into csvs of D/D0 vs. time.</p>
+<p>Given a folder of folders of binary images, converts each set of binary
+images into a csv of D/D0 vs. time, retaining information in the filename.</p>
+<p>For multiprocessing to work properly, the function that invokes the pool
+of processors and the function that uses them need to be defined separately.
+Thus, this function is here, and is called in binaries_to_csvs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subfolder_index</strong> (<em>int</em>) – Index to keep track of which folder we are currently processing</p></li>
+<li><p><strong>subfolders</strong> (<em>list of folders</em>) – List of folders that contain the binaries that this function
+is reading to produce Diameter and time data</p></li>
+<li><p><strong>images_folder</strong> (<em>path-like</em>) – Path to a folder in which the results of image processing were saved
+(i.e. the folders of binary images).</p></li>
+<li><p><strong>csv_folder</strong> (<em>path-like</em>) – Path to a folder in which to save the csv containing D/D0 vs. time.</p></li>
+<li><p><strong>short_fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split with only tags present
+in the names of the folders in images_folder. Should have “vtype”
+and “remove” tags removed compared to videos_to_binaries.
+Must contain “fps” tag.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tic</strong> (<em>float</em>) – Stores the time that the processing began at. Used in verbose mode
+to determine how long processing takes</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
+Used in this function:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+progress through major steps. True to see print statements, False to
+hide non-errors/warnings.
+Default is False.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Used in nested functions:</dt><dd><dl class="simple">
+<dt>fname_split: string</dt><dd><p>The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.data_processing.integration.multiprocess_vid_to_bin">
+<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_vid_to_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fnames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_vid_to_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_vid_to_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts videos in given folder into binary images.</p>
+<p>Matches videos in videos_folder into experimental and background pairs, and
+converts those paired videos into background-subtracted binaries.</p>
+<p>For multiprocessing to work properly, the function that invokes the pool
+of processors and the function that uses them need to be defined separately.
+Thus, this function is here, and is called in videos_to_binaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_number</strong> (<em>int</em>) – Index to keep track of which folder or video we are processing</p></li>
+<li><p><strong>fnames</strong> (<em>list of strings</em>) – List of base folder names for each matched pair of experimental and
+background folders.</p></li>
+<li><p><strong>exp_videos</strong> (<em>list of paths</em>) – List of paths to experimental video folders that were matched with
+backgrounds.</p></li>
+<li><p><strong>bg_videos</strong> (<em>list of paths</em>) – List of paths to background video folders matched with exp_videos.</p></li>
+<li><p><strong>images_folder</strong> (<em>path-like</em>) – Path to a folder in which to save the results of image processing,
+binaries and optional cropped and background-subtracted images.</p></li>
+<li><p><strong>tic</strong> (<em>float</em>) – Stores the time that the processing began at. Used in verbose mode
+to determine how long processing takes.</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
+Used in this function:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+progress through major steps. True to see print statements, False to
+hide non-errors/warnings.
+Default is False.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Used in nested functions:</dt><dd><dl class="simple">
+<dt>experiment_tag: string</dt><dd><p>The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p>
+</dd>
+<dt>background_tag: string</dt><dd><p>The tag for identifying background videos. May not be empty.
+Default is “bg”.</p>
+</dd>
+<dt>one_background: bool</dt><dd><p>True to use one background for a group of experiments only differing by
+run number. False to pair backgrounds and experiments 1:1.
+Default is False.</p>
+</dd>
+<dt>save_crop: bool</dt><dd><p>True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p>
+</dd>
+<dt>save_bg_sub: bool</dt><dd><p>True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p>
+</dd>
+<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+when a function would generate it. True to skip any existing files.
+False to overwrite (or delete and then write, where overwriting would
+generate an error).
+Default is True.</p>
+</dd>
+<dt>image_extension: string</dt><dd><p>The extension for images in the video folder. TIFF recommended.
+Default is “tif”. Do not include “.”.</p>
 </dd>
 </dl>
 </dd>
@@ -771,6 +891,9 @@ Default is “tif”. Do not include “.”.</p></li>
 provided, will be generated automatically based on the current date
 and time.
 Default is “” to trigger automatic generation.</p></li>
+<li><p><strong>cpu_count</strong> (<em>int</em>) – How many cores to use for multithreading/multiprocessing. If nothing
+provided, default will be the maximum number of cores returned from
+os.cpu_count()</p></li>
 </ul>
 </p>
 </dd>
@@ -805,6 +928,10 @@ Used in this function:</p>
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
 Default is False.</p>
+</dd>
+<dt>cpu_count: int</dt><dd><p>How many cores to use for multithreading/multiprocessing. If nothing
+provided, default will be the maximum number of cores returned from
+os.cpu_count()</p>
 </dd>
 </dl>
 </div></blockquote>

@@ -374,14 +374,16 @@ We prefer median because it is less sensitive to random noise and the values are
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.image_processing.tiff_handling.tiffs_to_binary">
 <span class="sig-prename descclassname"><span class="pre">dostools.image_processing.tiff_handling.</span></span><span class="sig-name descname"><span class="pre">tiffs_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimental_video_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_video_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/image_processing/tiff_handling.html#tiffs_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.tiff_handling.tiffs_to_binary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>experimental_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the experimental video to analyse.</p></li>
-<li><p><strong>background_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the background video used in analysis.</p></li>
-<li><p><strong>images_location</strong> (<em>path-like</em>) – The folder where folders of images should be saved.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
+<dd><blockquote>
+<div><p>Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory</p>
+<dl>
+<dt>experimental_video_folder: path-like</dt><dd><p>Points to the folder which contains the experimental video to analyse.</p>
+</dd>
+<dt>background_video_folder: path-like</dt><dd><p>Points to the folder which contains the background video used in analysis.</p>
+</dd>
+<dt>images_location: path-like</dt><dd><p>The folder where folders of images should be saved.</p>
+</dd>
+<dt>optional_settings: dict</dt><dd><p>A dictionary of optional settings.
 Used in this function:</p>
 <blockquote>
 <div><dl class="simple">
@@ -414,16 +416,15 @@ Default is False.</p>
 </dl>
 </dd>
 </dl>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Image sequence(s) (video) saved on the hard drive at images_location</p>
 </dd>
 </dl>
+</div></blockquote>
+<p>#    tic: time
+#        Used to measure time elapsed. The time at tic is the time
+#        processing started.</p>
+<blockquote>
+<div><p>Image sequence(s) (video) saved on the hard drive at images_location</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">

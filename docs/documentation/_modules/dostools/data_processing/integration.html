@@ -33,6 +33,11 @@
   <h1>Source code for dostools.data_processing.integration</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">multiprocessing.pool</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">image_processing.tiff_handling</span> <span class="k">as</span> <span class="nn">th</span>
 <span class="kn">import</span> <span class="nn">image_processing.binary</span> <span class="k">as</span> <span class="nn">binary</span>
@@ -130,6 +135,10 @@
 <span class="sd">        provided, will be generated automatically based on the current date</span>
 <span class="sd">        and time.</span>
 <span class="sd">        Default is &quot;&quot; to trigger automatic generation.</span>
+<span class="sd">    cpu_count: int</span>
+<span class="sd">        How many cores to use for multithreading/multiprocessing. If nothing</span>
+<span class="sd">        provided, default will be the maximum number of cores returned from</span>
+<span class="sd">        os.cpu_count()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="p">{}</span>
@@ -206,34 +215,42 @@
         <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;summary_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optional_settings</span><span class="p">[</span><span class="s2">&quot;summary_filename&quot;</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;summary_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optional_settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">settings</span></div>
 
-
-<div class="viewcode-block" id="videos_to_binaries"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.videos_to_binaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_binaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span><span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<div class="viewcode-block" id="multiprocess_vid_to_bin"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.multiprocess_vid_to_bin">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_vid_to_bin</span><span class="p">(</span><span class="n">file_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fnames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">exp_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">bg_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">tic</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+    
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts videos in given folder into binary images.</span>
 
 <span class="sd">    Matches videos in videos_folder into experimental and background pairs, and</span>
 <span class="sd">    converts those paired videos into background-subtracted binaries.</span>
+<span class="sd">    </span>
+<span class="sd">    For multiprocessing to work properly, the function that invokes the pool</span>
+<span class="sd">    of processors and the function that uses them need to be defined separately.</span>
+<span class="sd">    Thus, this function is here, and is called in videos_to_binaries.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    videos_folder: path-like</span>
-<span class="sd">        Path to a folder of experimental and background video folders.</span>
+<span class="sd">    file_number: int</span>
+<span class="sd">        Index to keep track of which folder or video we are processing</span>
+<span class="sd">    fnames: list of strings</span>
+<span class="sd">        List of base folder names for each matched pair of experimental and</span>
+<span class="sd">        background folders.</span>
+<span class="sd">    exp_videos: list of paths</span>
+<span class="sd">        List of paths to experimental video folders that were matched with</span>
+<span class="sd">        backgrounds.</span>
+<span class="sd">    bg_videos: list of paths</span>
+<span class="sd">        List of paths to background video folders matched with exp_videos.</span>
 <span class="sd">    images_folder: path-like</span>
 <span class="sd">        Path to a folder in which to save the results of image processing,</span>
 <span class="sd">        binaries and optional cropped and background-subtracted images.</span>
-<span class="sd">    fname_format: str</span>
-<span class="sd">        The format of the fname with parameter names separated</span>
-<span class="sd">        by the deliminator specified by fname_split. Must contain the &quot;vtype&quot;</span>
-<span class="sd">        tag corresponding to experiment vs. background. Can contain &quot;remove&quot; to</span>
-<span class="sd">        remove information that is not relevant or is different between the</span>
-<span class="sd">        experimental and background video names and would prevent matching.</span>
-<span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype_remove_remove&quot;</span>
-<span class="sd">    sampleinfo_format: str</span>
-<span class="sd">        The format of the sampleinfo section of the fname</span>
-<span class="sd">        separated by the deliminator specified by sample_split.</span>
+<span class="sd">    tic: float</span>
+<span class="sd">        Stores the time that the processing began at. Used in verbose mode</span>
+<span class="sd">        to determine how long processing takes. </span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
 <span class="sd">        Used in this function:</span>
@@ -271,25 +288,170 @@
 <span class="sd">                The extension for images in the video folder. TIFF recommended.</span>
 <span class="sd">                Default is &quot;tif&quot;. Do not include &quot;.&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">settings</span> <span class="o">=</span> <span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
     <span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">file_number</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing video &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">exp_video</span> <span class="o">=</span> <span class="n">exp_videos</span><span class="p">[</span><span class="n">file_number</span><span class="p">]</span>
+    <span class="n">bg_video</span> <span class="o">=</span> <span class="n">bg_videos</span><span class="p">[</span><span class="n">file_number</span><span class="p">]</span>
+    <span class="n">img_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_folder</span><span class="p">,</span><span class="n">fnames</span><span class="p">[</span><span class="n">file_number</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">img_folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">img_folder</span><span class="p">)</span>
+    <span class="n">th</span><span class="o">.</span><span class="n">tiffs_to_binary</span><span class="p">(</span><span class="n">exp_video</span><span class="p">,</span><span class="n">bg_video</span><span class="p">,</span><span class="n">img_folder</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Video &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot; processed to binary.&quot;</span> <span class="o">+</span><span class="s2">&quot; (&quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time elapsed (videos to binaries): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
+    <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="multiprocess_binaries_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.multiprocess_binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_binaries_to_csvs</span><span class="p">(</span><span class="n">subfolder_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subfolders</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">short_fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tic</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts binary image folders into csvs of D/D0 vs. time.</span>
+
+<span class="sd">    Given a folder of folders of binary images, converts each set of binary</span>
+<span class="sd">    images into a csv of D/D0 vs. time, retaining information in the filename.</span>
+<span class="sd">    </span>
+<span class="sd">    For multiprocessing to work properly, the function that invokes the pool</span>
+<span class="sd">    of processors and the function that uses them need to be defined separately.</span>
+<span class="sd">    Thus, this function is here, and is called in binaries_to_csvs.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subfolder_index: int</span>
+<span class="sd">        Index to keep track of which folder we are currently processing</span>
+<span class="sd">    subfolders: list of folders</span>
+<span class="sd">        List of folders that contain the binaries that this function</span>
+<span class="sd">        is reading to produce Diameter and time data</span>
+<span class="sd">    images_folder: path-like</span>
+<span class="sd">        Path to a folder in which the results of image processing were saved</span>
+<span class="sd">        (i.e. the folders of binary images).</span>
+<span class="sd">    csv_folder: path-like</span>
+<span class="sd">        Path to a folder in which to save the csv containing D/D0 vs. time.</span>
+<span class="sd">    short_fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split with only tags present</span>
+<span class="sd">        in the names of the folders in images_folder. Should have &quot;vtype&quot;</span>
+<span class="sd">        and &quot;remove&quot; tags removed compared to videos_to_binaries.</span>
+<span class="sd">        Must contain &quot;fps&quot; tag.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    tic: float</span>
+<span class="sd">        Stores the time that the processing began at. Used in verbose mode</span>
+<span class="sd">        to determine how long processing takes</span>
+<span class="sd">    optional_settings: dict</span>
+<span class="sd">        A dictionary of optional settings.</span>
+<span class="sd">        Used in this function:</span>
+<span class="sd">            verbose: bool</span>
+<span class="sd">                Determines whether processing functions print statements as they</span>
+<span class="sd">                progress through major steps. True to see print statements, False to</span>
+<span class="sd">                hide non-errors/warnings.</span>
+<span class="sd">                Default is False.</span>
+<span class="sd">        Used in nested functions:</span>
+<span class="sd">            fname_split: string</span>
+<span class="sd">                The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">                Default is &quot;_&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span>
+    <span class="n">subfolder</span> <span class="o">=</span> <span class="n">subfolders</span><span class="p">[</span><span class="n">subfolder_index</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing binary folder &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">subfolder</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; (&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">subfolder_index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+        <span class="c1">#print(&quot;Processing binary folder &quot; + str(subfolder))</span>
+    <span class="n">params_dict</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">parse_fname</span><span class="p">(</span><span class="n">subfolder</span><span class="p">,</span><span class="n">short_fname_format</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="c1">## TODO: deal with missing fps tag</span>
+    <span class="n">img_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_folder</span><span class="p">,</span><span class="n">subfolder</span><span class="p">)</span>
+    <span class="n">binary</span><span class="o">.</span><span class="n">binary_images_to_csv</span><span class="p">(</span><span class="n">img_folder</span><span class="p">,</span><span class="n">csv_folder</span><span class="p">,</span><span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;fps&quot;</span><span class="p">],</span> <span class="n">optional_settings</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Binary video &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">subfolder</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot; processed to csv.&quot;</span> <span class="o">+</span><span class="s2">&quot; (&quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">subfolder_index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time elapsed (binaries to csv): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="videos_to_binaries"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.videos_to_binaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_binaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span><span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts videos in given folder into binary images.</span>
+
+<span class="sd">    Matches videos in videos_folder into experimental and background pairs, and</span>
+<span class="sd">    converts those paired videos into background-subtracted binaries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    videos_folder: path-like</span>
+<span class="sd">        Path to a folder of experimental and background video folders.</span>
+<span class="sd">    images_folder: path-like</span>
+<span class="sd">        Path to a folder in which to save the results of image processing,</span>
+<span class="sd">        binaries and optional cropped and background-subtracted images.</span>
+<span class="sd">    fname_format: str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split. Must contain the &quot;vtype&quot;</span>
+<span class="sd">        tag corresponding to experiment vs. background. Can contain &quot;remove&quot; to</span>
+<span class="sd">        remove information that is not relevant or is different between the</span>
+<span class="sd">        experimental and background video names and would prevent matching.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype_remove_remove&quot;</span>
+<span class="sd">    sampleinfo_format: str</span>
+<span class="sd">        The format of the sampleinfo section of the fname</span>
+<span class="sd">        separated by the deliminator specified by sample_split.</span>
+<span class="sd">    optional_settings: dict</span>
+<span class="sd">        A dictionary of optional settings.</span>
+<span class="sd">        Used in this function:</span>
+<span class="sd">            verbose: bool</span>
+<span class="sd">                Determines whether processing functions print statements as they</span>
+<span class="sd">                progress through major steps. True to see print statements, False to</span>
+<span class="sd">                hide non-errors/warnings.</span>
+<span class="sd">                Default is False.</span>
+<span class="sd">            cpu_count: int</span>
+<span class="sd">                How many cores to use for multithreading/multiprocessing. If nothing</span>
+<span class="sd">                provided, default will be the maximum number of cores returned from</span>
+<span class="sd">                os.cpu_count()        </span>
+<span class="sd">        Used in nested functions:</span>
+<span class="sd">            experiment_tag: string</span>
+<span class="sd">                The tag for identifying experimental videos. May be empty (&quot;&quot;).</span>
+<span class="sd">                Default is &quot;exp&quot;.</span>
+<span class="sd">            background_tag: string</span>
+<span class="sd">                The tag for identifying background videos. May not be empty.</span>
+<span class="sd">                Default is &quot;bg&quot;.</span>
+<span class="sd">            one_background: bool</span>
+<span class="sd">                True to use one background for a group of experiments only differing by</span>
+<span class="sd">                run number. False to pair backgrounds and experiments 1:1.</span>
+<span class="sd">                Default is False.</span>
+<span class="sd">            save_crop: bool</span>
+<span class="sd">                True to save intermediate cropped images (i.e. experimental video</span>
+<span class="sd">                images cropped but not background-subtracted or binarized).</span>
+<span class="sd">                Default is False.</span>
+<span class="sd">            save_bg_sub: bool</span>
+<span class="sd">                True to save background-subtracted images (i.e. experimental video</span>
+<span class="sd">                images cropped and background-subtracted but not binarized).</span>
+<span class="sd">                Default is False.</span>
+<span class="sd">            skip_existing: bool</span>
+<span class="sd">                Determines the behavior when a file already appears exists</span>
+<span class="sd">                when a function would generate it. True to skip any existing files.</span>
+<span class="sd">                False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">                generate an error).</span>
+<span class="sd">                Default is True.</span>
+<span class="sd">            image_extension: string</span>
+<span class="sd">                The extension for images in the video folder. TIFF recommended.</span>
+<span class="sd">                Default is &quot;tif&quot;. Do not include &quot;.&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span>
+    <span class="n">cpu_count</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">cpu_count</span><span class="p">)</span>
 
     <span class="n">fnames</span><span class="p">,</span> <span class="n">exp_videos</span><span class="p">,</span> <span class="n">bg_videos</span> <span class="o">=</span> <span class="n">folder</span><span class="o">.</span><span class="n">select_video_folders</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
+
+    <span class="n">vid_to_bin_arguments</span> <span class="o">=</span> <span class="p">((</span><span class="n">file_number</span><span class="p">,</span> <span class="n">fnames</span><span class="p">,</span> <span class="n">exp_videos</span><span class="p">,</span> <span class="n">bg_videos</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">,</span> <span class="n">tic</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">file_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">)))</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; videos.&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fnames</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; video.&quot;</span><span class="p">)</span>
-        <span class="n">exp_video</span> <span class="o">=</span> <span class="n">exp_videos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">bg_video</span> <span class="o">=</span> <span class="n">bg_videos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">img_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_folder</span><span class="p">,</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">img_folder</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">img_folder</span><span class="p">)</span>
-        <span class="n">th</span><span class="o">.</span><span class="n">tiffs_to_binary</span><span class="p">(</span><span class="n">exp_video</span><span class="p">,</span><span class="n">bg_video</span><span class="p">,</span><span class="n">img_folder</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">multiprocess_vid_to_bin</span><span class="p">,</span> <span class="n">vid_to_bin_arguments</span><span class="p">)</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finished processing videos into binaries.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">multiprocess_vid_to_bin</span><span class="p">,</span> <span class="n">vid_to_bin_arguments</span><span class="p">)</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
     <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="binaries_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">binaries_to_csvs</span><span class="p">(</span><span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">short_fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -326,27 +488,27 @@
 <span class="sd">                    The deliminator for splitting folder/file names, used in fname_format.</span>
 <span class="sd">                    Default is &quot;_&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">settings</span> <span class="o">=</span> <span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
     <span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span>
-
+    <span class="n">cpu_count</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">cpu_count</span><span class="p">)</span>
+    
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">)</span>
-
+    
     <span class="n">subfolders</span> <span class="o">=</span> <span class="p">[</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">images_folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span>
+    <span class="n">bin_to_csv_arguments</span> <span class="o">=</span> <span class="p">((</span><span class="n">subfolder_index</span><span class="p">,</span> <span class="n">subfolders</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">,</span> <span class="n">csv_folder</span><span class="p">,</span> <span class="n">short_fname_format</span><span class="p">,</span> <span class="n">tic</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">subfolder_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders</span><span class="p">)))</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; binary folders.&quot;</span><span class="p">)</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="n">subfolder</span> <span class="ow">in</span> <span class="n">subfolders</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; binary folder.&quot;</span><span class="p">)</span>
-        <span class="n">params_dict</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">parse_fname</span><span class="p">(</span><span class="n">subfolder</span><span class="p">,</span><span class="n">short_fname_format</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
-        <span class="c1">## TODO: deal with missing fps tag</span>
-        <span class="n">img_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_folder</span><span class="p">,</span><span class="n">subfolder</span><span class="p">)</span>
-        <span class="n">binary</span><span class="o">.</span><span class="n">binary_images_to_csv</span><span class="p">(</span><span class="n">img_folder</span><span class="p">,</span><span class="n">csv_folder</span><span class="p">,</span><span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;fps&quot;</span><span class="p">],</span> <span class="n">optional_settings</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">multiprocess_binaries_to_csvs</span><span class="p">,</span> <span class="n">bin_to_csv_arguments</span><span class="p">)</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finished processing binaries into csvs of D/D0 versus time.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">multiprocess_binaries_to_csvs</span><span class="p">,</span> <span class="n">bin_to_csv_arguments</span><span class="p">)</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
     <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="videos_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.integration.videos_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">videos_to_csvs</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -431,13 +593,11 @@
 <span class="sd">        Path to a folder in which to find the csv containing D/D0 vs. time.</span>
 <span class="sd">    summary_save_location: path-like</span>
 <span class="sd">            Path to a folder in which to save the csv of the summary and the annotated datatset</span>
-<span class="sd">    fname_format: str</span>
+<span class="sd">    short_fname_format: str</span>
 <span class="sd">        The format of the fname with parameter names separated</span>
-<span class="sd">        by the deliminator specified by fname_split. Must contain the &quot;vtype&quot;</span>
-<span class="sd">        tag corresponding to experiment vs. background. Can contain &quot;remove&quot; to</span>
-<span class="sd">        remove information that is not relevant or is different between the</span>
-<span class="sd">        experimental and background video names and would prevent matching.</span>
-<span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype_remove_remove&quot;</span>
+<span class="sd">        by the deliminator specified by fname_split. Format should not have &quot;vtype&quot; and &quot;remove&quot;</span>
+<span class="sd">        tags--csvs will not have those formatting tags still attached.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
 <span class="sd">    sampleinfo_format: str</span>
 <span class="sd">        The format of the sampleinfo section of the fname</span>
 <span class="sd">        separated by the deliminator specified by sample_split.</span>
@@ -515,10 +675,11 @@
     <span class="c1">#### This is just a draft, I have written no tests for it...</span>
     <span class="c1">#### ... but it should work, right? Just need some optional breakpoints ###</span>
 
-    <span class="n">videos_to_csvs</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">,</span> <span class="n">csv_folder</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">,</span> <span class="n">sampleinfo_format</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
+    <span class="n">videos_to_csvs</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">,</span> <span class="n">images_folder</span><span class="p">,</span> <span class="n">csv_folder</span><span class="p">,</span> <span class="n">fname_format</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
     <span class="n">short_fname_format</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">shorten_fname_format</span><span class="p">(</span><span class="n">fname_format</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
     <span class="n">csvs_to_summaries</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">,</span> <span class="n">summary_save_location</span><span class="p">,</span> <span class="n">short_fname_format</span><span class="p">,</span> <span class="n">sampleinfo_format</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
     <span class="k">pass</span></div>
+
 </pre></div>
 
           </div>

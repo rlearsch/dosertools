@@ -370,6 +370,9 @@
 <span class="sd">                True to save background-subtracted images (i.e. experimental video</span>
 <span class="sd">                images cropped and background-subtracted but not binarized).</span>
 <span class="sd">                Default is False.</span>
+<span class="sd">#    tic: time</span>
+<span class="sd">#        Used to measure time elapsed. The time at tic is the time </span>
+<span class="sd">#        processing started. </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Image sequence(s) (video) saved on the hard drive at images_location</span>
@@ -386,7 +389,6 @@
     <span class="c1"># is True, skips loading and saving images completely.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">folders_exist</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">skip_existing</span><span class="p">:</span>
         <span class="c1"># TODO: test image format handling</span>
-        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing folder: &quot;</span> <span class="o">+</span> <span class="n">fname</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">image_extension</span> <span class="o">==</span> <span class="s2">&quot;tif&quot;</span> <span class="ow">or</span> <span class="n">image_extension</span> <span class="o">==</span> <span class="s2">&quot;tiff&quot;</span><span class="p">:</span>
@@ -402,8 +404,8 @@
         <span class="n">params_dict</span><span class="p">[</span><span class="s2">&quot;window_top&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_border</span><span class="p">(</span><span class="n">bg_median</span><span class="p">)</span>
         <span class="n">export_params</span><span class="p">(</span><span class="n">images_location</span><span class="p">,</span> <span class="n">params_dict</span><span class="p">)</span>
         <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Elapsed: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
+        <span class="c1">#if verbose:</span>
+        <span class="c1">#    print(&quot;Total time elapsed: &quot; + str(np.round((toc-tic))) + &quot; seconds&quot;)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Folder &quot;</span> <span class="o">+</span> <span class="n">fname</span> <span class="o">+</span> <span class="s2">&quot;skipped because all folders for processing already exist and optional_settings skip_existing is True (by default).&quot;</span><span class="p">)</span>

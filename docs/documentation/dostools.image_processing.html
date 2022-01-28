@@ -50,10 +50,7 @@
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>add_saved_params_to_dict</strong> – dictionary containing parameters from csv and from existing dictionary</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-even"><p><strong>add_saved_params_to_dict</strong> (<em>dict</em>) – dictionary containing parameters from csv and from existing dictionary</p>
 </dd>
 </dl>
 </dd></dl>
@@ -74,17 +71,14 @@ requires parameters nozzle_diameter and fps</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>binary_to_diameter_time</strong> – dataframe of time and D/D0 from the binary images</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>binary_to_diameter_time</strong> (<em>pd.DataFrame</em>) – dataframe of time and D/D0 from the binary images</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.image_processing.binary.binary_images_to_csv">
-<span class="sig-prename descclassname"><span class="pre">dostools.image_processing.binary.</span></span><span class="sig-name descname"><span class="pre">binary_images_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/image_processing/binary.html#binary_images_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.binary.binary_images_to_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dostools.image_processing.binary.</span></span><span class="sig-name descname"><span class="pre">binary_images_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dostools/image_processing/binary.html#binary_images_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.binary.binary_images_to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts from binary images to csv of normalized diameter versus time</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -92,19 +86,21 @@ requires parameters nozzle_diameter and fps</p></li>
 <li><p><strong>save_location</strong> (<em>path-like</em>) – The path to the folder that contains “bin” folder of binary images and
 csv of parameter metadata, should be named with relevent experimental
 information. Save location used in tiff_handling functions.
-ex. folder of “20210929_6M-PEO-0p01wtpt_fps25k_1”</p></li>
+ex. folder named “20210929_6M-PEO-0p01wtpt_fps25k_1”</p></li>
 <li><p><strong>csv_location</strong> (<em>path-like</em>) – The path to the folder in which csv should be saved.</p></li>
 <li><p><strong>fps</strong> (<em>float</em>) – Frames per second for the video (likely parsed from file name)</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>skip_existing, default True; False to overwrite existing csv</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>None. Saves file to disk.</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
+when a function would generate it. True to skip any existing files.
+False to overwrite (or delete and then write, where overwriting would
+generate an error).
+Default is True.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>Saved csv on disk.</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -123,11 +119,8 @@ of white pixels.</p>
 section to analyze</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>bottom_border</strong> – Index of last row to include in analysis, chosen as row with the most
+<dd class="field-even"><p><strong>bottom_border</strong> (<em>int</em>) – Index of last row to include in analysis, chosen as row with the most
 white pixels in the binary below the bottom half of the image</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -154,10 +147,7 @@ bottom will be replaced with the result of bottom_border(image)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>min_diameter</strong> – minimum diameter measured for the image in the window</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-even"><p><strong>min_diameter</strong> (<em>float</em>) – minimum diameter measured for the image in the window</p>
 </dd>
 </dl>
 </dd></dl>
@@ -167,9 +157,10 @@ bottom will be replaced with the result of bottom_border(image)</p></li>
 <span id="dostools-image-processing-tiff-handling-module"></span><h2>dostools.image_processing.tiff_handling module<a class="headerlink" href="#module-dostools.image_processing.tiff_handling" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.image_processing.tiff_handling.convert_tiff_image">
-<span class="sig-prename descclassname"><span class="pre">dostools.image_processing.tiff_handling.</span></span><span class="sig-name descname"><span class="pre">convert_tiff_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_median</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folders_exist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/image_processing/tiff_handling.html#convert_tiff_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.tiff_handling.convert_tiff_image" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dostools.image_processing.tiff_handling.</span></span><span class="sig-name descname"><span class="pre">convert_tiff_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_median</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folders_exist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dostools/image_processing/tiff_handling.html#convert_tiff_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.tiff_handling.convert_tiff_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fully converts a raw tiff to binary png image.</p>
-<p>Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps</p>
+<p>Crops, perforns background subtraction, and binarizies. Always saves the
+binarized image as a .png, optional to save the intermediate steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -190,8 +181,8 @@ skip_existing, default True; False to overwrite existing images</p>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Image sequence (video) saved on the hard drive at save_location</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Image sequence (video) saved on the hard drive at save_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -220,8 +211,8 @@ save_bg_sub, default False; True to save the background-subtracted image</p>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Image(s) saved locally in save_location</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Image(s) saved locally in save_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -238,10 +229,7 @@ save_bg_sub, default False; True to save the background-subtracted image</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>cropped_image</strong> – The input image, cropped according to values in parameters dictionary</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-even"><p><strong>cropped_image</strong> (<em>np.ndarray</em>) – The input image, cropped according to values in parameters dictionary</p>
 </dd>
 </dl>
 </dd></dl>
@@ -259,10 +247,7 @@ save_bg_sub, default False; True to save the background-subtracted image</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>params_dict</strong> – Dictionary of parameters with the crop information added</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-even"><p><strong>params_dict</strong> (<em>dict</em>) – Dictionary of parameters with the crop information added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -290,10 +275,7 @@ save_bg_sub, default False; True to save the background-subtracted image</p>
 <dd class="field-odd"><p><strong>background_subtracted_image</strong> (<em>np.ndarray</em>) – The cropped image with the background subtraction performed</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>binary_otsu</strong> – The binarized version of the input image</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-even"><p><strong>binary_otsu</strong> (<em>np.ndarray</em>) – The binarized version of the input image</p>
 </dd>
 </dl>
 </dd></dl>
@@ -310,11 +292,8 @@ save_bg_sub, default False; True to save the background-subtracted image</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>bg_median</strong> – The median of the frames in the background.
+<dd class="field-even"><p><strong>bg_median</strong> (<em>np.ndarray</em>) – The median of the frames in the background.
 We prefer median because it is less sensitive to random noise and the values are likely to be integers</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -332,8 +311,8 @@ We prefer median because it is less sensitive to random noise and the values are
 <li><p><strong>extension</strong> (<em>str</em>) – The file extension, eg, .tiff, .png</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Image saved on the hard drive at save_location</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Image saved on the hard drive at save_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -351,10 +330,7 @@ We prefer median because it is less sensitive to random noise and the values are
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>background_subtracted_image</strong> – The cropped image with the background subtraction performed</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-even"><p><strong>background_subtracted_image</strong> (<em>np.ndarray</em>) – The cropped image with the background subtraction performed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -362,16 +338,18 @@ We prefer median because it is less sensitive to random noise and the values are
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.image_processing.tiff_handling.tiffs_to_binary">
 <span class="sig-prename descclassname"><span class="pre">dostools.image_processing.tiff_handling.</span></span><span class="sig-name descname"><span class="pre">tiffs_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimental_video_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_video_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/image_processing/tiff_handling.html#tiffs_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.image_processing.tiff_handling.tiffs_to_binary" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory</p>
-<dl>
-<dt>experimental_video_folder: path-like</dt><dd><p>Points to the folder which contains the experimental video to analyse.</p>
-</dd>
-<dt>background_video_folder: path-like</dt><dd><p>Points to the folder which contains the background video used in analysis.</p>
-</dd>
-<dt>images_location: path-like</dt><dd><p>The folder where folders of images should be saved.</p>
-</dd>
-<dt>optional_settings: dict</dt><dd><p>A dictionary of optional settings.
+<dd><p>Processes experimental and background video into binarized video.</p>
+<p>Given a experimental video folder and a background video folder, processes
+the videos into a folder of binarized images in the target directory.
+Can also produce cropped and background subtracted images given optional
+settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experimental_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the experimental video to analyse.</p></li>
+<li><p><strong>background_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the background video used in analysis.</p></li>
+<li><p><strong>images_location</strong> (<em>path-like</em>) – The folder where folders of images should be saved.</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
 Used in this function:</p>
 <blockquote>
 <div><dl class="simple">
@@ -404,15 +382,13 @@ Default is False.</p>
 </dl>
 </dd>
 </dl>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Image sequence(s) (video) saved on the hard drive at images_location</em></p>
 </dd>
 </dl>
-</div></blockquote>
-<p>#    tic: time
-#        Used to measure time elapsed. The time at tic is the time
-#        processing started.</p>
-<blockquote>
-<div><p>Image sequence(s) (video) saved on the hard drive at images_location</p>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -426,10 +402,7 @@ border in further image analysis.</p>
 <dd class="field-odd"><p><strong>bg_median</strong> (<em>np.ndarray</em>) – Background image corresponding to a particular run.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>top_border</strong> – Last row of the nozzle.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-even"><p><strong>top_border</strong> (<em>int</em>) – Last row of the nozzle.</p>
 </dd>
 </dl>
 </dd></dl>

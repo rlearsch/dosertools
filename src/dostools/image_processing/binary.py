@@ -188,7 +188,7 @@ def binaries_to_diameter_time(binary_location: typing.Union[str, bytes, os.PathL
 
     ## TODO: errors if missing parameters
 
-def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float, optional_settings: dict = {}):
+def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike], csv_location: typing.Union[str, bytes, os.PathLike], fps: float, optional_settings: dict = {}) -> None:
     """
     Converts from binary images to csv of normalized diameter versus time
 
@@ -198,19 +198,26 @@ def binary_images_to_csv(images_location: typing.Union[str, bytes, os.PathLike],
         The path to the folder that contains "bin" folder of binary images and
         csv of parameter metadata, should be named with relevent experimental
         information. Save location used in tiff_handling functions.
-        ex. folder of "20210929_6M-PEO-0p01wtpt_fps25k_1"
+        ex. folder named "20210929_6M-PEO-0p01wtpt_fps25k_1"
     csv_location: path-like
         The path to the folder in which csv should be saved.
     fps: float
         Frames per second for the video (likely parsed from file name)
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            skip_existing, default True; False to overwrite existing csv
+
+    Optional Settings and Defaults
+    ------------------------------
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
 
     Returns
-    ------
-    None. Saves file to disk.
+    -------
+    Saved csv on disk.
     """
 
     settings = integration.set_defaults(optional_settings)

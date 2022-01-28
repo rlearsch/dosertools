@@ -163,6 +163,7 @@ def add_critical_time(dataset : pd.DataFrame, optional_settings: dict = {}) -> p
     add_critical_time : pd.DataFrame
         dataset with "tc", "t - tc (s)", and "Dtc/D0" columns added
     """
+
     settings = integration.set_defaults(optional_settings)
     tc_bounds = settings["tc_bounds"]
 

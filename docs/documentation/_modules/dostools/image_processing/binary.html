@@ -221,7 +221,7 @@
 
     <span class="c1">## TODO: errors if missing parameters</span>
 
-<div class="viewcode-block" id="binary_images_to_csv"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.binary.binary_images_to_csv">[docs]</a><span class="k">def</span> <span class="nf">binary_images_to_csv</span><span class="p">(</span><span class="n">images_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">csv_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<div class="viewcode-block" id="binary_images_to_csv"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.binary.binary_images_to_csv">[docs]</a><span class="k">def</span> <span class="nf">binary_images_to_csv</span><span class="p">(</span><span class="n">images_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">csv_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts from binary images to csv of normalized diameter versus time</span>
 
@@ -231,19 +231,26 @@
 <span class="sd">        The path to the folder that contains &quot;bin&quot; folder of binary images and</span>
 <span class="sd">        csv of parameter metadata, should be named with relevent experimental</span>
 <span class="sd">        information. Save location used in tiff_handling functions.</span>
-<span class="sd">        ex. folder of &quot;20210929_6M-PEO-0p01wtpt_fps25k_1&quot;</span>
+<span class="sd">        ex. folder named &quot;20210929_6M-PEO-0p01wtpt_fps25k_1&quot;</span>
 <span class="sd">    csv_location: path-like</span>
 <span class="sd">        The path to the folder in which csv should be saved.</span>
 <span class="sd">    fps: float</span>
 <span class="sd">        Frames per second for the video (likely parsed from file name)</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            skip_existing, default True; False to overwrite existing csv</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    skip_existing: bool</span>
+<span class="sd">        Determines the behavior when a file already appears exists</span>
+<span class="sd">        when a function would generate it. True to skip any existing files.</span>
+<span class="sd">        False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">        generate an error).</span>
+<span class="sd">        Default is True.</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">    ------</span>
-<span class="sd">    None. Saves file to disk.</span>
+<span class="sd">    -------</span>
+<span class="sd">    Saved csv on disk.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -346,7 +353,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

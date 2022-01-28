@@ -50,7 +50,6 @@
 <span class="kn">import</span> <span class="nn">data_processing.integration</span> <span class="k">as</span> <span class="nn">integration</span>
 
 <div class="viewcode-block" id="define_image_parameters"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.tiff_handling.define_image_parameters">[docs]</a><span class="k">def</span> <span class="nf">define_image_parameters</span><span class="p">(</span><span class="n">video</span><span class="p">:</span> <span class="n">skimage</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">ImageCollection</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    From the given video, determines the first-guess for the cropping operation.</span>
 
@@ -129,11 +128,12 @@
     <span class="n">skimage</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">full_filename</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">check_contrast</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="convert_tiff_image"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.tiff_handling.convert_tiff_image">[docs]</a><span class="k">def</span> <span class="nf">convert_tiff_image</span><span class="p">(</span><span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bg_median</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">params_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">image_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">images_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">folders_exist</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span><span class="nb">bool</span><span class="p">,</span><span class="nb">bool</span><span class="p">],</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<div class="viewcode-block" id="convert_tiff_image"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.tiff_handling.convert_tiff_image">[docs]</a><span class="k">def</span> <span class="nf">convert_tiff_image</span><span class="p">(</span><span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bg_median</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">params_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">image_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">images_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">folders_exist</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span><span class="nb">bool</span><span class="p">,</span><span class="nb">bool</span><span class="p">],</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fully converts a raw tiff to binary png image.</span>
 
-<span class="sd">    Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps</span>
+<span class="sd">    Crops, perforns background subtraction, and binarizies. Always saves the</span>
+<span class="sd">    binarized image as a .png, optional to save the intermediate steps.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -157,8 +157,9 @@
 <span class="sd">            skip_existing, default True; False to overwrite existing images</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">    -------</span>
+<span class="sd">    ------</span>
 <span class="sd">    Image sequence (video) saved on the hard drive at save_location</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -334,7 +335,13 @@
 
 <div class="viewcode-block" id="tiffs_to_binary"><a class="viewcode-back" href="../../../dostools.image_processing.html#dostools.image_processing.tiff_handling.tiffs_to_binary">[docs]</a><span class="k">def</span> <span class="nf">tiffs_to_binary</span><span class="p">(</span><span class="n">experimental_video_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">background_video_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">images_location</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory</span>
+
+<span class="sd">    Processes experimental and background video into binarized video.</span>
+
+<span class="sd">    Given a experimental video folder and a background video folder, processes</span>
+<span class="sd">    the videos into a folder of binarized images in the target directory.</span>
+<span class="sd">    Can also produce cropped and background subtracted images given optional</span>
+<span class="sd">    settings.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -370,12 +377,11 @@
 <span class="sd">                True to save background-subtracted images (i.e. experimental video</span>
 <span class="sd">                images cropped and background-subtracted but not binarized).</span>
 <span class="sd">                Default is False.</span>
-<span class="sd">#    tic: time</span>
-<span class="sd">#        Used to measure time elapsed. The time at tic is the time </span>
-<span class="sd">#        processing started. </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Image sequence(s) (video) saved on the hard drive at images_location</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -516,7 +522,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

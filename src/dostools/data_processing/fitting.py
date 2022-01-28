@@ -101,6 +101,7 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
     summary_df : pd.DataFrame
         dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info
     """
+
     # Initalizes parameters and empty list
     settings = integration.set_defaults(optional_settings)
     fitting_bounds = settings["fitting_bounds"]
@@ -157,6 +158,7 @@ def derivative_EC_fit(Dtc_D0: float, lambdaE: float, time: float, tc: float) -> 
     D'(t)/D0: float
 
     """
+    
     return Dtc_D0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:

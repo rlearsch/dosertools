@@ -6,6 +6,7 @@ Welcome to dostools's documentation!
    :caption: Contents:
 
    usage/installation
+   modules
 
 
 Indices and tables

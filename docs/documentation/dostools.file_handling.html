@@ -15,6 +15,8 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dostools.image_processing package" href="dostools.image_processing.html" />
+    <link rel="prev" title="dostools.data_processing package" href="dostools.data_processing.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -54,31 +56,32 @@ ex. “20210929_6M-PEO_fps-25k_1”</p></li>
 by the deliminator specified by fname_split. Must contain the “vtype”
 tag.
 ex. “date_sampleinfo_fps_run_vtype”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>fname_split, default “_”
-background_tag, default “bg”
-one_background, default False; True to use one background for</p>
-<blockquote>
-<div><p>a group of experiments only differing by run number</p>
-</div></blockquote>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
+run number. False to pair backgrounds and experiments 1:1.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>matched_bg</strong> (<em>bool</em>) – True if a matching background is found, False otherwise.</p></li>
 <li><p><strong>bg_folder</strong> (<em>string</em>) – Name of background folder if a matching one is found, ‘’ otherwise.</p></li>
-<li><p><em>Errors</em></p></li>
-<li><p><em>——</em></p></li>
-<li><p><em>Raises an error if the given fname_format does not contain the tag “vtype.”</em></p></li>
 </ul>
 </p>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the given fname_format does not contain the tag “vtype.”</p>
+</dd>
 <dt class="field-odd">Warns</dt>
-<dd class="field-odd"><p><strong>Warns if multiple matched backgrounds are found for a given fname.</strong></p>
+<dd class="field-odd"><p><strong>UserWarning</strong> – If multiple matched backgrounds are found for a given fname.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -97,26 +100,28 @@ experimental video folder.</p>
 by the deliminator specified by fname_split. Must contain the “vtype”
 tag.
 ex. “date_sampleinfo_fps_run_vtype”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>fname_split, default “_”
-experiment_tag, default “exp”</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>fname</strong> (<em>string</em>) – Base name of the folder if the given folder matches the pattern for an
 experimental folder, ‘’ otherwise.</p></li>
 <li><p><strong>exp_video</strong> (<em>bool</em>) – True if the folder matches the pattern for an experimental folder,
 False otherwise.</p></li>
-<li><p><em>Errors</em></p></li>
-<li><p><em>——</em></p></li>
-<li><p><em>Raises an error if the given fname_format does not contain the tag “vtype.”</em></p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the given fname_format does not contain the tag “vtype.”:</p>
 </dd>
 </dl>
 </dd></dl>
@@ -132,17 +137,22 @@ exist. Returns True for folders that exist or do not need to be created
 because of optional_settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>save_location</strong> (<em>path-like</em>) – Path to folder in which to save the sub folders.
+<dd class="field-odd"><p><strong>save_location</strong> (<em>path-like</em>) – Path to folder in which to save the sub folders.
 If it does not exist, function will create it (as long as rest of path
-already exists).</p></li>
-<li><p><strong>save_crop</strong> (<em>bool</em><em>, </em><em>optional</em>) – True if user wants to save intermediate cropped images (default: False).</p></li>
-<li><p><strong>save_bg_sub</strong> (<em>bool</em><em>, </em><em>optional</em>) – True if user wants to save intermediate background-subtracted images
-(default: False).</p></li>
+already exists).</p>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>bin_exists</strong> (<em>bool</em>) – True if binary folder already exists, False if does not exist</p></li>
 <li><p><strong>crop_exists</strong> (<em>bool</em>) – True if save_crop is True or crop folder already exists, False
 otherwise</p></li>
@@ -188,26 +198,24 @@ list of paths to background video folders.</p>
 by the deliminator specified by fname_split. Must contain the “vtype”
 tag.
 ex. “date_sampleinfo_fps_run_vtype”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>fname_split, default “_”</p>
-</div></blockquote>
-<dl>
-<dt>Used in nested functions:</dt><dd><p>fname_split, default “_”
-experiment_tag, default “exp”
-background_tag, default “bg”
-one_background, default False; True to use one background for</p>
-<blockquote>
-<div><p>a group of experiments only differing by run number</p>
-</div></blockquote>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
+run number. False to pair backgrounds and experiments 1:1.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>fnames</strong> (<em>list of strings</em>) – List of base folder names for each matched pair of experimental and
 background folders.</p></li>
 <li><p><strong>exp_videos</strong> (<em>list of paths</em>) – List of paths to experimental video folders that were matched with
@@ -324,17 +332,20 @@ by the deliminator specified by fname_split.
 ex. “date_sampleinfo_fps_run”</p></li>
 <li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname
 separated by the deliminator specified by sample_split.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>fname_split, default “_”
-sample_split, default “-”</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>parse_fname</strong> (<em>dict</em>) – Dictionary of parameters from fname.</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>sample_split</strong> (<em>string</em>) – The deliminator for splitting sampleinfo tag in folder/file names,
+used in sampleinfo_format.
+Default is “-“.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>parse_fname</strong> (<em>dict</em>) – Dictionary of parameters from fname.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -358,11 +369,10 @@ ex. “date_sampleinfo_fps_run”</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>remove_tag_from_fname</strong> (<em>str</em>) – Inputted fname with every occurence of given tag removed.</p>
 </dd>
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>UserWarning</strong> – Returns a warning if the given tag is not present.</p>
+</dd>
 </dl>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Returns a warning if the given tag is not present.</p>
-</div>
 <p class="rubric">Examples</p>
 <p>fname:          “20210929_6M-PEO_fps-25k_1”
 fname_format:   “date_sampleinfo_fps_run”
@@ -412,16 +422,15 @@ value</p>
 <li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
 by the deliminator specified by fname_split.
 ex. “date_sampleinfo_fps_run”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>fname_split, default “_”</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>shorten_fname_format</strong> (<em>str</em>) – fname_format with “vtype” and “remove” tags removed.</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>shorten_fname_format</strong> (<em>str</em>) – fname_format with “vtype” and “remove” tags removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -450,14 +459,24 @@ Used in this function:</p>
 
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">dostools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="dostools.html">dostools package</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">dostools</a><ul>
+  <li><a href="dostools.html">dostools package</a><ul>
+      <li>Previous: <a href="dostools.data_processing.html" title="previous chapter">dostools.data_processing package</a></li>
+      <li>Next: <a href="dostools.image_processing.html" title="next chapter">dostools.image_processing package</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

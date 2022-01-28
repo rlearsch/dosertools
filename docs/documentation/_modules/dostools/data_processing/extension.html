@@ -186,10 +186,13 @@
 
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in nested functions:</span>
-<span class="sd">        tc_bounds : np.array</span>
-<span class="sd">            two value array containing the upper and lower bounds in &quot;D/D0&quot; where</span>
-<span class="sd">            tc will be found in between</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    tc_bounds: 2 element list of floats</span>
+<span class="sd">        [start, end]</span>
+<span class="sd">        The D/D0 to bound the start and end for finding the critical time.</span>
+<span class="sd">        Default is [0.3,0.07].</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -248,6 +251,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">

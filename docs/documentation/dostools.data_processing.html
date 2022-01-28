@@ -15,6 +15,8 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dostools.file_handling package" href="dostools.file_handling.html" />
+    <link rel="prev" title="dostools package" href="dostools.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -173,27 +175,28 @@ is_dataframe_column_numeric(df,’c’) –&gt; KeyError</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>csv</strong> (<em>string</em>) – path to csv file to import</p></li>
-<li><p><strong>tc_bounds</strong> (<em>np.array</em>) – two value array containing the upper and lower bounds in “D/D0” where
-tc will be found in between</p></li>
-<li><p><strong>fname_format</strong> (<em>str</em>) – the format of the fname with parameter names separated
-by the deliminator specified by fname_split
+<li><p><strong>csv</strong> (<em>string</em>) – Path to csv file to import.</p></li>
+<li><p><strong>tc_bounds</strong> (<em>np.array</em>) – Two value array containing the upper and lower bounds in “D/D0” where
+tc will be found in between.</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
 ex. “date_sampleinfo_fps_run”</p></li>
-<li><p><strong>sampleinfo_format</strong> (<em>str</em>) – the format of the sampleinfo section of the fname
-separated by the deliminator specified by sample_split</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – </p></li>
-<li><p><strong>settings</strong> (<em>Takes the following optional</em>) – <dl class="simple">
-<dt>fname_split<span class="classifier">str, optional</span></dt><dd><p>the deliminator for splitting the name (default is “_”)</p>
-</dd>
-<dt>sample_split<span class="classifier">str, optional</span></dt><dd><p>the deliminator for splitting the sampleinfo section
-of the fname (default is “-“)</p>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname,
+separated by the deliminator specified by sample_split.</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>csv_to_dataframe</strong> (<em>pd.DataFrame</em>) – dataframe with data from csv, sample information from filename,
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>sample_split</strong> (<em>string</em>) – The deliminator for splitting sampleinfo tag in folder/file names,
+used in sampleinfo_format.
+Default is “-“.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>csv_to_dataframe</strong> (<em>pd.DataFrame</em>) – dataframe with data from csv, sample information from filename,
 strain rate and critical time calculated</p>
 </dd>
 </dl>
@@ -259,18 +262,16 @@ divided by initial diameter) to the dataset.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataset</strong> (<em>pandas.DataFrame</em>) – dataset to which to add the “tc (s)”, “t-tc (s)”, and “Dtc/D0” columns
 must contain “D/D0”, “time (s)”, and “strain rate (1/s)” columns</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in nested functions:
-tc_bounds : np.array</p>
-<blockquote>
-<div><p>two value array containing the upper and lower bounds in “D/D0” where
-tc will be found in between</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>add_critical_time</strong> (<em>pd.DataFrame</em>) – dataset with “tc”, “t - tc (s)”, and “Dtc/D0” columns added</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>tc_bounds</strong> (<em>2 element list of floats</em>) – [start, end]
+The D/D0 to bound the start and end for finding the critical time.
+Default is [0.3,0.07].</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>add_critical_time</strong> (<em>pd.DataFrame</em>) – dataset with “tc”, “t - tc (s)”, and “Dtc/D0” columns added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -396,18 +397,15 @@ time
 generated from data_processing.csv.generate_df</p></li>
 <li><p><strong>summary_df</strong> (<em>pd.DataFrame</em>) – Contains relaxation time, D(t_c)/D0, and sample info for all runs and samples
 generated from data_procescing.fitting.make_summary_dataframe</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Takes the following optional settings:
-needle_diameter_mm: float</p>
-<blockquote>
-<div><p>diameter of the needle used for the experiment, in milimeters
-Default value of 0.7176 mm is used for 22G needles</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dataset_w_visc</strong> (<em>pd.DataFrame</em>) – Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>needle_diameter_mm</strong> (<em>float</em>) – The needle outer diameter in millimeters.
+Default is 0.7176 mm (22G needle).</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>dataset_w_visc</strong> (<em>pd.DataFrame</em>) – Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -463,17 +461,16 @@ D’(t)/D0 = (-1/(3*LambdaE)) * D(tc)/D0 * (exp(-(t - tc)/(3*LambdaE)))</p>
 generated from data_processing.csv.generate_df</p></li>
 <li><p><strong>sampleinfo_format</strong> (<em>str</em>) – the format of the sampleinfo section of the filename
 separated by the deliminator specified by sample_split</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – </p></li>
-<li><p><strong>settings</strong> (<em>Takes the following optional</em>) – <dl class="simple">
-<dt>fitting_bounds: [float, float]</dt><dd><p>[start, end]
-These are the D/D0 values we look for to set the bounds for the EC region fitting</p>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>summary_df</strong> (<em>pd.DataFrame</em>) – dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info</p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>fitting_bounds</strong> (<em>2 element list of floats</em>) – [start, end]
+The D/D0 to bound the start and end of fitting of EC region.
+Default is [0.1, 0.045].</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>summary_df</strong> (<em>pd.DataFrame</em>) – dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info</p>
 </dd>
 </dl>
 </dd></dl>
@@ -488,20 +485,28 @@ These are the D/D0 values we look for to set the bounds for the EC region fittin
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Raw dataset with calculated columns for strain rate, strain, etc, and parsed sampleinfo columns.</p></li>
 <li><p><strong>save_location</strong> (<em>path-like</em>) – Path to folder in which to save the csv.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>summary_filename: string, default: ‘’, if not empty, replaces the</dt><dd><p>default filename generated by this function</p>
-</dd>
-</dl>
-<p>skip_existing, default True; False to overwrite existing csv</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
+when a function would generate it. True to skip any existing files.
+False to overwrite (or delete and then write, where overwriting would
+generate an error).
+Default is True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
+progress through major steps. True to see print statements, False to
+hide non-errors/warnings.
+Default is False.</p></li>
+<li><p><strong>summary_filename</strong> (<em>string</em>) – The base filename (no extension) for saving the summary csvs. If not
+provided, will be generated automatically based on the current date
+and time.
+Default is “” to trigger automatic generation.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>filename_string</strong> (<em>string</em>) – Filename at which the annotated dataframe was saved.</p></li>
 <li><p><em>Saves file to disk.</em></p></li>
 </ul>
@@ -521,33 +526,28 @@ Used in this function:</p>
 <li><p><strong>summary_df</strong> (<em>pd.DataFrame</em>) – Contains LambdaE, D(tc)/D0, and sample info for multiple runs and samples</p></li>
 <li><p><strong>save_location</strong> (<em>path-like</em>) – path to folder in which to save the csv</p></li>
 <li><p><strong>filename</strong> (<em>string</em>) – Currently not used, but this will be the name to give to the summary dataset csv</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
 when a function would generate it. True to skip any existing files.
 False to overwrite (or delete and then write, where overwriting would
 generate an error).
-Default is True.</p>
-</dd>
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+Default is True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-<dt>summary_filename: string</dt><dd><p>The base filename (no extension) for saving the summary csvs. If not
+Default is False.</p></li>
+<li><p><strong>summary_filename</strong> (<em>string</em>) – The base filename (no extension) for saving the summary csvs. If not
 provided, will be generated automatically based on the current date
 and time.
-Default is “” to trigger automatic generation.</p>
-</dd>
-</dl>
-</div></blockquote>
-</p></li>
+Default is “” to trigger automatic generation.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>filename_string</strong> (<em>string</em>) – Filename at which the summary dataframe was saved.</p></li>
 <li><p><em>Saves file to disk.</em></p></li>
 </ul>
@@ -577,26 +577,17 @@ in the names of the folders in images_folder. Should have “vtype”
 and “remove” tags removed compared to videos_to_binaries.
 Must contain “fps” tag.
 ex. “date_sampleinfo_fps_run”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>fname_split: string</dt><dd><p>The deliminator for splitting folder/file names, used in fname_format.
-Default is “_”.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is False.</p></li>
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
 </ul>
 </dd>
 </dl>
@@ -617,38 +608,26 @@ tags–csvs will not have those formatting tags still attached.
 ex. “date_sampleinfo_fps_run”</p></li>
 <li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname
 separated by the deliminator specified by sample_split.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>fname_split: string</dt><dd><p>The deliminator for splitting folder/file names, used in fname_format.
-Default is “_”.</p>
-</dd>
-<dt>sample_split: string</dt><dd><p>The deliminator for splitting sampleinfo tag in folder/file names,
+Default is False.</p></li>
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>sample_split</strong> (<em>string</em>) – The deliminator for splitting sampleinfo tag in folder/file names,
 used in sampleinfo_format.
-Default is “-“.</p>
-</dd>
-<dt>fitting_bounds: 2 element list of floats</dt><dd><p>[start, end]
+Default is “-“.</p></li>
+<li><p><strong>fitting_bounds</strong> (<em>2 element list of floats</em>) – [start, end]
 The D/D0 to bound the start and end of fitting of EC region.
-Default is [0.1, 0.045].</p>
-</dd>
-<dt>tc_bounds: 2 element list of floats</dt><dd><p>[start, end]
+Default is [0.1, 0.045].</p></li>
+<li><p><strong>tc_bounds</strong> (<em>2 element list of floats</em>) – [start, end]
 The D/D0 to bound the start and end for finding the critical time.
-Default is [0.3,0.07].</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is [0.3,0.07].</p></li>
 </ul>
 </dd>
 </dl>
@@ -656,7 +635,7 @@ Default is [0.3,0.07].</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.data_processing.integration.multiprocess_binaries_to_csvs">
-<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_binaries_to_csvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subfolder_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_binaries_to_csvs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_binaries_to_csvs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_binaries_to_csvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subfolder_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_binaries_to_csvs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_binaries_to_csvs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts binary image folders into csvs of D/D0 vs. time.</p>
 <p>Given a folder of folders of binary images, converts each set of binary
 images into a csv of D/D0 vs. time, retaining information in the filename.</p>
@@ -680,26 +659,17 @@ Must contain “fps” tag.
 ex. “date_sampleinfo_fps_run”</p></li>
 <li><p><strong>tic</strong> (<em>float</em>) – Stores the time that the processing began at. Used in verbose mode
 to determine how long processing takes</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>fname_split: string</dt><dd><p>The deliminator for splitting folder/file names, used in fname_format.
-Default is “_”.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is False.</p></li>
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
 </ul>
 </dd>
 </dl>
@@ -707,7 +677,7 @@ Default is “_”.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dostools.data_processing.integration.multiprocess_vid_to_bin">
-<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_vid_to_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fnames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_vid_to_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_vid_to_bin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dostools.data_processing.integration.</span></span><span class="sig-name descname"><span class="pre">multiprocess_vid_to_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fnames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dostools/data_processing/integration.html#multiprocess_vid_to_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.data_processing.integration.multiprocess_vid_to_bin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts videos in given folder into binary images.</p>
 <p>Matches videos in videos_folder into experimental and background pairs, and
 converts those paired videos into background-subtracted binaries.</p>
@@ -727,50 +697,35 @@ backgrounds.</p></li>
 binaries and optional cropped and background-subtracted images.</p></li>
 <li><p><strong>tic</strong> (<em>float</em>) – Stores the time that the processing began at. Used in verbose mode
 to determine how long processing takes.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>experiment_tag: string</dt><dd><p>The tag for identifying experimental videos. May be empty (“”).
-Default is “exp”.</p>
-</dd>
-<dt>background_tag: string</dt><dd><p>The tag for identifying background videos. May not be empty.
-Default is “bg”.</p>
-</dd>
-<dt>one_background: bool</dt><dd><p>True to use one background for a group of experiments only differing by
+Default is False.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
 run number. False to pair backgrounds and experiments 1:1.
-Default is False.</p>
-</dd>
-<dt>save_crop: bool</dt><dd><p>True to save intermediate cropped images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
 images cropped but not background-subtracted or binarized).
-Default is False.</p>
-</dd>
-<dt>save_bg_sub: bool</dt><dd><p>True to save background-subtracted images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
 images cropped and background-subtracted but not binarized).
-Default is False.</p>
-</dd>
-<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+Default is False.</p></li>
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
 when a function would generate it. True to skip any existing files.
 False to overwrite (or delete and then write, where overwriting would
 generate an error).
-Default is True.</p>
-</dd>
-<dt>image_extension: string</dt><dd><p>The extension for images in the video folder. TIFF recommended.
-Default is “tif”. Do not include “.”.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is True.</p></li>
+<li><p><strong>image_extension</strong> (<em>string</em>) – The extension for images in the video folder. TIFF recommended.
+Default is “tif”. Do not include “.”.</p></li>
 </ul>
 </dd>
 </dl>
@@ -871,54 +826,38 @@ experimental and background video names and would prevent matching.
 ex. “date_sampleinfo_fps_run_vtype_remove_remove”</p></li>
 <li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname
 separated by the deliminator specified by sample_split.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-<dt>cpu_count: int</dt><dd><p>How many cores to use for multithreading/multiprocessing. If nothing
+Default is False.</p></li>
+<li><p><strong>cpu_count</strong> (<em>int</em>) – How many cores to use for multithreading/multiprocessing. If nothing
 provided, default will be the maximum number of cores returned from
-os.cpu_count()</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>experiment_tag: string</dt><dd><p>The tag for identifying experimental videos. May be empty (“”).
-Default is “exp”.</p>
-</dd>
-<dt>background_tag: string</dt><dd><p>The tag for identifying background videos. May not be empty.
-Default is “bg”.</p>
-</dd>
-<dt>one_background: bool</dt><dd><p>True to use one background for a group of experiments only differing by
+os.cpu_count()</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
 run number. False to pair backgrounds and experiments 1:1.
-Default is False.</p>
-</dd>
-<dt>save_crop: bool</dt><dd><p>True to save intermediate cropped images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
 images cropped but not background-subtracted or binarized).
-Default is False.</p>
-</dd>
-<dt>save_bg_sub: bool</dt><dd><p>True to save background-subtracted images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
 images cropped and background-subtracted but not binarized).
-Default is False.</p>
-</dd>
-<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+Default is False.</p></li>
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
 when a function would generate it. True to skip any existing files.
 False to overwrite (or delete and then write, where overwriting would
 generate an error).
-Default is True.</p>
-</dd>
-<dt>image_extension: string</dt><dd><p>The extension for images in the video folder. TIFF recommended.
-Default is “tif”. Do not include “.”.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is True.</p></li>
+<li><p><strong>image_extension</strong> (<em>string</em>) – The extension for images in the video folder. TIFF recommended.
+Default is “tif”. Do not include “.”.</p></li>
 </ul>
 </dd>
 </dl>
@@ -946,48 +885,37 @@ remove information that is not relevant or is different between the
 experimental and background video names and would prevent matching.
 Must contain “fps” tag.
 ex. “date_sampleinfo_fps_run_vtype_remove_remove”</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in nested functions:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>fname_split: string</dt><dd><p>The deliminator for splitting folder/file names, used in fname_format.
-Default is “_”.</p>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
 </dd>
-<dt>experiment_tag: string</dt><dd><p>The tag for identifying experimental videos. May be empty (“”).
-Default is “exp”.</p>
-</dd>
-<dt>background_tag: string</dt><dd><p>The tag for identifying background videos. May not be empty.
-Default is “bg”.</p>
-</dd>
-<dt>one_background: bool</dt><dd><p>True to use one background for a group of experiments only differing by
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
 run number. False to pair backgrounds and experiments 1:1.
-Default is False.</p>
-</dd>
-<dt>save_crop: bool</dt><dd><p>True to save intermediate cropped images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
 images cropped but not background-subtracted or binarized).
-Default is False.</p>
-</dd>
-<dt>save_bg_sub: bool</dt><dd><p>True to save background-subtracted images (i.e. experimental video
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
 images cropped and background-subtracted but not binarized).
-Default is False.</p>
-</dd>
-<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+Default is False.</p></li>
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
 when a function would generate it. True to skip any existing files.
 False to overwrite (or delete and then write, where overwriting would
 generate an error).
-Default is True.</p>
-</dd>
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+Default is True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-<dt>image_extension: string</dt><dd><p>The extension for images in the video folder. TIFF recommended.
-Default is “tif”. Do not include “.”.</p>
-</dd>
-</dl>
-</div></blockquote>
-</p></li>
+Default is False.</p></li>
+<li><p><strong>image_extension</strong> (<em>string</em>) – The extension for images in the video folder. TIFF recommended.
+Default is “tif”. Do not include “.”.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1043,14 +971,24 @@ separated by the deliminator specified by sample_split.</p></li>
 
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">dostools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="dostools.html">dostools package</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">dostools</a><ul>
+  <li><a href="dostools.html">dostools package</a><ul>
+      <li>Previous: <a href="dostools.html" title="previous chapter">dostools package</a></li>
+      <li>Next: <a href="dostools.file_handling.html" title="next chapter">dostools.file_handling package</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

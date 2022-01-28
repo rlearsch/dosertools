@@ -67,6 +67,7 @@
 <span class="sd">    slope, intercept, r_value: floats</span>
 <span class="sd">        slope is the slope of the semilog-transformed version of the dataset. It corresponds to the decaying exponential in the linear-linear version of the data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">start_index</span> <span class="o">=</span> <span class="n">dparray</span><span class="o">.</span><span class="n">closest_index_for_value</span><span class="p">(</span><span class="n">run_dataset</span><span class="p">,</span> <span class="s2">&quot;D/D0&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
     <span class="n">end_index</span> <span class="o">=</span> <span class="n">dparray</span><span class="o">.</span><span class="n">closest_index_for_value</span><span class="p">(</span><span class="n">run_dataset</span><span class="p">,</span> <span class="s2">&quot;D/D0&quot;</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
     <span class="n">dataset_EC</span> <span class="o">=</span> <span class="n">run_dataset</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span>
@@ -90,6 +91,7 @@
 <span class="sd">    lambdaE_df : pd.DataFrame</span>
 <span class="sd">        dataframe containing lambdaE relaxation time for each run from the input df</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1">## TODO: address issue raised in docstring</span>
 
     <span class="n">lambdaE_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">fitting_results_list</span><span class="p">)</span>
@@ -123,11 +125,14 @@
 <span class="sd">        the format of the sampleinfo section of the filename</span>
 <span class="sd">        separated by the deliminator specified by sample_split</span>
 <span class="sd">    optional_settings: dict</span>
-<span class="sd">    Takes the following optional settings:</span>
-<span class="sd">        fitting_bounds: [float, float]</span>
-<span class="sd">            [start, end]</span>
-<span class="sd">            These are the D/D0 values we look for to set the bounds for the EC region fitting</span>
+<span class="sd">        A dictionary of optional settings.</span>
 
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fitting_bounds: 2 element list of floats</span>
+<span class="sd">        [start, end]</span>
+<span class="sd">        The D/D0 to bound the start and end of fitting of EC region.</span>
+<span class="sd">        Default is [0.1, 0.045].</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -175,13 +180,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    Dtc_D0: float</span>
 <span class="sd">        The normalized diameter at which the transition to EC behavior occurs</span>
-
 <span class="sd">    LambdaE: float</span>
 <span class="sd">        The relaxation time of the polymer solution</span>
-
 <span class="sd">    time: float</span>
 <span class="sd">        the moment in time to evaluate the derivative</span>
-
 <span class="sd">    tc: float</span>
 <span class="sd">        the critical time for the experiment, this number is purely emperical</span>
 <span class="sd">        (it depends entirely on when in the process the video starts)</span>
@@ -191,7 +193,7 @@
 <span class="sd">    D&#39;(t)/D0: float</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">return</span> <span class="n">Dtc_D0</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">lambdaE</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">time</span> <span class="o">-</span> <span class="n">tc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">lambdaE</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="calculate_elongational_visc"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.fitting.calculate_elongational_visc">[docs]</a><span class="k">def</span> <span class="nf">calculate_elongational_visc</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">summary_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -208,10 +210,13 @@
 <span class="sd">        generated from data_procescing.fitting.make_summary_dataframe</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Takes the following optional settings:</span>
-<span class="sd">        needle_diameter_mm: float</span>
-<span class="sd">            diameter of the needle used for the experiment, in milimeters</span>
-<span class="sd">            Default value of 0.7176 mm is used for 22G needles</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    needle_diameter_mm: float</span>
+<span class="sd">        The needle outer diameter in millimeters.</span>
+<span class="sd">        Default is 0.7176 mm (22G needle).</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    ------</span>
@@ -271,23 +276,25 @@
 <span class="sd">        Currently not used, but this will be the name to give to the summary dataset csv</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            skip_existing: bool</span>
-<span class="sd">                Determines the behavior when a file already appears exists</span>
-<span class="sd">                when a function would generate it. True to skip any existing files.</span>
-<span class="sd">                False to overwrite (or delete and then write, where overwriting would</span>
-<span class="sd">                generate an error).</span>
-<span class="sd">                Default is True.</span>
-<span class="sd">            verbose: bool</span>
-<span class="sd">                Determines whether processing functions print statements as they</span>
-<span class="sd">                progress through major steps. True to see print statements, False to</span>
-<span class="sd">                hide non-errors/warnings.</span>
-<span class="sd">                Default is False.</span>
-<span class="sd">            summary_filename: string</span>
-<span class="sd">                The base filename (no extension) for saving the summary csvs. If not</span>
-<span class="sd">                provided, will be generated automatically based on the current date</span>
-<span class="sd">                and time.</span>
-<span class="sd">                Default is &quot;&quot; to trigger automatic generation.</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    skip_existing: bool</span>
+<span class="sd">        Determines the behavior when a file already appears exists</span>
+<span class="sd">        when a function would generate it. True to skip any existing files.</span>
+<span class="sd">        False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">        generate an error).</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    verbose: bool</span>
+<span class="sd">        Determines whether processing functions print statements as they</span>
+<span class="sd">        progress through major steps. True to see print statements, False to</span>
+<span class="sd">        hide non-errors/warnings.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    summary_filename: string</span>
+<span class="sd">        The base filename (no extension) for saving the summary csvs. If not</span>
+<span class="sd">        provided, will be generated automatically based on the current date</span>
+<span class="sd">        and time.</span>
+<span class="sd">        Default is &quot;&quot; to trigger automatic generation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -349,10 +356,25 @@
 <span class="sd">        Path to folder in which to save the csv.</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            summary_filename: string, default: &#39;&#39;, if not empty, replaces the</span>
-<span class="sd">                default filename generated by this function</span>
-<span class="sd">            skip_existing, default True; False to overwrite existing csv</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    skip_existing: bool</span>
+<span class="sd">        Determines the behavior when a file already appears exists</span>
+<span class="sd">        when a function would generate it. True to skip any existing files.</span>
+<span class="sd">        False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">        generate an error).</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    verbose: bool</span>
+<span class="sd">        Determines whether processing functions print statements as they</span>
+<span class="sd">        progress through major steps. True to see print statements, False to</span>
+<span class="sd">        hide non-errors/warnings.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    summary_filename: string</span>
+<span class="sd">        The base filename (no extension) for saving the summary csvs. If not</span>
+<span class="sd">        provided, will be generated automatically based on the current date</span>
+<span class="sd">        and time.</span>
+<span class="sd">        Default is &quot;&quot; to trigger automatic generation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -420,6 +442,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">

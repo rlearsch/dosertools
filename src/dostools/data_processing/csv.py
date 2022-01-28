@@ -35,24 +35,29 @@ def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, opt
     Parameters
     ----------
     csv : string
-        path to csv file to import
+        Path to csv file to import.
     tc_bounds : np.array
-        two value array containing the upper and lower bounds in "D/D0" where
-        tc will be found in between
+        Two value array containing the upper and lower bounds in "D/D0" where
+        tc will be found in between.
     fname_format : str
-        the format of the fname with parameter names separated
-        by the deliminator specified by fname_split
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split.
         ex. "date_sampleinfo_fps_run"
     sampleinfo_format : str
-        the format of the sampleinfo section of the fname
-        separated by the deliminator specified by sample_split
+        The format of the sampleinfo section of the fname,
+        separated by the deliminator specified by sample_split.
     optional_settings: dict
-    Takes the following optional settings:
-        fname_split : str, optional
-            the deliminator for splitting the name (default is "_")
-        sample_split : str, optional
-            the deliminator for splitting the sampleinfo section
-            of the fname (default is "-")
+        A dictionary of optional settings.
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    sample_split: string
+        The deliminator for splitting sampleinfo tag in folder/file names,
+        used in sampleinfo_format.
+        Default is "-".
 
     Returns
     -------

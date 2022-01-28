@@ -34,6 +34,7 @@ def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing
     slope, intercept, r_value: floats
         slope is the slope of the semilog-transformed version of the dataset. It corresponds to the decaying exponential in the linear-linear version of the data
     """
+
     start_index = dparray.closest_index_for_value(run_dataset, "D/D0", start)
     end_index = dparray.closest_index_for_value(run_dataset, "D/D0", end)
     dataset_EC = run_dataset[start_index:end_index]
@@ -57,6 +58,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df : pd.DataFrame
         dataframe containing lambdaE relaxation time for each run from the input df
     """
+
     ## TODO: address issue raised in docstring
 
     lambdaE_df = pd.DataFrame(fitting_results_list)
@@ -90,11 +92,14 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
         the format of the sampleinfo section of the filename
         separated by the deliminator specified by sample_split
     optional_settings: dict
-    Takes the following optional settings:
-        fitting_bounds: [float, float]
-            [start, end]
-            These are the D/D0 values we look for to set the bounds for the EC region fitting
+        A dictionary of optional settings.
 
+    Optional Settings and Defaults
+    ------------------------------
+    fitting_bounds: 2 element list of floats
+        [start, end]
+        The D/D0 to bound the start and end of fitting of EC region.
+        Default is [0.1, 0.045].
 
     Returns
     -------
@@ -142,13 +147,10 @@ def derivative_EC_fit(Dtc_D0: float, lambdaE: float, time: float, tc: float) -> 
     ----------
     Dtc_D0: float
         The normalized diameter at which the transition to EC behavior occurs
-
     LambdaE: float
         The relaxation time of the polymer solution
-
     time: float
         the moment in time to evaluate the derivative
-
     tc: float
         the critical time for the experiment, this number is purely emperical
         (it depends entirely on when in the process the video starts)
@@ -158,7 +160,7 @@ def derivative_EC_fit(Dtc_D0: float, lambdaE: float, time: float, tc: float) -> 
     D'(t)/D0: float
 
     """
-    
+
     return Dtc_D0*(-1/(3*lambdaE))*np.exp(-(time - tc)/(3*lambdaE))
 
 def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, optional_settings: dict = {}) -> pd.DataFrame:
@@ -175,10 +177,13 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
         generated from data_procescing.fitting.make_summary_dataframe
     optional_settings: dict
         A dictionary of optional settings.
-        Takes the following optional settings:
-        needle_diameter_mm: float
-            diameter of the needle used for the experiment, in milimeters
-            Default value of 0.7176 mm is used for 22G needles
+
+    Optional Settings and Defaults
+    ------------------------------
+    needle_diameter_mm: float
+        The needle outer diameter in millimeters.
+        Default is 0.7176 mm (22G needle).
+
 
     Returns
     ------
@@ -238,23 +243,25 @@ def save_summary_df(summary_df: pd.DataFrame, save_location: typing.Union[str, b
         Currently not used, but this will be the name to give to the summary dataset csv
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            skip_existing: bool
-                Determines the behavior when a file already appears exists
-                when a function would generate it. True to skip any existing files.
-                False to overwrite (or delete and then write, where overwriting would
-                generate an error).
-                Default is True.
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-            summary_filename: string
-                The base filename (no extension) for saving the summary csvs. If not
-                provided, will be generated automatically based on the current date
-                and time.
-                Default is "" to trigger automatic generation.
+
+    Optional Settings and Defaults
+    ------------------------------
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    summary_filename: string
+        The base filename (no extension) for saving the summary csvs. If not
+        provided, will be generated automatically based on the current date
+        and time.
+        Default is "" to trigger automatic generation.
 
     Returns
     -------
@@ -316,10 +323,25 @@ def save_processed_df(df: pd.DataFrame, save_location: typing.Union[str, bytes, 
         Path to folder in which to save the csv.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            summary_filename: string, default: '', if not empty, replaces the
-                default filename generated by this function
-            skip_existing, default True; False to overwrite existing csv
+
+    Optional Settings and Defaults
+    ------------------------------
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    summary_filename: string
+        The base filename (no extension) for saving the summary csvs. If not
+        provided, will be generated automatically based on the current date
+        and time.
+        Default is "" to trigger automatic generation.
 
     Returns
     -------

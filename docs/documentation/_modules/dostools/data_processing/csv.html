@@ -68,24 +68,29 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    csv : string</span>
-<span class="sd">        path to csv file to import</span>
+<span class="sd">        Path to csv file to import.</span>
 <span class="sd">    tc_bounds : np.array</span>
-<span class="sd">        two value array containing the upper and lower bounds in &quot;D/D0&quot; where</span>
-<span class="sd">        tc will be found in between</span>
+<span class="sd">        Two value array containing the upper and lower bounds in &quot;D/D0&quot; where</span>
+<span class="sd">        tc will be found in between.</span>
 <span class="sd">    fname_format : str</span>
-<span class="sd">        the format of the fname with parameter names separated</span>
-<span class="sd">        by the deliminator specified by fname_split</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
 <span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
 <span class="sd">    sampleinfo_format : str</span>
-<span class="sd">        the format of the sampleinfo section of the fname</span>
-<span class="sd">        separated by the deliminator specified by sample_split</span>
+<span class="sd">        The format of the sampleinfo section of the fname,</span>
+<span class="sd">        separated by the deliminator specified by sample_split.</span>
 <span class="sd">    optional_settings: dict</span>
-<span class="sd">    Takes the following optional settings:</span>
-<span class="sd">        fname_split : str, optional</span>
-<span class="sd">            the deliminator for splitting the name (default is &quot;_&quot;)</span>
-<span class="sd">        sample_split : str, optional</span>
-<span class="sd">            the deliminator for splitting the sampleinfo section</span>
-<span class="sd">            of the fname (default is &quot;-&quot;)</span>
+<span class="sd">        A dictionary of optional settings.</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    sample_split: string</span>
+<span class="sd">        The deliminator for splitting sampleinfo tag in folder/file names,</span>
+<span class="sd">        used in sampleinfo_format.</span>
+<span class="sd">        Default is &quot;-&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -177,6 +182,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">
@@ -214,7 +220,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

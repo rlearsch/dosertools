@@ -22,11 +22,17 @@ def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike
         Path to folder in which to save the sub folders.
         If it does not exist, function will create it (as long as rest of path
         already exists).
-    save_crop: bool, optional
-        True if user wants to save intermediate cropped images (default: False).
-    save_bg_sub: bool, optional
-        True if user wants to save intermediate background-subtracted images
-        (default: False).
+
+    Optional Settings and Defaults
+    ------------------------------
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
 
     Returns
     -------
@@ -120,9 +126,15 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
         ex. "date_sampleinfo_fps_run_vtype"
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            fname_split, default "_"
-            experiment_tag, default "exp"
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
 
     Returns
     -------
@@ -133,9 +145,9 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
         True if the folder matches the pattern for an experimental folder,
         False otherwise.
 
-    Errors
+    Raises
     ------
-    Raises an error if the given fname_format does not contain the tag "vtype."
+    ValueError: If the given fname_format does not contain the tag "vtype."
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -232,11 +244,19 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
         ex. "date_sampleinfo_fps_run_vtype"
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            fname_split, default "_"
-            background_tag, default "bg"
-            one_background, default False; True to use one background for
-                a group of experiments only differing by run number
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
 
     Returns
     -------
@@ -245,13 +265,15 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
     bg_folder: string
         Name of background folder if a matching one is found, '' otherwise.
 
-    Errors
+    Raises
     ------
-    Raises an error if the given fname_format does not contain the tag "vtype."
+    ValueError
+        If the given fname_format does not contain the tag "vtype."
 
     Warns
     -----
-    Warns if multiple matched backgrounds are found for a given fname.
+    UserWarning
+        If multiple matched backgrounds are found for a given fname.
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -331,14 +353,22 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
         ex. "date_sampleinfo_fps_run_vtype"
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            fname_split, default "_"
-        Used in nested functions:
-            fname_split, default "_"
-            experiment_tag, default "exp"
-            background_tag, default "bg"
-            one_background, default False; True to use one background for
-                a group of experiments only differing by run number
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
 
     Returns
     -------

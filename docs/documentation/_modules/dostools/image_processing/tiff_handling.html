@@ -151,10 +151,23 @@
 <span class="sd">        saves if optional_settings has skip_existing = True</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            save_crop, default False; True to save the intermediate cropped image</span>
-<span class="sd">            save_bg_sub, default False; True to save the background-subtracted image</span>
-<span class="sd">            skip_existing, default True; False to overwrite existing images</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    save_crop: bool</span>
+<span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
+<span class="sd">        images cropped but not background-subtracted or binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    save_bg_sub: bool</span>
+<span class="sd">        True to save background-subtracted images (i.e. experimental video</span>
+<span class="sd">        images cropped and background-subtracted but not binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    skip_existing: bool</span>
+<span class="sd">        Determines the behavior when a file already appears exists</span>
+<span class="sd">        when a function would generate it. True to skip any existing files.</span>
+<span class="sd">        False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">        generate an error).</span>
+<span class="sd">        Default is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    ------</span>
@@ -235,9 +248,17 @@
 <span class="sd">        saves if optional_settings has skip_existing = True</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            save_crop, default False; True to save the intermediate cropped image</span>
-<span class="sd">            save_bg_sub, default False; True to save the background-subtracted image</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    save_crop: bool</span>
+<span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
+<span class="sd">        images cropped but not background-subtracted or binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    save_bg_sub: bool</span>
+<span class="sd">        True to save background-subtracted images (i.e. experimental video</span>
+<span class="sd">        images cropped and background-subtracted but not binarized).</span>
+<span class="sd">        Default is False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -353,31 +374,32 @@
 <span class="sd">        The folder where folders of images should be saved.</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            skip_existing: bool</span>
-<span class="sd">                Determines the behavior when a file already appears exists</span>
-<span class="sd">                when a function would generate it. True to skip any existing files.</span>
-<span class="sd">                False to overwrite (or delete and then write, where overwriting would</span>
-<span class="sd">                generate an error).</span>
-<span class="sd">                Default is True.</span>
-<span class="sd">            verbose: bool</span>
-<span class="sd">                Determines whether processing functions print statements as they</span>
-<span class="sd">                progress through major steps. True to see print statements, False to</span>
-<span class="sd">                hide non-errors/warnings.</span>
-<span class="sd">                Default is False.</span>
-<span class="sd">            image_extension: string</span>
-<span class="sd">                The extension for images in the video folder. TIFF recommended.</span>
-<span class="sd">                Default is &quot;tif&quot;. Do not include &quot;.&quot;.</span>
-<span class="sd">        Used in nested functions:</span>
-<span class="sd">            save_crop: bool</span>
-<span class="sd">                True to save intermediate cropped images (i.e. experimental video</span>
-<span class="sd">                images cropped but not background-subtracted or binarized).</span>
-<span class="sd">                Default is False.</span>
-<span class="sd">            save_bg_sub: bool</span>
-<span class="sd">                True to save background-subtracted images (i.e. experimental video</span>
-<span class="sd">                images cropped and background-subtracted but not binarized).</span>
-<span class="sd">                Default is False.</span>
 
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    save_crop: bool</span>
+<span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
+<span class="sd">        images cropped but not background-subtracted or binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    save_bg_sub: bool</span>
+<span class="sd">        True to save background-subtracted images (i.e. experimental video</span>
+<span class="sd">        images cropped and background-subtracted but not binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    skip_existing: bool</span>
+<span class="sd">        Determines the behavior when a file already appears exists</span>
+<span class="sd">        when a function would generate it. True to skip any existing files.</span>
+<span class="sd">        False to overwrite (or delete and then write, where overwriting would</span>
+<span class="sd">        generate an error).</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    verbose: bool</span>
+<span class="sd">        Determines whether processing functions print statements as they</span>
+<span class="sd">        progress through major steps. True to see print statements, False to</span>
+<span class="sd">        hide non-errors/warnings.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    image_extension: string</span>
+<span class="sd">        The extension for images in the video folder. TIFF recommended.</span>
+<span class="sd">        Default is &quot;tif&quot;. Do not include &quot;.&quot;.</span>
+<span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Image sequence(s) (video) saved on the hard drive at images_location</span>
@@ -485,6 +507,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">

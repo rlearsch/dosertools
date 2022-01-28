@@ -134,6 +134,7 @@
 <span class="sd">    summary_df : pd.DataFrame</span>
 <span class="sd">        dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Initalizes parameters and empty list</span>
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
     <span class="n">fitting_bounds</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;fitting_bounds&quot;</span><span class="p">]</span>
@@ -190,6 +191,7 @@
 <span class="sd">    D&#39;(t)/D0: float</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="k">return</span> <span class="n">Dtc_D0</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">lambdaE</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">time</span> <span class="o">-</span> <span class="n">tc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">lambdaE</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="calculate_elongational_visc"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.fitting.calculate_elongational_visc">[docs]</a><span class="k">def</span> <span class="nf">calculate_elongational_visc</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">summary_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -455,7 +457,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

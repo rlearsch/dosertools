@@ -17,7 +17,6 @@ import file_handling.folder as folder
 import data_processing.integration as integration
 
 def define_image_parameters(video: skimage.io.collection.ImageCollection, optional_settings: dict = {}) -> dict:
-
     """
     From the given video, determines the first-guess for the cropping operation.
 
@@ -96,11 +95,12 @@ def save_image(image: np.ndarray, image_number: int, save_location: typing.Union
     skimage.io.imsave(full_filename, image, check_contrast=False)
     pass
 
-def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, images_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
+def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: dict, image_number: int, images_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}) -> None:
     """
     Fully converts a raw tiff to binary png image.
 
-    Crops, perforns background subtraction, and binarizies. Always saves the png, optional to save the intermediate steps
+    Crops, perforns background subtraction, and binarizies. Always saves the
+    binarized image as a .png, optional to save the intermediate steps.
 
     Parameters
     ----------
@@ -124,8 +124,9 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
             skip_existing, default True; False to overwrite existing images
 
     Returns
-    -------
+    ------
     Image sequence (video) saved on the hard drive at save_location
+
     """
 
     settings = integration.set_defaults(optional_settings)
@@ -301,7 +302,13 @@ def mean_binarize_single_image(background_subtracted_image: np.ndarray) -> np.nd
 
 def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathLike], background_video_folder: typing.Union[str, bytes, os.PathLike], images_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}):
     """
-    Overall video processing pipeline: takes experimental video and background video, produces binarized video in target directory
+
+    Processes experimental and background video into binarized video.
+
+    Given a experimental video folder and a background video folder, processes
+    the videos into a folder of binarized images in the target directory.
+    Can also produce cropped and background subtracted images given optional
+    settings.
 
     Parameters
     ----------
@@ -337,12 +344,11 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
                 True to save background-subtracted images (i.e. experimental video
                 images cropped and background-subtracted but not binarized).
                 Default is False.
-#    tic: time
-#        Used to measure time elapsed. The time at tic is the time 
-#        processing started. 
+
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location
+
     """
 
     settings = integration.set_defaults(optional_settings)

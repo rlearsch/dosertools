@@ -52,10 +52,7 @@ column must be numeric (int or float)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>closest_index_for_value</strong> – Closest index in dataset[column] for given value</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-even"><p><strong>closest_index_for_value</strong> (<em>int</em>) – Closest index in dataset[column] for given value</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -84,12 +81,9 @@ of indices a through a+n-1.</p>
 array must be numeric (integer or float)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>continuous_nonzero</strong> – (m, 2) array where m is the number of “blocks” of non-zeros.
+<dd class="field-even"><p><strong>continuous_nonzero</strong> (<em>np.ndarray</em>) – (m, 2) array where m is the number of “blocks” of non-zeros.
 The first column is the index of the first non-zero,
 the second is the index of the first zero following the block.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -116,12 +110,9 @@ of indices a through a+n-1.</p>
 array must be numeric (integer or float)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>nonzero_runs</strong> – (m, 2) array where m is the number of “blocks” of zeros.
+<dd class="field-even"><p><strong>nonzero_runs</strong> (<em>np.ndarray</em>) – (m, 2) array where m is the number of “blocks” of zeros.
 The first column is the index of the first zero,
 the second is the index of the first non-zero following the block.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -139,10 +130,7 @@ the second is the index of the first non-zero following the block.</p>
 <dd class="field-odd"><p><strong>array</strong> (<em>np.ndarray</em>) – array to check if numeric</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>is_array_numeric</strong> – True if array is float or signed/unsigned int, otherwise False</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-even"><p><strong>is_array_numeric</strong> (<em>bool</em>) – True if array is float or signed/unsigned int, otherwise False</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -164,10 +152,7 @@ is_array_numeric([True,False,False]) = False</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>is_dataframe_column_numeric</strong> – True if column in dataset is float or int, otherwise False</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-even"><p><strong>is_dataframe_column_numeric</strong> (<em>bool</em>) – True if column in dataset is float or int, otherwise False</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -208,11 +193,8 @@ of the fname (default is “-“)</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>csv_to_dataframe</strong> – dataframe with data from csv, sample information from filename,
+<dd class="field-even"><p><strong>csv_to_dataframe</strong> (<em>pd.DataFrame</em>) – dataframe with data from csv, sample information from filename,
 strain rate and critical time calculated</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -242,10 +224,7 @@ of the fname (default is “-“)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>generate_df</strong> – dataframe containing data from all csvs in csv_location</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>generate_df</strong> (<em>pd.DataFrame</em>) – dataframe containing data from all csvs in csv_location</p>
 </dd>
 </dl>
 </dd></dl>
@@ -259,10 +238,7 @@ of the fname (default is “-“)</p></li>
 <dd class="field-odd"><p><strong>csv_location</strong> (<em>path-like</em>) – path to a location containing desired csvs</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>get_csvs</strong> – sorted list of csvs in csv_location as path strings</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-even"><p><strong>get_csvs</strong> (<em>list</em>) – sorted list of csvs in csv_location as path strings</p>
 </dd>
 </dl>
 </dd></dl>
@@ -294,10 +270,7 @@ tc will be found in between</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>add_critical_time</strong> – dataset with “tc”, “t - tc (s)”, and “Dtc/D0” columns added</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>add_critical_time</strong> (<em>pd.DataFrame</em>) – dataset with “tc”, “t - tc (s)”, and “Dtc/D0” columns added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -317,11 +290,8 @@ column.</p>
 must contain “D/D0” and “time (s)” columns</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>add_strain_rate</strong> – dataset with strain rate (1/s) column added and all rows with
+<dd class="field-even"><p><strong>add_strain_rate</strong> (<em>pandas.DataFrame</em>) – dataset with strain rate (1/s) column added and all rows with
 infinite/NaN removed</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,10 +316,7 @@ of zeroes.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>truncate_data</strong> – Dataframe with truncated data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>truncate_data</strong> (<em>pd.DataFrame</em>) – Dataframe with truncated data.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -413,10 +380,7 @@ time
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>lambdaE_df</strong> – dataframe containing lambdaE relaxation time for each run from the input df</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>lambdaE_df</strong> (<em>pd.DataFrame</em>) – dataframe containing lambdaE relaxation time for each run from the input df</p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,10 +407,7 @@ Default value of 0.7176 mm is used for 22G needles</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dataset_w_visc</strong> – Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>dataset_w_visc</strong> (<em>pd.DataFrame</em>) – Dataset with the additional values calculated by this function: strain and (elongational viscosity / surface tension)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -468,10 +429,7 @@ D’(t)/D0 = (-1/(3*LambdaE)) * D(tc)/D0 * (exp(-(t - tc)/(3*LambdaE)))</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>D’(t)/D0</strong></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-even"><p><strong>D’(t)/D0</strong> (<em>float</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -489,10 +447,7 @@ D’(t)/D0 = (-1/(3*LambdaE)) * D(tc)/D0 * (exp(-(t - tc)/(3*LambdaE)))</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>slope, intercept, r_value</strong> – slope is the slope of the semilog-transformed version of the dataset. It corresponds to the decaying exponential in the linear-linear version of the data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>floats</p>
+<dd class="field-even"><p><strong>slope, intercept, r_value</strong> (<em>floats</em>) – slope is the slope of the semilog-transformed version of the dataset. It corresponds to the decaying exponential in the linear-linear version of the data</p>
 </dd>
 </dl>
 </dd></dl>
@@ -518,10 +473,7 @@ These are the D/D0 values we look for to set the bounds for the EC region fittin
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>summary_df</strong> – dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dd class="field-even"><p><strong>summary_df</strong> (<em>pd.DataFrame</em>) – dataframe containing lambdaE (relaxation time) and R(t_c)/R_0 for each run from the input df, along with their sample info</p>
 </dd>
 </dl>
 </dd></dl>
@@ -833,11 +785,11 @@ Default is “tif”. Do not include “.”.</p>
 <dd class="field-odd"><p><strong>optional_settings</strong> (<em>dict</em>) – Dictionary of optional settings.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>settings</strong> (<em>dict</em>) – Dictionary with optional_settings and default values, prioritizing
-optional_settings values.</p></li>
-<li><p><em>Optional Settings and Defaults</em></p></li>
-<li><p><em>——————————</em></p></li>
+<dd class="field-even"><p><strong>settings</strong> (<em>dict</em>) – Dictionary with optional_settings and default values, prioritizing
+optional_settings values.</p>
+</dd>
+<dt class="field-odd">Optional Settings and Defaults</dt>
+<dd class="field-odd"><ul class="simple">
 <li><p><strong>nozzle_row</strong> (<em>int</em>) – Row to use for determining the nozzle diameter.
 Default is 1.</p></li>
 <li><p><strong>crop_width_coefficient</strong> (<em>float</em>) – Multiplied by the calculated nozzle_diameter to determine the buffer
@@ -895,7 +847,6 @@ Default is “” to trigger automatic generation.</p></li>
 provided, default will be the maximum number of cores returned from
 os.cpu_count()</p></li>
 </ul>
-</p>
 </dd>
 </dl>
 </dd></dl>

@@ -54,9 +54,16 @@
 <span class="sd">        separated by the deliminator specified by sample_split.</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
-<span class="sd">            sample_split, default &quot;-&quot;</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    sample_split: string</span>
+<span class="sd">        The deliminator for splitting sampleinfo tag in folder/file names,</span>
+<span class="sd">        used in sampleinfo_format.</span>
+<span class="sd">        Default is &quot;-&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -168,9 +175,10 @@
 <span class="sd">    remove_tag_from_fname: str</span>
 <span class="sd">        Inputted fname with every occurence of given tag removed.</span>
 
-<span class="sd">    Warnings</span>
+<span class="sd">    Warns</span>
 <span class="sd">    --------</span>
-<span class="sd">    Returns a warning if the given tag is not present.</span>
+<span class="sd">    UserWarning</span>
+<span class="sd">        Returns a warning if the given tag is not present.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -347,8 +355,12 @@
 <span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -385,6 +397,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">
@@ -422,7 +435,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

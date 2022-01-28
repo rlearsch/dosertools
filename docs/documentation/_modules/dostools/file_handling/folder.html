@@ -55,11 +55,17 @@
 <span class="sd">        Path to folder in which to save the sub folders.</span>
 <span class="sd">        If it does not exist, function will create it (as long as rest of path</span>
 <span class="sd">        already exists).</span>
-<span class="sd">    save_crop: bool, optional</span>
-<span class="sd">        True if user wants to save intermediate cropped images (default: False).</span>
-<span class="sd">    save_bg_sub: bool, optional</span>
-<span class="sd">        True if user wants to save intermediate background-subtracted images</span>
-<span class="sd">        (default: False).</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    save_crop: bool</span>
+<span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
+<span class="sd">        images cropped but not background-subtracted or binarized).</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    save_bg_sub: bool</span>
+<span class="sd">        True to save background-subtracted images (i.e. experimental video</span>
+<span class="sd">        images cropped and background-subtracted but not binarized).</span>
+<span class="sd">        Default is False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -153,9 +159,15 @@
 <span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype&quot;</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
-<span class="sd">            experiment_tag, default &quot;exp&quot;</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    experiment_tag: string</span>
+<span class="sd">        The tag for identifying experimental videos. May be empty (&quot;&quot;).</span>
+<span class="sd">        Default is &quot;exp&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -166,9 +178,9 @@
 <span class="sd">        True if the folder matches the pattern for an experimental folder,</span>
 <span class="sd">        False otherwise.</span>
 
-<span class="sd">    Errors</span>
+<span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    Raises an error if the given fname_format does not contain the tag &quot;vtype.&quot;</span>
+<span class="sd">    ValueError: If the given fname_format does not contain the tag &quot;vtype.&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -265,11 +277,19 @@
 <span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype&quot;</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
-<span class="sd">            background_tag, default &quot;bg&quot;</span>
-<span class="sd">            one_background, default False; True to use one background for</span>
-<span class="sd">                a group of experiments only differing by run number</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    background_tag: string</span>
+<span class="sd">        The tag for identifying background videos. May not be empty.</span>
+<span class="sd">        Default is &quot;bg&quot;.</span>
+<span class="sd">    one_background: bool</span>
+<span class="sd">        True to use one background for a group of experiments only differing by</span>
+<span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
+<span class="sd">        Default is False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -278,13 +298,15 @@
 <span class="sd">    bg_folder: string</span>
 <span class="sd">        Name of background folder if a matching one is found, &#39;&#39; otherwise.</span>
 
-<span class="sd">    Errors</span>
+<span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    Raises an error if the given fname_format does not contain the tag &quot;vtype.&quot;</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the given fname_format does not contain the tag &quot;vtype.&quot;</span>
 
 <span class="sd">    Warns</span>
 <span class="sd">    -----</span>
-<span class="sd">    Warns if multiple matched backgrounds are found for a given fname.</span>
+<span class="sd">    UserWarning</span>
+<span class="sd">        If multiple matched backgrounds are found for a given fname.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">settings</span> <span class="o">=</span> <span class="n">integration</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -364,14 +386,22 @@
 <span class="sd">        ex. &quot;date_sampleinfo_fps_run_vtype&quot;</span>
 <span class="sd">    optional_settings: dict</span>
 <span class="sd">        A dictionary of optional settings.</span>
-<span class="sd">        Used in this function:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
-<span class="sd">        Used in nested functions:</span>
-<span class="sd">            fname_split, default &quot;_&quot;</span>
-<span class="sd">            experiment_tag, default &quot;exp&quot;</span>
-<span class="sd">            background_tag, default &quot;bg&quot;</span>
-<span class="sd">            one_background, default False; True to use one background for</span>
-<span class="sd">                a group of experiments only differing by run number</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    experiment_tag: string</span>
+<span class="sd">        The tag for identifying experimental videos. May be empty (&quot;&quot;).</span>
+<span class="sd">        Default is &quot;exp&quot;.</span>
+<span class="sd">    background_tag: string</span>
+<span class="sd">        The tag for identifying background videos. May not be empty.</span>
+<span class="sd">        Default is &quot;bg&quot;.</span>
+<span class="sd">    one_background: bool</span>
+<span class="sd">        True to use one background for a group of experiments only differing by</span>
+<span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
+<span class="sd">        Default is False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -446,6 +476,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
 </ul>
 
 <div class="relations">
@@ -483,7 +514,7 @@
       &copy;2022, Rob Learsch and Red Lhota.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

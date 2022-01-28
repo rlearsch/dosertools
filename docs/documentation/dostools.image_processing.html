@@ -15,6 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="dostools.file_handling package" href="dostools.file_handling.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -171,18 +172,26 @@ binarized image as a .png, optional to save the intermediate steps.</p>
 <li><p><strong>folders_exist</strong> (<em>Tuple of three bools</em>) – Booleans indicating whether the binary, crop, and bg_sub folders
 already existed to allow convert_tiff_image image to skip the relevant
 saves if optional_settings has skip_existing = True</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>save_crop, default False; True to save the intermediate cropped image
-save_bg_sub, default False; True to save the background-subtracted image
-skip_existing, default True; False to overwrite existing images</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>Image sequence (video) saved on the hard drive at save_location</em></p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p></li>
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
+when a function would generate it. True to skip any existing files.
+False to overwrite (or delete and then write, where overwriting would
+generate an error).
+Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>Image sequence (video) saved on the hard drive at save_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -202,17 +211,21 @@ skip_existing, default True; False to overwrite existing images</p>
 <li><p><strong>folders_exist</strong> (<em>Tuple of three bools</em>) – Booleans indicating whether the binary, crop, and bg_sub folders
 already existed to allow convert_tiff_image image to skip the relevant
 saves if optional_settings has skip_existing = True</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><p>save_crop, default False; True to save the intermediate cropped image
-save_bg_sub, default False; True to save the background-subtracted image</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>Image(s) saved locally in save_location</em></p>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>Image(s) saved locally in save_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -349,44 +362,32 @@ settings.</p>
 <li><p><strong>experimental_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the experimental video to analyse.</p></li>
 <li><p><strong>background_video_folder</strong> (<em>path-like</em>) – Points to the folder which contains the background video used in analysis.</p></li>
 <li><p><strong>images_location</strong> (<em>path-like</em>) – The folder where folders of images should be saved.</p></li>
-<li><p><strong>optional_settings</strong> (<em>dict</em>) – <p>A dictionary of optional settings.
-Used in this function:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>skip_existing: bool</dt><dd><p>Determines the behavior when a file already appears exists
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p></li>
+<li><p><strong>skip_existing</strong> (<em>bool</em>) – Determines the behavior when a file already appears exists
 when a function would generate it. True to skip any existing files.
 False to overwrite (or delete and then write, where overwriting would
 generate an error).
-Default is True.</p>
-</dd>
-<dt>verbose: bool</dt><dd><p>Determines whether processing functions print statements as they
+Default is True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Determines whether processing functions print statements as they
 progress through major steps. True to see print statements, False to
 hide non-errors/warnings.
-Default is False.</p>
-</dd>
-<dt>image_extension: string</dt><dd><p>The extension for images in the video folder. TIFF recommended.
-Default is “tif”. Do not include “.”.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>Used in nested functions:</dt><dd><dl class="simple">
-<dt>save_crop: bool</dt><dd><p>True to save intermediate cropped images (i.e. experimental video
-images cropped but not background-subtracted or binarized).
-Default is False.</p>
-</dd>
-<dt>save_bg_sub: bool</dt><dd><p>True to save background-subtracted images (i.e. experimental video
-images cropped and background-subtracted but not binarized).
-Default is False.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</p></li>
+Default is False.</p></li>
+<li><p><strong>image_extension</strong> (<em>string</em>) – The extension for images in the video folder. TIFF recommended.
+Default is “tif”. Do not include “.”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>Image sequence(s) (video) saved on the hard drive at images_location</em></p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>Image sequence(s) (video) saved on the hard drive at images_location</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -431,14 +432,23 @@ border in further image analysis.</p>
 
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">dostools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="dostools.html">dostools package</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">dostools</a><ul>
+  <li><a href="dostools.html">dostools package</a><ul>
+      <li>Previous: <a href="dostools.file_handling.html" title="previous chapter">dostools.file_handling package</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

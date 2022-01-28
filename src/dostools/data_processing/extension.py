@@ -153,10 +153,13 @@ def add_critical_time(dataset : pd.DataFrame, optional_settings: dict = {}) -> p
 
     optional_settings: dict
         A dictionary of optional settings.
-        Used in nested functions:
-        tc_bounds : np.array
-            two value array containing the upper and lower bounds in "D/D0" where
-            tc will be found in between
+
+    Optional Settings and Defaults
+    ------------------------------
+    tc_bounds: 2 element list of floats
+        [start, end]
+        The D/D0 to bound the start and end for finding the critical time.
+        Default is [0.3,0.07].
 
     Returns
     -------

@@ -188,14 +188,13 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["cpu_count"] = os.cpu_count()
     return settings
 
-def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg_videos: list, images_folder: typing.Union[str, bytes, os.PathLike], tic: float, optional_settings: dict = {}):
-    
+def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg_videos: list, images_folder: typing.Union[str, bytes, os.PathLike], tic: float, optional_settings: dict = {}) -> None:
     """
     Converts videos in given folder into binary images.
 
     Matches videos in videos_folder into experimental and background pairs, and
     converts those paired videos into background-subtracted binaries.
-    
+
     For multiprocessing to work properly, the function that invokes the pool
     of processors and the function that uses them need to be defined separately.
     Thus, this function is here, and is called in videos_to_binaries.
@@ -217,44 +216,46 @@ def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg
         binaries and optional cropped and background-subtracted images.
     tic: float
         Stores the time that the processing began at. Used in verbose mode
-        to determine how long processing takes. 
+        to determine how long processing takes.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-        Used in nested functions:
-            experiment_tag: string
-                The tag for identifying experimental videos. May be empty ("").
-                Default is "exp".
-            background_tag: string
-                The tag for identifying background videos. May not be empty.
-                Default is "bg".
-            one_background: bool
-                True to use one background for a group of experiments only differing by
-                run number. False to pair backgrounds and experiments 1:1.
-                Default is False.
-            save_crop: bool
-                True to save intermediate cropped images (i.e. experimental video
-                images cropped but not background-subtracted or binarized).
-                Default is False.
-            save_bg_sub: bool
-                True to save background-subtracted images (i.e. experimental video
-                images cropped and background-subtracted but not binarized).
-                Default is False.
-            skip_existing: bool
-                Determines the behavior when a file already appears exists
-                when a function would generate it. True to skip any existing files.
-                False to overwrite (or delete and then write, where overwriting would
-                generate an error).
-                Default is True.
-            image_extension: string
-                The extension for images in the video folder. TIFF recommended.
-                Default is "tif". Do not include ".".
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    image_extension: string
+        The extension for images in the video folder. TIFF recommended.
+        Default is "tif". Do not include ".".
     """
+
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     if verbose:
@@ -271,18 +272,18 @@ def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg
         print("Video " + str(j)+ " processed to binary." +" (" +str(j) + "/" + str(len(fnames))+")")
         print("Time elapsed (videos to binaries): " + str(np.round((toc-tic))) + " seconds")
     pass
-    
-def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, tic: float, optional_settings: dict = {}):
+
+def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, tic: float, optional_settings: dict = {}) -> None:
     """
     Converts binary image folders into csvs of D/D0 vs. time.
 
     Given a folder of folders of binary images, converts each set of binary
     images into a csv of D/D0 vs. time, retaining information in the filename.
-    
+
     For multiprocessing to work properly, the function that invokes the pool
     of processors and the function that uses them need to be defined separately.
     Thus, this function is here, and is called in binaries_to_csvs.
-    
+
     Parameters
     ----------
     subfolder_index: int
@@ -307,18 +308,19 @@ def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images
         to determine how long processing takes
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-        Used in nested functions:
-            fname_split: string
-                The deliminator for splitting folder/file names, used in fname_format.
-                Default is "_".
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
     """
-    
+
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     subfolder = subfolders[subfolder_index]
@@ -362,45 +364,46 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-            cpu_count: int
-                How many cores to use for multithreading/multiprocessing. If nothing
-                provided, default will be the maximum number of cores returned from
-                os.cpu_count()        
-        Used in nested functions:
-            experiment_tag: string
-                The tag for identifying experimental videos. May be empty ("").
-                Default is "exp".
-            background_tag: string
-                The tag for identifying background videos. May not be empty.
-                Default is "bg".
-            one_background: bool
-                True to use one background for a group of experiments only differing by
-                run number. False to pair backgrounds and experiments 1:1.
-                Default is False.
-            save_crop: bool
-                True to save intermediate cropped images (i.e. experimental video
-                images cropped but not background-subtracted or binarized).
-                Default is False.
-            save_bg_sub: bool
-                True to save background-subtracted images (i.e. experimental video
-                images cropped and background-subtracted but not binarized).
-                Default is False.
-            skip_existing: bool
-                Determines the behavior when a file already appears exists
-                when a function would generate it. True to skip any existing files.
-                False to overwrite (or delete and then write, where overwriting would
-                generate an error).
-                Default is True.
-            image_extension: string
-                The extension for images in the video folder. TIFF recommended.
-                Default is "tif". Do not include ".".
-    """  
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    cpu_count: int
+        How many cores to use for multithreading/multiprocessing. If nothing
+        provided, default will be the maximum number of cores returned from
+        os.cpu_count()
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    image_extension: string
+        The extension for images in the video folder. TIFF recommended.
+        Default is "tif". Do not include ".".
+    """
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     cpu_count = settings["cpu_count"]
@@ -430,43 +433,44 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
 
     Parameters
     ----------
-        images_folder: path-like
-            Path to a folder in which the results of image processing were saved
-            (i.e. the folders of binary images).
-        csv_folder: path-like
-            Path to a folder in which to save the csv containing D/D0 vs. time.
-        short_fname_format: str
-            The format of the fname with parameter names separated
-            by the deliminator specified by fname_split with only tags present
-            in the names of the folders in images_folder. Should have "vtype"
-            and "remove" tags removed compared to videos_to_binaries.
-            Must contain "fps" tag.
-            ex. "date_sampleinfo_fps_run"
-        optional_settings: dict
-            A dictionary of optional settings.
-            Used in this function:
-                verbose: bool
-                    Determines whether processing functions print statements as they
-                    progress through major steps. True to see print statements, False to
-                    hide non-errors/warnings.
-                    Default is False.
-            Used in nested functions:
-                fname_split: string
-                    The deliminator for splitting folder/file names, used in fname_format.
-                    Default is "_".
+    images_folder: path-like
+        Path to a folder in which the results of image processing were saved
+        (i.e. the folders of binary images).
+    csv_folder: path-like
+        Path to a folder in which to save the csv containing D/D0 vs. time.
+    short_fname_format: str
+        The format of the fname with parameter names separated
+        by the deliminator specified by fname_split with only tags present
+        in the names of the folders in images_folder. Should have "vtype"
+        and "remove" tags removed compared to videos_to_binaries.
+        Must contain "fps" tag.
+        ex. "date_sampleinfo_fps_run"
+    optional_settings: dict
+        A dictionary of optional settings.
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
     """
     settings = set_defaults(optional_settings)
     verbose = settings["verbose"]
     cpu_count = settings["cpu_count"]
     pool = multiprocessing.Pool(cpu_count)
-    
+
     if not os.path.isdir(csv_folder):
         os.mkdir(csv_folder)
-    
+
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
     bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings) for subfolder_index in range(0,len(subfolders)))
     tic = time.time()
-    
+
     if verbose:
         print("Processing " + str(len(subfolders)) + " binary folders.")
         pool.starmap(multiprocess_binaries_to_csvs, bin_to_csv_arguments)
@@ -506,42 +510,44 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
         ex. "date_sampleinfo_fps_run_vtype_remove_remove"
     optional_settings: dict
         A dictionary of optional settings.
-        Used in nested functions:
-            fname_split: string
-                The deliminator for splitting folder/file names, used in fname_format.
-                Default is "_".
-            experiment_tag: string
-                The tag for identifying experimental videos. May be empty ("").
-                Default is "exp".
-            background_tag: string
-                The tag for identifying background videos. May not be empty.
-                Default is "bg".
-            one_background: bool
-                True to use one background for a group of experiments only differing by
-                run number. False to pair backgrounds and experiments 1:1.
-                Default is False.
-            save_crop: bool
-                True to save intermediate cropped images (i.e. experimental video
-                images cropped but not background-subtracted or binarized).
-                Default is False.
-            save_bg_sub: bool
-                True to save background-subtracted images (i.e. experimental video
-                images cropped and background-subtracted but not binarized).
-                Default is False.
-            skip_existing: bool
-                Determines the behavior when a file already appears exists
-                when a function would generate it. True to skip any existing files.
-                False to overwrite (or delete and then write, where overwriting would
-                generate an error).
-                Default is True.
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-            image_extension: string
-                The extension for images in the video folder. TIFF recommended.
-                Default is "tif". Do not include ".".
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    experiment_tag: string
+        The tag for identifying experimental videos. May be empty ("").
+        Default is "exp".
+    background_tag: string
+        The tag for identifying background videos. May not be empty.
+        Default is "bg".
+    one_background: bool
+        True to use one background for a group of experiments only differing by
+        run number. False to pair backgrounds and experiments 1:1.
+        Default is False.
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    image_extension: string
+        The extension for images in the video folder. TIFF recommended.
+        Default is "tif". Do not include ".".
     """
 
     videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
@@ -570,28 +576,29 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-        Used in nested functions:
-            fname_split: string
-                The deliminator for splitting folder/file names, used in fname_format.
-                Default is "_".
-            sample_split: string
-                The deliminator for splitting sampleinfo tag in folder/file names,
-                used in sampleinfo_format.
-                Default is "-".
-            fitting_bounds: 2 element list of floats
-                [start, end]
-                The D/D0 to bound the start and end of fitting of EC region.
-                Default is [0.1, 0.045].
-            tc_bounds: 2 element list of floats
-                [start, end]
-                The D/D0 to bound the start and end for finding the critical time.
-                Default is [0.3,0.07].
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    sample_split: string
+        The deliminator for splitting sampleinfo tag in folder/file names,
+        used in sampleinfo_format.
+        Default is "-".
+    fitting_bounds: 2 element list of floats
+        [start, end]
+        The D/D0 to bound the start and end of fitting of EC region.
+        Default is [0.1, 0.045].
+    tc_bounds: 2 element list of floats
+        [start, end]
+        The D/D0 to bound the start and end for finding the critical time.
+        Default is [0.3,0.07].
     """
 
     settings = set_defaults(optional_settings)
@@ -646,4 +653,3 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
     csvs_to_summaries(csv_folder, summary_save_location, short_fname_format, sampleinfo_format, optional_settings)
     pass
-

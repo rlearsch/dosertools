@@ -21,9 +21,16 @@ def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, optional_
         separated by the deliminator specified by sample_split.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            fname_split, default "_"
-            sample_split, default "-"
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
+    sample_split: string
+        The deliminator for splitting sampleinfo tag in folder/file names,
+        used in sampleinfo_format.
+        Default is "-".
 
     Returns
     -------
@@ -135,9 +142,10 @@ def remove_tag_from_fname(fname: str, fname_format: str, tag: str, fname_split: 
     remove_tag_from_fname: str
         Inputted fname with every occurence of given tag removed.
 
-    Warnings
+    Warns
     --------
-    Returns a warning if the given tag is not present.
+    UserWarning
+        Returns a warning if the given tag is not present.
 
     Examples
     --------
@@ -314,8 +322,12 @@ def shorten_fname_format(fname_format: str, optional_settings: dict = {}) -> str
         ex. "date_sampleinfo_fps_run"
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            fname_split, default "_"
+
+    Optional Settings and Defaults
+    ------------------------------
+    fname_split: string
+        The deliminator for splitting folder/file names, used in fname_format.
+        Default is "_".
 
     Returns
     -------

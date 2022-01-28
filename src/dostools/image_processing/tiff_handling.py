@@ -118,10 +118,23 @@ def convert_tiff_image(image: np.ndarray, bg_median: np.ndarray, params_dict: di
         saves if optional_settings has skip_existing = True
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            save_crop, default False; True to save the intermediate cropped image
-            save_bg_sub, default False; True to save the background-subtracted image
-            skip_existing, default True; False to overwrite existing images
+
+    Optional Settings and Defaults
+    ------------------------------
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
 
     Returns
     ------
@@ -202,9 +215,17 @@ def convert_tiff_sequence_to_binary(experimental_video: skimage.io.collection.Im
         saves if optional_settings has skip_existing = True
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            save_crop, default False; True to save the intermediate cropped image
-            save_bg_sub, default False; True to save the background-subtracted image
+
+    Optional Settings and Defaults
+    ------------------------------
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
 
     Returns
     -------
@@ -320,31 +341,32 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         The folder where folders of images should be saved.
     optional_settings: dict
         A dictionary of optional settings.
-        Used in this function:
-            skip_existing: bool
-                Determines the behavior when a file already appears exists
-                when a function would generate it. True to skip any existing files.
-                False to overwrite (or delete and then write, where overwriting would
-                generate an error).
-                Default is True.
-            verbose: bool
-                Determines whether processing functions print statements as they
-                progress through major steps. True to see print statements, False to
-                hide non-errors/warnings.
-                Default is False.
-            image_extension: string
-                The extension for images in the video folder. TIFF recommended.
-                Default is "tif". Do not include ".".
-        Used in nested functions:
-            save_crop: bool
-                True to save intermediate cropped images (i.e. experimental video
-                images cropped but not background-subtracted or binarized).
-                Default is False.
-            save_bg_sub: bool
-                True to save background-subtracted images (i.e. experimental video
-                images cropped and background-subtracted but not binarized).
-                Default is False.
 
+    Optional Settings and Defaults
+    ------------------------------
+    save_crop: bool
+        True to save intermediate cropped images (i.e. experimental video
+        images cropped but not background-subtracted or binarized).
+        Default is False.
+    save_bg_sub: bool
+        True to save background-subtracted images (i.e. experimental video
+        images cropped and background-subtracted but not binarized).
+        Default is False.
+    skip_existing: bool
+        Determines the behavior when a file already appears exists
+        when a function would generate it. True to skip any existing files.
+        False to overwrite (or delete and then write, where overwriting would
+        generate an error).
+        Default is True.
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
+    image_extension: string
+        The extension for images in the video folder. TIFF recommended.
+        Default is "tif". Do not include ".".
+    
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location

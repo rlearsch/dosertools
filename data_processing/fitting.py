@@ -71,10 +71,15 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
         df_header[i] = constant_fitting_header[i - len(header_params)]
 
     lambdaE_df = lambdaE_df.rename(columns=df_header)
-    lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
-    lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
-    lambdaE_df['R^2'] = (lambdaE_df['R'])**2
-    lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
+    try:
+        lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
+        lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)'] * 1000
+        lambdaE_df['R^2'] = (lambdaE_df['R']) ** 2
+        lambdaE_df = lambdaE_df.drop(["-b", "Intercept", "R", "Lambda E (s)", ], axis=1)
+    except KeyError:
+        #print("Error in fitting csv")
+        pass
+
     return lambdaE_df
 
 def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}) -> pd.DataFrame:

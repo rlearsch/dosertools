@@ -670,6 +670,13 @@ class TestMakeSummaryDataframe:
         out, err = capfd.readouterr()
         assert "Fitting Sample" in out
 
+    def test_ValueError_in_fitting_results(self, capfd, fixtures_fitting, generated_df):
+        pathological_generated_df = generated_df
+        pathological_generated_df["D/D0"] = 0.3
+        fitting.make_summary_dataframe(pathological_generated_df,'MW-polymer-c')
+        out, err = capfd.readouterr()
+        assert "Error in fitting csv" in out
+
 def test_derivative_EC_fit():
     """
 

@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dostools.data_processing.csv &#8212; dostools 2022 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for dostools.data_processing.csv</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">file_handling.tags</span> <span class="k">as</span> <span class="nn">tags</span>
+<span class="kn">import</span> <span class="nn">data_processing.extension</span> <span class="k">as</span> <span class="nn">extension</span>
+
+<div class="viewcode-block" id="get_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.csv.get_csvs">[docs]</a><span class="k">def</span> <span class="nf">get_csvs</span><span class="p">(</span><span class="n">csv_location</span> <span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of csvs in csv_location.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    csv_location : path-like</span>
+<span class="sd">        path to a location containing desired csvs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    get_csvs : list</span>
+<span class="sd">        sorted list of csvs in csv_location as path strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Because glob does not return the files in any particular order, sorts</span>
+    <span class="c1"># before returning to keep consistent order between runs.</span>
+    <span class="n">csvs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">csv_location</span><span class="p">,</span><span class="s2">&quot;*.csv&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">csvs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="csv_to_dataframe"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.csv.csv_to_dataframe">[docs]</a><span class="k">def</span> <span class="nf">csv_to_dataframe</span><span class="p">(</span><span class="n">csv</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fname_format</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampleinfo_format</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads in a csv into a dataframe with sample parameters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    csv : string</span>
+<span class="sd">        Path to csv file to import.</span>
+<span class="sd">    tc_bounds : np.array</span>
+<span class="sd">        Two value array containing the upper and lower bounds in &quot;D/D0&quot; where</span>
+<span class="sd">        tc will be found in between.</span>
+<span class="sd">    fname_format : str</span>
+<span class="sd">        The format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split.</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    sampleinfo_format : str</span>
+<span class="sd">        The format of the sampleinfo section of the fname,</span>
+<span class="sd">        separated by the deliminator specified by sample_split.</span>
+<span class="sd">    optional_settings: dict</span>
+<span class="sd">        A dictionary of optional settings.</span>
+
+<span class="sd">    Optional Settings and Defaults</span>
+<span class="sd">    ------------------------------</span>
+<span class="sd">    fname_split: string</span>
+<span class="sd">        The deliminator for splitting folder/file names, used in fname_format.</span>
+<span class="sd">        Default is &quot;_&quot;.</span>
+<span class="sd">    sample_split: string</span>
+<span class="sd">        The deliminator for splitting sampleinfo tag in folder/file names,</span>
+<span class="sd">        used in sampleinfo_format.</span>
+<span class="sd">        Default is &quot;-&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    csv_to_dataframe : pd.DataFrame</span>
+<span class="sd">        dataframe with data from csv, sample information from filename,</span>
+<span class="sd">        strain rate and critical time calculated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span>
+
+    <span class="c1"># Truncates the data before the longest block of zeros.</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">extension</span><span class="o">.</span><span class="n">truncate_data</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="c1"># Adds the strain rate to the dataset.</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">extension</span><span class="o">.</span><span class="n">add_strain_rate</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+    <span class="c1"># Finds critical time by locating the maximum strain rate within the bounds.</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">extension</span><span class="o">.</span><span class="n">add_critical_time</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
+
+    <span class="c1"># Reads in parameters from file name and add to dataframe.</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">parse_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">fname_format</span><span class="p">,</span><span class="n">sampleinfo_format</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">dataset</span></div>
+
+<div class="viewcode-block" id="generate_df"><a class="viewcode-back" href="../../../dostools.data_processing.html#dostools.data_processing.csv.generate_df">[docs]</a><span class="k">def</span> <span class="nf">generate_df</span><span class="p">(</span><span class="n">csv_location</span> <span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">fname_format</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampleinfo_format</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads in all csvs and process them into a dataframe.</span>
+
+<span class="sd">    Reads in data from all csvs in csv_location, process each, adding</span>
+<span class="sd">    strain rate, critical time, diameter at critical time, and parameters from the</span>
+<span class="sd">    filename, and put all data into one dataframe. Loops csv_to_dataframe for</span>
+<span class="sd">    all csvs in folder.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    csv_location : path-like</span>
+<span class="sd">        folder in which csvs to process are stored</span>
+<span class="sd">    tc_bounds : np.array</span>
+<span class="sd">        two value array containing the upper and lower bounds in &quot;D/D0&quot; where</span>
+<span class="sd">        tc will be found in between</span>
+<span class="sd">    fname_format : str</span>
+<span class="sd">        the format of the fname with parameter names separated</span>
+<span class="sd">        by the deliminator specified by fname_split</span>
+<span class="sd">        ex. &quot;date_sampleinfo_fps_run&quot;</span>
+<span class="sd">    sampleinfo_format : str</span>
+<span class="sd">        the format of the sampleinfo section of the fname</span>
+<span class="sd">        separated by the deliminator specified by sample_split</span>
+<span class="sd">    fname_split : str, optional</span>
+<span class="sd">        the deliminator for splitting the name (default is &quot;_&quot;)</span>
+<span class="sd">    sample_split : str, optional</span>
+<span class="sd">        the deliminator for splitting the sampleinfo section</span>
+<span class="sd">        of the fname (default is &quot;-&quot;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    generate_df : pd.DataFrame</span>
+<span class="sd">        dataframe containing data from all csvs in csv_location</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">csvs</span> <span class="o">=</span> <span class="n">get_csvs</span><span class="p">(</span><span class="n">csv_location</span><span class="p">)</span>
+    <span class="c1"># Runs the processing for each csv in the folder.</span>
+    <span class="k">for</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="p">:</span>
+        <span class="n">sample_df</span> <span class="o">=</span> <span class="n">csv_to_dataframe</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span><span class="n">fname_format</span><span class="p">,</span><span class="n">sampleinfo_format</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
+        <span class="n">df_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample_df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_list</span><span class="p">,</span><span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dostools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">dostools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Rob Learsch and Red Lhota.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

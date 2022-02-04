@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>dostools.file_handling package &#8212; dostools 2022 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dostools.image_processing package" href="dostools.image_processing.html" />
+    <link rel="prev" title="dostools.data_processing package" href="dostools.data_processing.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="dostools-file-handling-package">
+<h1>dostools.file_handling package<a class="headerlink" href="#dostools-file-handling-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-dostools.file_handling.folder">
+<span id="dostools-file-handling-folder-module"></span><h2>dostools.file_handling.folder module<a class="headerlink" href="#module-dostools.file_handling.folder" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.folder.identify_background_video_folder">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.folder.</span></span><span class="sig-name descname"><span class="pre">identify_background_video_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/dostools/file_handling/folder.html#identify_background_video_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.folder.identify_background_video_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies a background folder that matches a given experimental fname.</p>
+<p>Identifies a background folder tagged with appropriate parameters such that
+it matches the given base folder name for an experimental video.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_folder</strong> (<em>path-like</em>) – Path in which to look for background video folders.</p></li>
+<li><p><strong>fname</strong> (<em>str</em>) – The base name of the experimental video folder.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split. Must contain the “vtype”
+tag.
+ex. “date_sampleinfo_fps_run_vtype”</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
+run number. False to pair backgrounds and experiments 1:1.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>matched_bg</strong> (<em>bool</em>) – True if a matching background is found, False otherwise.</p></li>
+<li><p><strong>bg_folder</strong> (<em>string</em>) – Name of background folder if a matching one is found, ‘’ otherwise.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the given fname_format does not contain the tag “vtype.”</p>
+</dd>
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>UserWarning</strong> – If multiple matched backgrounds are found for a given fname.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.folder.identify_experimental_video_folder">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.folder.</span></span><span class="sig-name descname"><span class="pre">identify_experimental_video_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/dostools/file_handling/folder.html#identify_experimental_video_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.folder.identify_experimental_video_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies if a given folder is an experimental video folder.</p>
+<p>Using the given fname_format, identifies if the given folder is an
+experimental video folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – Folder to check if it matches the format for the experimental video.</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split. Must contain the “vtype”
+tag.
+ex. “date_sampleinfo_fps_run_vtype”</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em>) – Base name of the folder if the given folder matches the pattern for an
+experimental folder, ‘’ otherwise.</p></li>
+<li><p><strong>exp_video</strong> (<em>bool</em>) – True if the folder matches the pattern for an experimental folder,
+False otherwise.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the given fname_format does not contain the tag “vtype.”:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.folder.make_destination_folders">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.folder.</span></span><span class="sig-name descname"><span class="pre">make_destination_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/dostools/file_handling/folder.html#make_destination_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.folder.make_destination_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates destination folders for binary files (crop and bg_sub optional)</p>
+<p>Creates the folder save_location if it does not yet exist, then within
+save_location makes the folder ‘bin’ (additionally ‘crop’ and ‘bg_sub’ if
+those optional settings are True). Warns if any of the folders already
+exist. Returns True for folders that exist or do not need to be created
+because of optional_settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>save_location</strong> (<em>path-like</em>) – Path to folder in which to save the sub folders.
+If it does not exist, function will create it (as long as rest of path
+already exists).</p>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>save_crop</strong> (<em>bool</em>) – True to save intermediate cropped images (i.e. experimental video
+images cropped but not background-subtracted or binarized).
+Default is False.</p></li>
+<li><p><strong>save_bg_sub</strong> (<em>bool</em>) – True to save background-subtracted images (i.e. experimental video
+images cropped and background-subtracted but not binarized).
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>bin_exists</strong> (<em>bool</em>) – True if binary folder already exists, False if does not exist</p></li>
+<li><p><strong>crop_exists</strong> (<em>bool</em>) – True if save_crop is True or crop folder already exists, False
+otherwise</p></li>
+<li><p><strong>bg_sub_exists</strong> (<em>bool</em>) – True if save_bg_sub is True or bg_sub folder already exists, False
+otherwise</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.folder.make_folder">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.folder.</span></span><span class="sig-name descname"><span class="pre">make_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/folder.html#make_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.folder.make_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates directory in save_location, returns False if already exists</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_location</strong> (<em>path-like</em>) – path to folder in which to save the sub folders</p></li>
+<li><p><strong>folder_tag</strong> (<em>str</em>) – sub folder name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>make_folder</strong> (<em>bool</em>) – returns True if makes directory, False if it already exists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.folder.select_video_folders">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.folder.</span></span><span class="sig-name descname"><span class="pre">select_video_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/dostools/file_handling/folder.html#select_video_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.folder.select_video_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pairs experimental and background videos in a given folder.</p>
+<p>Iterates through every folder in a given folder, checks if the folder
+matches the pattern for an experimental video folder, looks for a matching
+background video folder if it is, and returns three matched lists, a list of
+base folder names, a list of paths to experimental video folders, and a
+list of paths to background video folders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_folder</strong> (<em>path-like</em>) – Path in which to look for experimental and background video folder pairs.</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split. Must contain the “vtype”
+tag.
+ex. “date_sampleinfo_fps_run_vtype”</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>experiment_tag</strong> (<em>string</em>) – The tag for identifying experimental videos. May be empty (“”).
+Default is “exp”.</p></li>
+<li><p><strong>background_tag</strong> (<em>string</em>) – The tag for identifying background videos. May not be empty.
+Default is “bg”.</p></li>
+<li><p><strong>one_background</strong> (<em>bool</em>) – True to use one background for a group of experiments only differing by
+run number. False to pair backgrounds and experiments 1:1.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>fnames</strong> (<em>list of strings</em>) – List of base folder names for each matched pair of experimental and
+background folders.</p></li>
+<li><p><strong>exp_videos</strong> (<em>list of paths</em>) – List of paths to experimental video folders that were matched with
+backgrounds.</p></li>
+<li><p><strong>bg_videos</strong> (<em>list of paths</em>) – List of paths to background video folders matched with exp_videos.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+</dd></dl>
+
+</section>
+<section id="module-dostools.file_handling.tags">
+<span id="dostools-file-handling-tags-module"></span><h2>dostools.file_handling.tags module<a class="headerlink" href="#module-dostools.file_handling.tags" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.check_fname_format_for_tag">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">check_fname_format_for_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#check_fname_format_for_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.check_fname_format_for_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if given tag is in a given fname_format string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of a fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to check for in fname_format.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>check_fname_format_for_tag</strong> (<em>bool</em>) – Returns True if fname_format contains tag, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.get_tag_from_fname">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">get_tag_from_fname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#get_tag_from_fname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.get_tag_from_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns value(s) of given tag in fname.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – The name of the file/folder to get values of a tag from.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to get values for from fname.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>get_tag_from_fname</strong> (<em>list of strings</em>) – List of values in fname corresponding to each occurence of given tag
+in fname_format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.identify_tag_in_fname_format">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">identify_tag_in_fname_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#identify_tag_in_fname_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.identify_tag_in_fname_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies indices of a tag in a given fname_format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to identify in fname_format.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>identify_tag_in_fname_format</strong> (<em>list of integers</em>) – Indices of given tag in fname_format. Empty if tag not present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.insert_tag_in_fname">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">insert_tag_in_fname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#insert_tag_in_fname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.insert_tag_in_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert tag into fname with given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – The name of the file/folder to insert value in.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to insert in fname.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – String to insert at location of given tag in fname.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>insert_tag_from_fname</strong> (<em>list of strings</em>) – Inputted tag with given value inserted at location of given tag in
+fname_format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.parse_fname">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">parse_fname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleinfo_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#parse_fname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.parse_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses folder/file names into a dictonary of parameters using supplied format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – The name of the file/folder to parse.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>sampleinfo_format</strong> (<em>str</em>) – The format of the sampleinfo section of the fname
+separated by the deliminator specified by sample_split.</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p></li>
+<li><p><strong>sample_split</strong> (<em>string</em>) – The deliminator for splitting sampleinfo tag in folder/file names,
+used in sampleinfo_format.
+Default is “-“.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>parse_fname</strong> (<em>dict</em>) – Dictionary of parameters from fname.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.remove_tag_from_fname">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">remove_tag_from_fname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#remove_tag_from_fname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.remove_tag_from_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes given tag from a folder/file name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – The name of the file/folder to remove a tag from.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to remove from fname.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>remove_tag_from_fname</strong> (<em>str</em>) – Inputted fname with every occurence of given tag removed.</p>
+</dd>
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>UserWarning</strong> – Returns a warning if the given tag is not present.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>fname:          “20210929_6M-PEO_fps-25k_1”
+fname_format:   “date_sampleinfo_fps_run”
+tag:            “run”
+result:         “20210929_6M-PEO_fps-25k”</p>
+<p>fname:          “20210929_6M-PEO_fps-25k_1_2503_2354”
+fname_format:   “date_sampleinfo_fps_run_remove_remove”
+tag:            “remove”
+result:         “20210929_6M-PEO_fps-25k_1”</p>
+<p>fname:          “20210929_6M-PEO_fps-25k_1”
+fname_format:   “date_sampleinfo_fps_run”
+tag:            “remove”
+result:         “20210929_6M-PEO_fps-25k_1” and warning</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.replace_tag_in_fname">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">replace_tag_in_fname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#replace_tag_in_fname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.replace_tag_in_fname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace value(s) of given tag in fname with given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – The name of the file/folder to replace values in.
+ex. “20210929_6M-PEO_fps-25k_1”</p></li>
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Tag to replace in fname.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – String to use to replace value of given tag in fname.</p></li>
+<li><p><strong>fname_split</strong> (<em>str</em><em>, </em><em>optional</em>) – The deliminator for splitting the fname (default is “_”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>replace_tag_in_fname</strong> (<em>string</em>) – Inputted fname with every occurence of the given tag replaced with given
+value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dostools.file_handling.tags.shorten_fname_format">
+<span class="sig-prename descclassname"><span class="pre">dostools.file_handling.tags.</span></span><span class="sig-name descname"><span class="pre">shorten_fname_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/dostools/file_handling/tags.html#shorten_fname_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dostools.file_handling.tags.shorten_fname_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortens the fname_format to remove the “vtype” and “remove” tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname_format</strong> (<em>str</em>) – The format of the fname with parameter names separated
+by the deliminator specified by fname_split.
+ex. “date_sampleinfo_fps_run”</p></li>
+<li><p><strong>optional_settings</strong> (<em>dict</em>) – A dictionary of optional settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Settings and Defaults</dt>
+<dd class="field-even"><p><strong>fname_split</strong> (<em>string</em>) – The deliminator for splitting folder/file names, used in fname_format.
+Default is “_”.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>shorten_fname_format</strong> (<em>str</em>) – fname_format with “vtype” and “remove” tags removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-dostools.file_handling">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dostools.file_handling" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">dostools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">dostools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="dostools.html">dostools package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">dostools</a><ul>
+  <li><a href="dostools.html">dostools package</a><ul>
+      <li>Previous: <a href="dostools.data_processing.html" title="previous chapter">dostools.data_processing package</a></li>
+      <li>Next: <a href="dostools.image_processing.html" title="next chapter">dostools.image_processing package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Rob Learsch and Red Lhota.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/dostools.file_handling.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

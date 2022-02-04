@@ -73,10 +73,15 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
         df_header[i] = constant_fitting_header[i - len(header_params)]
 
     lambdaE_df = lambdaE_df.rename(columns=df_header)
-    lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
-    lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)']*1000
-    lambdaE_df['R^2'] = (lambdaE_df['R'])**2
-    lambdaE_df = lambdaE_df.drop(["-b","Intercept","R","Lambda E (s)", ],axis=1)
+    try:
+        lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
+        lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)'] * 1000
+        lambdaE_df['R^2'] = (lambdaE_df['R']) ** 2
+        lambdaE_df = lambdaE_df.drop(["-b", "Intercept", "R", "Lambda E (s)", ], axis=1)
+    except KeyError:
+        #print("Error in fitting csv")
+        pass
+
     return lambdaE_df
 
 def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_settings: dict = {}) -> pd.DataFrame:
@@ -130,8 +135,11 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
             Dtc_D0 = run_dataset.loc[0, "Dtc/D0"]
-            fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
-            fitting_results_list.append(fitting_results_temp)
+            try:
+                fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
+                fitting_results_list.append(fitting_results_temp)
+            except ValueError:
+                print("Error in fitting csv of Sample: " + str(sample) + " Run: " + str(run))
     #### TODO: Clean up the dataframe column names ###
     summary_df = annotate_summary_df(fitting_results_list, header_params)
     return summary_df

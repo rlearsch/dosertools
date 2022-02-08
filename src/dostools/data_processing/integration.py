@@ -491,9 +491,16 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike],
         pool.starmap(multiprocess_binaries_to_csvs, bin_to_csv_arguments)
         pool.close()
 
-    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
-    time_layout, _ = figures.layout_csvs(df)
-    #time_layout, _, _ = figures.layout_csvs(df)
+    df_list = []
+    csvs = get_csvs(csv_folder)
+    # Runs the processing for each csv in the folder.
+    for csv in csvs:
+        sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
+        df_list.append(sample_df)
+    df = pd.concat(df_list, ignore_index=True)
+
+    plot_normalized = False
+    time_layout = figures.layout_time_csvs(df, plot_normalized)
     figures.save_figure(time_layout,'_raw',summary_folder, optional_settings)
     pass
 
@@ -635,10 +642,11 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike],
     fitting.save_summary_df(summary_df, summary_folder,optional_settings)
     processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
     fitting.save_processed_df(processed_df, summary_folder, optional_settings)
-    #_,t_tc_layout, elongational_viscosity_layout = figures.layout_csvs(processed_df)
-    _,t_tc_layout = figures.layout_csvs(processed_df)
+    plot_normalized = True
+    t_tc_layout = figures.layout_time_csvs(processed_df, plot_normalized)
+    elongational_viscosity_layout = figures.layout_viscosity_csvs(processed_df)
     figures.save_figure(t_tc_layout,'_tc_nomralized', summary_folder, optional_settings)
-    #figures.save_figure(elongational_viscosity_layout,'_elongational_viscosity',summary_folder, optional_settings)
+    figures.save_figure(elongational_viscosity_layout,'_elongational_viscosity',summary_folder, optional_settings)
     pass
 
 

@@ -3,8 +3,8 @@ import os
 import time
 import multiprocessing
 import multiprocessing.pool
-
 import numpy as np
+import pandas as pd
 
 import image_processing.tiff_handling as th
 import image_processing.binary as binary
@@ -12,7 +12,7 @@ import file_handling.folder as folder
 import file_handling.tags as tags
 
 import data_processing.fitting as fitting
-import data_processing.csv as csv
+import data_processing.csv as dpcsv
 import data_processing.figures as figures
 
 def set_defaults(optional_settings: dict = {}) -> dict:
@@ -479,7 +479,8 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike],
         os.mkdir(csv_folder)
 
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
-    bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings) for subfolder_index in range(0,len(subfolders)))
+    bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic,
+                             optional_settings) for subfolder_index in range(0,len(subfolders)))
     tic = time.time()
 
     if verbose:
@@ -492,10 +493,10 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike],
         pool.close()
 
     df_list = []
-    csvs = get_csvs(csv_folder)
+    csvs = dpcsv.get_csvs(csv_folder)
     # Runs the processing for each csv in the folder.
     for csv in csvs:
-        sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
+        sample_df = dpcsv.csv_to_dataframe(csv,short_fname_format,sampleinfo_format,optional_settings)
         df_list.append(sample_df)
     df = pd.concat(df_list, ignore_index=True)
 
@@ -635,7 +636,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike],
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
+    df = dpcsv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
     if not os.path.isdir(summary_folder):
         os.mkdir(summary_folder)

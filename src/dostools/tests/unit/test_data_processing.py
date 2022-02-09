@@ -278,7 +278,8 @@ class TestCSVToDataFrame:
     """
 
     # Sets up sample data.
-    data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
+    data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],
+            "time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
     fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
     fname_format = "date_sampleinfo_fps_run"
@@ -315,10 +316,6 @@ class TestCSVToDataFrame:
         # Checks standard columns for every dataset.
         assert "time (s)" in columns
         assert "D/D0" in columns
-        assert "strain rate (1/s)" in columns
-        assert "tc (s)" in columns
-        assert "Dtc/D0" in columns
-        assert "t - tc (s)" in columns
 
         # Checks columns from filename.
         assert "date" in columns
@@ -369,6 +366,7 @@ class TestGenerateDF:
     # Sets up sample data.
     data = {"D/D0":[1,0.9,0,0.8,0.5,0.2,0.1,0.01,0,0,0,0,0,0.2,0.3,0,0],"time (s)":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6]}
     dataset = pd.DataFrame(data)
+    fname = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k_1"
     fname_base = datetime.today().strftime('%Y%m%d') + "_1M-PEO-0.01wtpt_fps-25k"
     fname_format = "date_sampleinfo_fps_run"
     sampleinfo_format = "mw-backbone-conc"
@@ -383,6 +381,35 @@ class TestGenerateDF:
             self.dataset.to_csv(path,index=False)
 
         assert type(dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)) is pd.DataFrame
+
+    def test_correct_columns(self,tmp_path):
+        # Fails if generate_df does not return correct columns.
+
+        # Constructs sample file.
+        csv_name = self.fname + ".csv"
+        path = tmp_path / csv_name
+        self.dataset.to_csv(path,index=False)
+        csv = str(path)
+
+        # Checks columns of output.
+        columns = dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format).columns
+
+        # Checks standard columns for every dataset.
+        assert "time (s)" in columns
+        assert "D/D0" in columns
+        assert "strain rate (1/s)" in columns
+        assert "tc (s)" in columns
+        assert "Dtc/D0" in columns
+        assert "t - tc (s)" in columns
+
+        # Checks columns from filename.
+        assert "date" in columns
+        assert "sample" in columns
+        assert "mw" in columns
+        assert "backbone" in columns
+        assert "conc" in columns
+        assert "fps" in columns
+        assert "run" in columns
 
     def test_correct_values(self,tmp_path,fixtures_fitting):
         # Fails if generate_df does not return correct_values.
@@ -1093,25 +1120,31 @@ class TestBinariesToCSVs:
         Tests if binaries_to_csvs produces print statements if verbose is True.
     """
 
-    def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format):
+    def test_saves_csvs(self,tmp_path,fname,test_sequence,short_fname_format, sampleinfo_format):
         # Fails if binaries_to_csvs does not save csvs or if the csv is
         # incorrect.
         csv_folder = tmp_path / "csv"
+        summary_folder = tmp_path / "summary"
         os.mkdir(csv_folder)
-        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format)
+        os.mkdir(summary_folder)
+
+        integration.binaries_to_csvs(test_sequence, csv_folder, summary_folder, short_fname_format, sampleinfo_format)
         assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
 
-    def test_verbose(self,tmp_path,capfd,test_sequence,short_fname_format):
+    def test_verbose(self,tmp_path,capfd,test_sequence,short_fname_format, sampleinfo_format):
         # Fails if binaries_to_csvs does not produce print statements if
         # verbose is True.
         csv_folder = tmp_path / "csv"
+        summary_folder = tmp_path / "summary"
         os.mkdir(csv_folder)
+        os.mkdir(summary_folder)
         optional_settings = {"verbose" : True}
-        integration.binaries_to_csvs(test_sequence, csv_folder, short_fname_format, optional_settings)
+        integration.binaries_to_csvs(test_sequence, csv_folder, summary_folder, short_fname_format,sampleinfo_format,
+                                     optional_settings)
 
         out, err = capfd.readouterr()
         print(out)
@@ -1133,16 +1166,19 @@ class TestVideosToCSVs:
     """
 
 
-
-    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder,long_fname_format):
+    def test_saves_binary_files(self,tmp_path,videos_folder,image_count,fname,bin_folder,long_fname_format,
+                                sampleinfo_format):
         # Fails if videos_to_csvs does not save binary images or if those
         # binary images are incorrect.
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
+        summary_folder = tmp_path / "summary"
+        os.mkdir(summary_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, summary_folder, long_fname_format,
+                                   sampleinfo_format, optional_settings)
         for i in range(0,image_count):
             assert os.path.exists(os.path.join(images_folder, fname, "bin", f"{i:03}." + "png"))
         output_path = os.path.join(images_folder,fname,"bin","*")
@@ -1152,15 +1188,18 @@ class TestVideosToCSVs:
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
 
-    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname,long_fname_format):
+    def test_saves_csvs(self,tmp_path,videos_folder,test_sequence,fname,long_fname_format, sampleinfo_format):
         # Fails if videos_to_binaries does not save csvs or if the csv is
         # incorrect.
         images_folder = tmp_path / "images"
         os.mkdir(images_folder)
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
+        summary_folder = tmp_path / "summary"
+        os.mkdir(summary_folder)
         optional_settings = {"experiment_tag" : ''}
-        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, long_fname_format, optional_settings)
+        integration.videos_to_csvs(videos_folder, images_folder, csv_folder, summary_folder, long_fname_format,
+                                   sampleinfo_format, optional_settings)
         assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
         test_data = pd.read_csv(os.path.join(test_sequence,fname,"csv",fname + ".csv"))
         results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
@@ -1185,7 +1224,7 @@ class TestCSVsToSummaries:
         assert os.path.isdir(save_folder)
         saved_files = os.listdir(save_folder)
         for filename in saved_files:
-            assert '.csv' in filename
+            assert '.csv' or '.html' in filename
             if 'summary' in filename:
                 file_location = os.path.join(save_folder, filename)
                 test_summary_df = pd.read_csv(file_location)

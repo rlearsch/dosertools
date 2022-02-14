@@ -3,8 +3,8 @@ import os
 import time
 import multiprocessing
 import multiprocessing.pool
-
 import numpy as np
+import pandas as pd
 
 import image_processing.tiff_handling as th
 import image_processing.binary as binary
@@ -12,7 +12,8 @@ import file_handling.folder as folder
 import file_handling.tags as tags
 
 import data_processing.fitting as fitting
-import data_processing.csv as csv
+import data_processing.csv as dpcsv
+import data_processing.figures as figures
 
 def set_defaults(optional_settings: dict = {}) -> dict:
     """
@@ -188,7 +189,9 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["cpu_count"] = os.cpu_count()
     return settings
 
-def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg_videos: list, images_folder: typing.Union[str, bytes, os.PathLike], tic: float, optional_settings: dict = {}) -> None:
+def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg_videos: list,
+                            images_folder: typing.Union[str, bytes, os.PathLike], tic: float,
+                            optional_settings: dict = {}) -> None:
     """
     Converts videos in given folder into binary images.
 
@@ -273,7 +276,10 @@ def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg
         print("Time elapsed (videos to binaries): " + str(np.round((toc-tic))) + " seconds")
     pass
 
-def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, tic: float, optional_settings: dict = {}) -> None:
+def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list,
+                                  images_folder: typing.Union[str, bytes, os.PathLike],
+                                  csv_folder: typing.Union[str, bytes, os.PathLike],
+                                  short_fname_format: str, tic: float, optional_settings: dict = {}) -> None:
     """
     Converts binary image folders into csvs of D/D0 vs. time.
 
@@ -338,7 +344,9 @@ def multiprocess_binaries_to_csvs(subfolder_index: int, subfolders: list, images
     pass
 
 
-def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],images_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
+def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],
+                       images_folder: typing.Union[str, bytes, os.PathLike],
+                       fname_format: str, optional_settings: dict = {}):
     """
     Converts videos in given folder into binary images.
 
@@ -424,7 +432,10 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],imag
 
     pass
 
-def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], short_fname_format: str, optional_settings: dict = {}):
+def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike],
+                     csv_folder: typing.Union[str, bytes, os.PathLike],
+                     summary_folder: typing.Union[str, bytes, os.PathLike],
+                     short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Converts binary image folders into csvs of D/D0 vs. time.
 
@@ -468,7 +479,8 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
         os.mkdir(csv_folder)
 
     subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
-    bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings) for subfolder_index in range(0,len(subfolders)))
+    bin_to_csv_arguments = ((subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic,
+                             optional_settings) for subfolder_index in range(0,len(subfolders)))
     tic = time.time()
 
     if verbose:
@@ -480,9 +492,24 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike], csv_f
         pool.starmap(multiprocess_binaries_to_csvs, bin_to_csv_arguments)
         pool.close()
 
+    df_list = []
+    csvs = dpcsv.get_csvs(csv_folder)
+    # Runs the processing for each csv in the folder.
+    for csv in csvs:
+        sample_df = dpcsv.csv_to_dataframe(csv,short_fname_format,sampleinfo_format,optional_settings)
+        df_list.append(sample_df)
+    df = pd.concat(df_list, ignore_index=True)
+
+    plot_normalized = False
+    time_layout = figures.layout_time_csvs(df, plot_normalized)
+    figures.save_figure(time_layout,'_raw',summary_folder, optional_settings)
     pass
 
-def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], fname_format: str, optional_settings: dict = {}):
+def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike],
+                   images_folder: typing.Union[str, bytes, os.PathLike],
+                   csv_folder: typing.Union[str, bytes, os.PathLike],
+                   summary_folder: typing.Union[str, bytes, os.PathLike],
+                   fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Converts videos in given folder into csvs of D/D0 vs. time.
 
@@ -550,13 +577,15 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike], images_
         Default is "tif". Do not include ".".
     """
 
-    videos_to_binaries(videos_folder,images_folder,fname_format,optional_settings)
+    videos_to_binaries(videos_folder,images_folder, fname_format, optional_settings)
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
-    binaries_to_csvs(images_folder,csv_folder,short_fname_format,optional_settings)
+    binaries_to_csvs(images_folder,csv_folder,summary_folder, short_fname_format,sampleinfo_format, optional_settings)
     pass
 
 
-def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike],
+                      summary_folder: typing.Union[str, bytes, os.PathLike],
+                      short_fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Processes the raw csvs and determines elongational relaxation time, D(tc)/D0, and elongational viscosity.
 
@@ -564,7 +593,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     ----------
     csv_folder: path-like
         Path to a folder in which to find the csv containing D/D0 vs. time.
-    summary_save_location: path-like
+    summary_folder: path-like
             Path to a folder in which to save the csv of the summary and the annotated datatset
     short_fname_format: str
         The format of the fname with parameter names separated
@@ -607,17 +636,26 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike], summary
     if verbose:
         print("Processing csvs of D/D0 versus time into annotated summary csvs and fitting the elasto-capillary regime.")
 
-    df = csv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
+    df = dpcsv.generate_df(csv_folder, short_fname_format, sampleinfo_format, optional_settings)
     summary_df = fitting.make_summary_dataframe(df, sampleinfo_format, optional_settings)
-    if not os.path.isdir(summary_save_location):
-        os.mkdir(summary_save_location)
-    fitting.save_summary_df(summary_df, summary_save_location,optional_settings)
+    if not os.path.isdir(summary_folder):
+        os.mkdir(summary_folder)
+    fitting.save_summary_df(summary_df, summary_folder,optional_settings)
     processed_df = fitting.calculate_elongational_visc(df, summary_df, optional_settings)
-    fitting.save_processed_df(processed_df, summary_save_location, optional_settings)
+    fitting.save_processed_df(processed_df, summary_folder, optional_settings)
+    plot_normalized = True
+    t_tc_layout = figures.layout_time_csvs(processed_df, plot_normalized)
+    elongational_viscosity_layout = figures.layout_viscosity_csvs(processed_df)
+    figures.save_figure(t_tc_layout,'_tc_nomralized', summary_folder, optional_settings)
+    figures.save_figure(elongational_viscosity_layout,'_elongational_viscosity',summary_folder, optional_settings)
     pass
 
 
-def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], images_folder: typing.Union[str, bytes, os.PathLike], csv_folder: typing.Union[str, bytes, os.PathLike], summary_save_location: typing.Union[str, bytes, os.PathLike], fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
+def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike],
+                        images_folder: typing.Union[str, bytes, os.PathLike],
+                        csv_folder: typing.Union[str, bytes, os.PathLike],
+                        summary_folder: typing.Union[str, bytes, os.PathLike],
+                        fname_format: str, sampleinfo_format: str, optional_settings: dict = {}):
     """
     Full integrating function: converts from videos to csv files
 
@@ -649,7 +687,8 @@ def videos_to_summaries(videos_folder: typing.Union[str, bytes, os.PathLike], im
     #### This is just a draft, I have written no tests for it...
     #### ... but it should work, right? Just need some optional breakpoints ###
 
-    videos_to_csvs(videos_folder, images_folder, csv_folder, fname_format, optional_settings)
+    videos_to_csvs(videos_folder, images_folder, csv_folder, summary_folder, fname_format,
+                   sampleinfo_format, optional_settings)
     short_fname_format = tags.shorten_fname_format(fname_format, optional_settings)
-    csvs_to_summaries(csv_folder, summary_save_location, short_fname_format, sampleinfo_format, optional_settings)
+    csvs_to_summaries(csv_folder, summary_folder, short_fname_format, sampleinfo_format, optional_settings)
     pass

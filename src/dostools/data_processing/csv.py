@@ -28,6 +28,7 @@ def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     csvs = glob.glob(os.path.join(csv_location,"*.csv"))
     return sorted(csvs)
 
+
 def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, optional_settings: dict = {}) -> pd.DataFrame:
     """
     Reads in a csv into a dataframe with sample parameters.
@@ -65,16 +66,7 @@ def csv_to_dataframe(csv : str, fname_format : str, sampleinfo_format : str, opt
         dataframe with data from csv, sample information from filename,
         strain rate and critical time calculated
     """
-
     dataset = pd.read_csv(csv)
-
-    # Truncates the data before the longest block of zeros.
-    dataset = extension.truncate_data(dataset)
-    # Adds the strain rate to the dataset.
-    dataset = extension.add_strain_rate(dataset)
-
-    # Finds critical time by locating the maximum strain rate within the bounds.
-    dataset = extension.add_critical_time(dataset, optional_settings)
 
     # Reads in parameters from file name and add to dataframe.
     fname = Path(csv).name
@@ -124,6 +116,12 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_form
     # Runs the processing for each csv in the folder.
     for csv in csvs:
         sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
+        # Truncates the data before the longest block of zeros.
+        sample_df = extension.truncate_data(sample_df)
+        # Adds the strain rate to the dataset.
+        sample_df = extension.add_strain_rate(sample_df)
+        # Finds critical time by locating the maximum strain rate within the bounds.
+        sample_df = extension.add_critical_time(sample_df, optional_settings)
         df_list.append(sample_df)
     df = pd.concat(df_list,ignore_index=True)
 

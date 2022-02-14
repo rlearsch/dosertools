@@ -973,7 +973,7 @@ class TestSetDefaults:
         optional_settings = {"one_background" : True}
         settings = integration.set_defaults(optional_settings)
         assert settings["fname_split"] == "_"
-        
+
 class TestMultiprocessingVideoToBinary:
     """
     Tests
@@ -1004,9 +1004,9 @@ class TestMultiprocessingVideoToBinary:
         target_sequence = skimage.io.imread_collection(str(target_path))
         for i in range(0,len(output_sequence)):
             assert (np.all(target_sequence[i] == output_sequence[i]))
-    
+
     def test_verbose(self,tmp_path,capfd, test_sequence, fname, short_fname_format, videos_folder):
-        
+
         optional_settings = {"verbose" : True, "experiment_tag" : ''}
 
         fnames, exp_videos, bg_videos = folder.select_video_folders(videos_folder, self.fname_format, optional_settings)
@@ -1079,9 +1079,9 @@ class TestMultiprocessingBinToCSVs:
 
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        
+
         optional_settings = {"verbose" : False}
-    
+
         tic = time.time()
         integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
         assert os.path.exists(os.path.join(csv_folder,fname + ".csv"))
@@ -1089,16 +1089,16 @@ class TestMultiprocessingBinToCSVs:
         results = pd.read_csv(os.path.join(csv_folder,fname + ".csv"))
         for column in test_data.columns:
             assert pd.Series.eq(round(results[column],4),round(test_data[column],4)).all()
-    
+
     def test_verbose(self,tmp_path,capfd, test_sequence, fname, short_fname_format):
         images_folder = test_sequence
         subfolders = [ f.name for f in os.scandir(images_folder) if f.is_dir()]
         subfolder_index = 0
-        
+
         csv_folder = tmp_path / "csv"
         os.mkdir(csv_folder)
-        
-        optional_settings = {"verbose" : True}        
+
+        optional_settings = {"verbose" : True}
         tic = time.time()
         integration.multiprocess_binaries_to_csvs(subfolder_index, subfolders, images_folder, csv_folder, short_fname_format, tic, optional_settings)
 
@@ -1150,8 +1150,8 @@ class TestBinariesToCSVs:
         print(out)
         assert "Processing 1 binary folder" in out
         assert "Finished processing binaries into csvs of D/D0 versus time." in out
-        
-        
+
+
 class TestVideosToCSVs:
     """
     Tests videos_to_csvs.
@@ -1253,8 +1253,8 @@ class TestCSVsToSummaries:
 
 def test_multiprocessing_faster_than_1_core():
     """
-    Fails if multiprocessing is not correctly sharing tasks.   
-    
+    Fails if multiprocessing is not correctly sharing tasks.
+
     """
     sleep_inputs = ((0.5, 0.5, 0.5, 0.5, 0.5))
     pool = multiprocessing.Pool(os.cpu_count())
@@ -1274,5 +1274,5 @@ def test_multiprocessing_faster_than_1_core():
     time_1_core = (toc-tic)
 
     assert time_1_core >= time_max_cores
-    
+
 # TODO: TestVideosToSummaries

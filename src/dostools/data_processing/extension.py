@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-import data_processing.array as dparray
-import data_processing.integration as integration
+from . import array as dparray
+from . import integration as integration
 
 def truncate_data(dataset : pd.DataFrame, before: bool = True) -> pd.DataFrame:
     """
@@ -87,15 +87,16 @@ def truncate_data(dataset : pd.DataFrame, before: bool = True) -> pd.DataFrame:
     blocks = dparray.continuous_zero(np.array(dataset["D/D0"]))
     # Finds the length of those blocks.
     block_length = np.transpose(blocks)[:][1] - np.transpose(blocks)[:][0]
-    longest_block = np.argmax(block_length)
-    if before:
-        # Defines the end of the dataset as the beginning of the longest block
-        # of zeroes.
-        end_data = blocks[longest_block][0]
-    else:
-        # Defines the end of the dataset as the end the longest block of zeroes.
-        end_data = blocks[longest_block][1]
-    dataset = dataset[0:end_data]
+    if len(block_length): # Skips truncation if there are no blocks of zeroes
+        longest_block = np.argmax(block_length)
+        if before:
+            # Defines the end of the dataset as the beginning of the longest block
+            # of zeroes.
+            end_data = blocks[longest_block][0]
+        else:
+            # Defines the end of the dataset as the end the longest block of zeroes.
+            end_data = blocks[longest_block][1]
+        dataset = dataset[0:end_data]
     return dataset
 
 def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:

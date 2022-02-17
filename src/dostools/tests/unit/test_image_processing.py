@@ -47,6 +47,12 @@ def images_list(fixtures_binary):
 def bg_median(fixtures_folder):
     return np.load(os.path.join(fixtures_folder,"bg_median_array.npy"))
 
+@pytest.fixture
+def bg_drop_removed(fixtures_folder):
+    return np.load(os.path.join(fixtures_folder,"bg_median_drop_removed.npy"))
+
+
+
 ## TODO: class for tests for define_image_parameters
 
 def test_define_image_parameters(experimental_video,target_params_dict):
@@ -103,12 +109,14 @@ class TestConvertTiffImage:
         # Reports folders already exist
         folders_exist = [True, True, True]
 
+        # If all folders exist, should skip binary and intermediates
         th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         assert not os.path.exists(os.path.join(save_location,"crop","261.tiff"))
         assert not os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert not os.path.exists(os.path.join(save_location,"bin","261.png"))
 
-        # Represents case where binary is saved, but intermediates were not
+        # Represents case where binary already exists, but intermediates were not
+        # In that case, should save intermediates, but not binary.
         folders_exist = [True, False, False]
         th.convert_tiff_image(image, bg_median, target_params_dict, self.image_number, save_location, folders_exist, self.optional_settings)
         assert os.path.exists(os.path.join(save_location,"crop","261.tiff"))
@@ -131,6 +139,26 @@ class TestConvertTiffImage:
         assert os.path.exists(os.path.join(save_location,"bg_sub","261.tiff"))
         assert os.path.exists(os.path.join(save_location,"bin","261.png"))
 
+    def test_remove_drop_from_background(self,tmp_path, image, target_params_dict, bg_drop_removed, fixtures_folder):
+        # Fails if convert_tiff_image does not produce expected result when
+        # given a background with the background drop on the substrate removed.
+        save_location = tmp_path
+
+        # Creates all folders
+        folder.make_destination_folders(save_location)
+        # Reports folders already exist
+        folders_exist = [False, True, True]
+
+        params_dict = target_params_dict
+
+        # Using bg_median with bg_drop removed, checks if result matches
+        # saved target.
+        th.convert_tiff_image(image, bg_drop_removed, params_dict, self.image_number, save_location, folders_exist)
+        target_bin_drop_removed = skimage.io.imread(os.path.join(fixtures_folder,"test_processed_images","targets","bin_drop_removed.png"))
+        produced_bin_drop_removed = skimage.io.imread(os.path.join(save_location,"bin","261.png"))
+        assert np.all(target_bin_drop_removed == produced_bin_drop_removed)
+
+
 class TestProduceBackgroundImage:
     """
     Tests produce_background_image.
@@ -146,6 +174,60 @@ class TestProduceBackgroundImage:
     def test_produces_correct_background(self,target_params_dict,background_video,bg_median):
         bg_median_test = th.produce_background_image(background_video, target_params_dict)
         assert np.all(bg_median.astype(int) == bg_median_test.astype(int))
+
+class TestRemoveBGDrop:
+    """
+    Tests remove_bg_drop
+
+    Tests
+    -----
+    test_returns_correct_shape_array:
+        Checks if remove_bg_drop returns an array and if that array is the
+        same shape as the bg_median given
+    test_returns_bg_with_drop_removed:
+        Checks if remove_bg_drop returns the bg_median given with the
+        background drop removed
+    """
+
+    # TODO: docstring
+
+    def test_returns_correct_shape_array(self,bg_median):
+        # Fails if remove_bg_drop does not return an ndarray of the correct
+        # shape
+        bg_median_drop_removed = th.remove_bg_drop(bg_median)
+        assert type(bg_median_drop_removed) is np.ndarray
+        assert bg_median_drop_removed.shape == bg_median.shape
+
+    def test_returns_bg_with_drop_removed(self,bg_median,bg_drop_removed):
+        # Fails if remove_bg_drop does not remove the bg_drop from the bottom
+        # of the background
+        bg_median_drop_removed = th.remove_bg_drop(bg_median)
+        assert np.all(bg_median_drop_removed.astype(int) == bg_drop_removed.astype(int))
+
+class TestBGDropTopEdge:
+    """
+    Tests bg_drop_top_edge
+
+    Tests
+    -----
+    test_returns_list:
+        Checks if bg_drop_top_edge returns a list
+    test_returns_correct_values:
+        Checks if bg_drop_top_edge returns expected values for given background
+    """
+
+    @pytest.mark.bg_drop
+    def test_returns_list(self,bg_median):
+        # Fails if bg_drop_top_edge does not return a list
+        assert type(th.bg_drop_top_edge(bg_median)) is list
+
+    @pytest.mark.bg_drop
+    def test_returns_correct_values(self,bg_median,fixtures_folder):
+        # Fails if bg_drop_top_edge does not return correct values for test
+        # case example background.
+        top_edge = th.bg_drop_top_edge(bg_median)
+        target_top_edge = np.load(os.path.join(fixtures_folder,"bg_drop_edge.npy"))
+        assert np.all(top_edge == target_top_edge)
 
 class TestConvertTiffSequenceToBinary:
     """
@@ -209,6 +291,7 @@ def test_tiffs_to_binary():
     # TODO: Image format test
     # TODO: Test verbose mode
     # TODO: Test skip_existing
+    # TODO: test bg_drop_removal_subtraction
 
     #assert save_location exists
     #assert produced video matches test_sequence
@@ -228,7 +311,7 @@ class TestTopBorder:
 
     def test_returns_int(self,bg_median):
         # Fails if top_border does not return an integer.
-        assert type(th.top_border(bg_median).item()) is int
+        assert type(th.top_border(bg_median)) is int
 
     def test_returns_correct_value(self,bg_median):
         # Fails if top_border does not return correct value for test background.
@@ -236,7 +319,7 @@ class TestTopBorder:
 
 class TestExportParams:
     """
-    Test export_params
+    Tests export_params
 
     Tests
     -----
@@ -268,7 +351,7 @@ class TestExportParams:
 
 class TestBottomBorder:
     """
-    Test bottom_border
+    Tests bottom_border
 
     Tests
     -----
@@ -295,7 +378,7 @@ class TestBottomBorder:
 
 class TestCalculateMinDiameter:
     """
-    Test calculate_min_diameter
+    Tests calculate_min_diameter
 
     Tests
     -----
@@ -330,7 +413,7 @@ class TestCalculateMinDiameter:
 
 class TestBinariesToDiameterTime:
     """
-    Test binaries_to_diameter_time
+    Tests binaries_to_diameter_time
 
     Tests
     -----
@@ -370,7 +453,7 @@ class TestBinariesToDiameterTime:
 
 class TestBinaryImagesToCSV:
     """
-    Test binary_images_to_csv
+    Tests binary_images_to_csv
 
     Tests
     -----

@@ -38,7 +38,7 @@ def add_saved_params_to_dict(save_location: typing.Union[str, bytes, os.PathLike
 
 def bottom_border(image : np.ndarray) -> int:
     """
-    Finds bottom border of supplied image
+    Finds bottom border of supplied image.
 
     Finds bottom border of supplied image for analysis by finding the row with
     the maximum number of white pixels below the half the height of the image

@@ -64,6 +64,11 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
         Default is False.
+    bg_drop_removal: bool
+        True to remove the background drop from the background that is
+        subtracted from the image before binarization. False to not alter
+        the background.
+        Default is False.
     save_crop: bool
         True to save intermediate cropped images (i.e. experimental video
         images cropped but not background-subtracted or binarized).
@@ -146,6 +151,10 @@ def set_defaults(optional_settings: dict = {}) -> dict:
         settings["one_background"] = optional_settings["one_background"]
     except KeyError:
         settings["one_background"] = False
+    try:
+        settings["bg_drop_removal"] = optional_settings["bg_drop_removal"]
+    except KeyError:
+        settings["bg_drop_removal"] = False
     try:
         settings["save_crop"] = optional_settings["save_crop"]
     except KeyError:

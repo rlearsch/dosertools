@@ -193,6 +193,81 @@ def produce_background_image(background_video: skimage.io.collection.ImageCollec
 
     return bg_median
 
+def remove_bg_drop(bg_median: np.ndarray):
+    """
+    Removes the background drop on the substrate from the background image.
+
+    Using the edge from bg_drop_top_edge, replaces all pixels at or below it
+    with the maximum in the background.
+
+    Parameters
+    ----------
+    bg_median: np.ndarray
+        median of the background video from produce_background_image
+
+    Returns
+    -------
+    bg_new: np.ndarray
+        bg_median with the drop at the bottom set to the maximum value
+    """
+
+    # Creates a duplicate of the background
+    bg_new = bg_median
+
+    # Finds the maximum of the bg_median array
+    #max_value = np.iinfo(bg_median.dtype).max
+    max_value = bg_median.max()
+
+    # Selects pixels below the top of the background drop that are in the drop
+    # based on edge detection and sets those pixels to the maximum available
+    # for the background
+    top_edge = bg_drop_top_edge(bg_median)
+
+    for i in range(0,np.shape(bg_new)[0]):
+        for j in range (0,np.shape(bg_new)[1]):
+            if i >= top_edge[j]:
+                bg_new[i][j] = max_value
+
+    # Returns the bg_median with the drop set to max
+    return bg_new
+
+def bg_drop_top_edge(bg_median: np.ndarray):
+    """
+    Determines the top edge of the background drop on the substrate.
+
+    Detects the lowest edge in the background image. Uses Sobel edge detection.
+
+
+    Parameters
+    ----------
+    bg_median: np.ndarray
+        median of the background video from produce_background_image
+
+    Returns
+    -------
+    bg_drop_top_edge: list
+        list of pixel y-values for the top edge of the background
+    """
+
+    # Finds edges in the background image using the Sobel edge detection method
+    edge_sobel = skimage.filters.sobel(bg_median)
+    sobel_otsu = skimage.filters.threshold_otsu(edge_sobel)
+    binary_sobel = (edge_sobel < sobel_otsu)*1
+    # binary sobel: edge = 0, nonedge = 1
+
+    height = np.shape(bg_median)[1]
+    bg_drop_top_edge = []
+    for i in range(0, np.shape(binary_sobel)[1]):
+        edge = dparray.continuous_zero(binary_sobel[:,i])
+        if len(edge):
+            # Returns top pixel of bottom edge if there is an edge detected
+            bg_drop_top_edge.append(edge[-1][0])
+        else:
+            # Returns the bottom pixel if no edge exists
+            bg_drop_top_edge.append(height-1)
+
+    return bg_drop_top_edge
+
 def convert_tiff_sequence_to_binary(experimental_video: skimage.io.collection.ImageCollection, bg_median: np.ndarray, params_dict: dict, save_location: typing.Union[str, bytes, os.PathLike], folders_exist: typing.Tuple[bool,bool,bool], optional_settings: dict = {}):
     """
     Takes as arguments the skimage image sequence holding the experimental video and the background image to subtract.
@@ -352,6 +427,11 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
         True to save background-subtracted images (i.e. experimental video
         images cropped and background-subtracted but not binarized).
         Default is False.
+    bg_drop_removal: bool
+        True to remove the background drop from the background that is
+        subtracted from the image before binarization. False to not alter
+        the background.
+        Default is False.
     skip_existing: bool
         Determines the behavior when a file already appears exists
         when a function would generate it. True to skip any existing files.
@@ -377,6 +457,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     skip_existing = settings["skip_existing"]
     image_extension = settings["image_extension"]
     verbose = settings["verbose"]
+    bg_drop_removal = settings["bg_drop_removal"]
     fname = os.path.basename(experimental_video_folder)
 
     folders_exist = folder.make_destination_folders(images_location, optional_settings)
@@ -395,6 +476,8 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
             background_video = skimage.io.imread_collection(os.path.join(background_video_folder,"*." + image_extension))
         params_dict = define_image_parameters(experimental_video, optional_settings)
         bg_median = produce_background_image(background_video, params_dict, optional_settings)
+        if bg_drop_removal:
+            bg_median = remove_bg_drop(bg_median)
         convert_tiff_sequence_to_binary(experimental_video, bg_median, params_dict, images_location, folders_exist, optional_settings)
         params_dict["window_top"] = top_border(bg_median)
         export_params(images_location, params_dict)
@@ -433,7 +516,7 @@ def top_border(bg_median: np.ndarray) -> int:
     binary_sum = np.sum(bg_binary, axis = 1)
     white_blocks = dparray.continuous_nonzero(binary_sum)
     top = white_blocks[0][1] # Take the last row of the first block of white.
-    return top
+    return top.item()
 
 def export_params(images_location: typing.Union[str, bytes, os.PathLike], params_dict: dict):
     """

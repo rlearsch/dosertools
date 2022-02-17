@@ -5,8 +5,8 @@ import os
 import pandas as pd
 from pathlib import Path
 
-import file_handling.folder as folder
-import data_processing.integration as integration
+from ..file_handling import folder as folder
+from ..data_processing import integration as integration
 
 def add_saved_params_to_dict(save_location: typing.Union[str, bytes, os.PathLike],params_dict: dict):
     """

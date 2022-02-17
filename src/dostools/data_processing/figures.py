@@ -6,7 +6,7 @@ import pandas as pd
 import holoviews as hv
 hv.extension('bokeh')
 
-import data_processing.integration as integration
+from . import integration as integration
 
 
 def layout_time_csvs(df: pd.DataFrame, plot_normalized: bool) -> hv.Points:

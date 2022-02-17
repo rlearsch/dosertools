@@ -6,14 +6,13 @@ import multiprocessing.pool
 import numpy as np
 import pandas as pd
 
-import image_processing.tiff_handling as th
-import image_processing.binary as binary
-import file_handling.folder as folder
-import file_handling.tags as tags
-
-import data_processing.fitting as fitting
-import data_processing.csv as dpcsv
-import data_processing.figures as figures
+from ..image_processing import tiff_handling as th
+from ..image_processing import binary as binary
+from ..file_handling import folder as folder
+from ..file_handling import tags as tags
+from . import fitting as fitting
+from . import csv as dpcsv
+from . import figures as figures
 
 def set_defaults(optional_settings: dict = {}) -> dict:
     """

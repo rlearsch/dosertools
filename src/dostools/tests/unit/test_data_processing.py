@@ -10,14 +10,14 @@ import fnmatch
 import skimage.io
 import multiprocessing
 
-import data_processing.array as dparray
-import data_processing.csv as dpcsv
-import data_processing.fitting as fitting
-import data_processing.extension as extension
-import data_processing.integration as integration
+from dostools.data_processing import array as dparray
+from dostools.data_processing import csv as dpcsv
+from dostools.data_processing import fitting as fitting
+from dostools.data_processing import extension as extension
+from dostools.data_processing import integration as integration
 
-import file_handling.folder as folder
-import file_handling.tags as tags
+from dostools.file_handling import folder as folder
+from dostools.file_handling import tags as tags
 
 @pytest.fixture
 def fixtures_fitting(fixtures_folder):
@@ -649,13 +649,14 @@ class TestAddCriticalTime:
 
 def test_find_EC_slope(fixtures_fitting):
     test_dataset = pd.read_csv(os.path.join(fixtures_fitting,"example_DOS_data.csv"))
-    slope, intercept, r_value = fitting.find_EC_slope(test_dataset, 0.1, 0.045)
+    slope, intercept, r_value, std_error = fitting.find_EC_slope(test_dataset, 0.1, 0.045)
     assert np.isclose(slope, -347.7499821602085)
     assert np.isclose(intercept, 0.2809024757035168)
     assert np.isclose(r_value,-0.9996926885633579)
+    assert np.isclose(std_error, 1.1627604374222034)
 
 def test_annotate_summary_df(fixtures_fitting):
-    #sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
+    # sample_info = "0.8MDa-PAM-1wtpct-2M-NaCl"
     # header_params was produced by the following function:
     # folder.parse_filename(sample_info,"sampleinfo","MW-Polymer-c-salt_c-salt_id",'_','-')
     # it is hard-coded in to not use folder.parse_filename in the test
@@ -665,11 +666,11 @@ def test_annotate_summary_df(fixtures_fitting):
                      'c': '1wtpct',
                      'salt_c': '2M',
                      'salt_id': 'NaCl'}
-    fitting_results_list = [[*header_params.values(), -347, 0.28, -0.999, 1, 0.56]]
-    target_lambdaE_df = pd.io.json.read_json(os.path.join(fixtures_fitting,"target_lambdaE_df.json"))
+    # fitting_results_list is in order of header_params, slope, intercept, r_value, std_error, run, Dtc/D0
+    fitting_results_list = [[*header_params.values(), -347, 0.28, -0.999, 1.16, 1, 0.56]]
     lambdaE_df = fitting.annotate_summary_df(fitting_results_list, header_params)
+    target_lambdaE_df = pd.io.json.read_json(os.path.join(fixtures_fitting,"target_lambdaE_df.json"))
     pd.testing.assert_frame_equal(lambdaE_df, target_lambdaE_df, check_dtype=False)
-    #pass
 
 class TestMakeSummaryDataframe:
     """
@@ -677,18 +678,17 @@ class TestMakeSummaryDataframe:
     # TODO: docstring, comments
     @pytest.fixture
     def generated_df(self,fixtures_fitting):
-        return pd.read_csv(os.path.join(fixtures_fitting,"fixture_generate_df.csv"))
+        return pd.read_csv(os.path.join(fixtures_fitting,"fixture_example_csvs_df.csv"))
 
     def test_default_bounds(self, fixtures_fitting, generated_df):
-        find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-c')
-        target_lambdaE_with_default_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.json"))
-        ### Setting check_dtype to false because the 0s in column R and R^2 are causing errors. 0 is very unlikely with real data ###
-        pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds, check_dtype=False)
+        find_lambdaE_with_default_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-pass-c')
+        target_lambdaE_with_default_bounds = pd.read_csv(os.path.join(fixtures_fitting,"fixture_find_lambdaE_default_bounds.csv"))
+        pd.testing.assert_frame_equal(find_lambdaE_with_default_bounds, target_lambdaE_with_default_bounds)
 
     def test_modified_bounds(self, fixtures_fitting, generated_df):
         optional_settings = {"fitting_bounds":[0.8, 0.1]}
-        find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-c',optional_settings)
-        target_lambdaE_with_modified_bounds = pd.io.json.read_json(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.json"))
+        find_lambdaE_with_modified_bounds = fitting.make_summary_dataframe(generated_df, 'MW-Polymer-pass-c',optional_settings)
+        target_lambdaE_with_modified_bounds = pd.read_csv(os.path.join(fixtures_fitting,"fixture_find_lambdaE_modified_bounds.csv"))
         pd.testing.assert_frame_equal(find_lambdaE_with_modified_bounds, target_lambdaE_with_modified_bounds)
 
     def test_verbose(self,capfd,generated_df):
@@ -1231,8 +1231,8 @@ class TestCSVsToSummaries:
             if 'annotated' in filename:
                 file_location = os.path.join(save_folder, filename)
                 test_annotated_df = pd.read_csv(file_location)
-        fixture_annotated_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-50_DOS-annotated.csv'))
-        fixture_summary_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2021-11-29_10-22-49_DOS-summary.csv'))
+        fixture_annotated_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2022-02-17_16-41-34_DOS-annotated.csv'))
+        fixture_summary_df = pd.read_csv(os.path.join(fixtures_folder,'example_csvs_outputs','2022-02-17_16-41-34_DOS-summary.csv'))
         pandas.testing.assert_frame_equal(fixture_annotated_df,test_annotated_df, check_exact=False, atol=1E-6)
         pandas.testing.assert_frame_equal(fixture_summary_df, test_summary_df, check_exact=False, atol=1E-6)
         #TODO: assert they have the correct columns?

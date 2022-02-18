@@ -58,6 +58,7 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df : pd.DataFrame
         dataframe containing lambdaE relaxation time for each run from the input df
     """
+    # TODO: make fittings_results_list entry in docstring clearer
 
     ## TODO: address issue raised in docstring
 

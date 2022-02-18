@@ -1,8 +1,8 @@
 import os
 import pytest
 
-import file_handling.folder as folder
-import file_handling.tags as tags
+from dostools.file_handling import folder as folder
+from dostools.file_handling import tags as tags
 
 # Creates sample data for folder names and filenames.
 

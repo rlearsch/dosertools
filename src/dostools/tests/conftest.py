@@ -3,7 +3,7 @@ import os
 
 @pytest.fixture(scope="module")
 def fixtures_folder():
-    return os.path.join("tests","fixtures")
+    return os.path.join("dostools", "tests","fixtures")
 
 @pytest.fixture(scope="module")
 def fname():

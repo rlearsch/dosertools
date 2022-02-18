@@ -645,7 +645,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike],
     plot_normalized = True
     t_tc_layout = figures.layout_time_csvs(processed_df, plot_normalized)
     elongational_viscosity_layout = figures.layout_viscosity_csvs(processed_df)
-    figures.save_figure(t_tc_layout,'_tc_nomralized', summary_folder, optional_settings)
+    figures.save_figure(t_tc_layout,'_tc_normalized', summary_folder, optional_settings)
     figures.save_figure(elongational_viscosity_layout,'_elongational_viscosity',summary_folder, optional_settings)
     pass
 

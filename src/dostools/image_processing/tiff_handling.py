@@ -356,9 +356,8 @@ def subtract_background_single_image(cropped_image: np.ndarray, bg_median: np.nd
     -------
     background_subtracted_image: np.ndarray
         The cropped image with the background subtraction performed
-
-
     """
+
     background_subtracted_image_org = np.int32(cropped_image) - np.int32(bg_median)
     if np.any(background_subtracted_image_org < 0):
         #this means image is darker than background
@@ -450,7 +449,6 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location
-
     """
 
     settings = integration.set_defaults(optional_settings)

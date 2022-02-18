@@ -216,12 +216,10 @@ class TestBGDropTopEdge:
         Checks if bg_drop_top_edge returns expected values for given background
     """
 
-    @pytest.mark.bg_drop
     def test_returns_list(self,bg_median):
         # Fails if bg_drop_top_edge does not return a list
         assert type(th.bg_drop_top_edge(bg_median)) is list
 
-    @pytest.mark.bg_drop
     def test_returns_correct_values(self,bg_median,fixtures_folder):
         # Fails if bg_drop_top_edge does not return correct values for test
         # case example background.

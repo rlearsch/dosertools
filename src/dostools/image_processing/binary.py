@@ -154,7 +154,7 @@ def binaries_to_diameter_time(binary_location: typing.Union[str, bytes, os.PathL
         array of the boundaries of the image to analyze in the format
         [left, top, right, bottom]
     params_dict:
-        dictionary of parameters from file name and metadate saved with
+        dictionary of parameters from file name and metadata saved with
         binary images
         requires parameters nozzle_diameter and fps
 

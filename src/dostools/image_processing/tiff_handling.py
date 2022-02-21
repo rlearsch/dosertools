@@ -12,9 +12,9 @@ import skimage.morphology
 from skimage.filters import (threshold_otsu, threshold_mean, threshold_li)
 from skimage import exposure
 
-import data_processing.array as dparray
-import file_handling.folder as folder
-import data_processing.integration as integration
+from ..data_processing import array as dparray
+from ..data_processing import integration as integration
+from ..file_handling import folder as folder
 
 def define_image_parameters(video: skimage.io.collection.ImageCollection, optional_settings: dict = {}) -> dict:
     """
@@ -366,7 +366,7 @@ def tiffs_to_binary(experimental_video_folder: typing.Union[str, bytes, os.PathL
     image_extension: string
         The extension for images in the video folder. TIFF recommended.
         Default is "tif". Do not include ".".
-    
+
     Returns
     -------
     Image sequence(s) (video) saved on the hard drive at images_location

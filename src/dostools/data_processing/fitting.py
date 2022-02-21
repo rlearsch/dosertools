@@ -9,11 +9,11 @@ from scipy.optimize import curve_fit
 from scipy.optimize import fsolve
 from scipy import stats
 
-import data_processing.array as dparray
-import data_processing.csv as process
-import file_handling.folder as folder
-import file_handling.tags as tags
-import data_processing.integration as integration
+from . import array as dparray
+#from . import csv as dpcsv
+from . import integration as integration
+from ..file_handling import folder as folder
+from ..file_handling import tags as tags
 
 
 def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing.Tuple[float, float, float]:
@@ -40,7 +40,7 @@ def find_EC_slope(run_dataset: pd.DataFrame, start: float, end: float) -> typing
     dataset_EC = run_dataset[start_index:end_index]
     log_diameter = np.log(dataset_EC['D/D0'])
     slope, intercept, r_value, p_value, std_err = stats.linregress(dataset_EC['time (s)'],log_diameter)
-    return slope, intercept, r_value
+    return slope, intercept, r_value, std_err
 
 def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.DataFrame:
     """
@@ -58,12 +58,13 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
     lambdaE_df : pd.DataFrame
         dataframe containing lambdaE relaxation time for each run from the input df
     """
+    # TODO: make fittings_results_list entry in docstring clearer
 
     ## TODO: address issue raised in docstring
 
     lambdaE_df = pd.DataFrame(fitting_results_list)
     # Constructs column headers for the summary dataframe
-    constant_fitting_header = ("-b","Intercept", "R","run","Dtc/D0")
+    constant_fitting_header = ("-b","Intercept", "R","slope standard error", "run","Dtc/D0")
     df_header = {}
     keys_list = header_params.keys()
     keys_list = list(keys_list)
@@ -77,7 +78,9 @@ def annotate_summary_df(fitting_results_list: list, header_params: dict) -> pd.D
         lambdaE_df['Lambda E (s)'] = -1/(3*lambdaE_df['-b'])
         lambdaE_df['Lambda E (ms)'] = lambdaE_df['Lambda E (s)'] * 1000
         lambdaE_df['R^2'] = (lambdaE_df['R']) ** 2
-        lambdaE_df = lambdaE_df.drop(["-b", "Intercept", "R", "Lambda E (s)", ], axis=1)
+        lambdaE_df['Lambda E standard error (s)'] = lambdaE_df["slope standard error"]/(3*(lambdaE_df['-b']**2))
+        lambdaE_df['Lambda E standard error (ms)'] = lambdaE_df['Lambda E standard error (s)'] * 1000
+        lambdaE_df = lambdaE_df.drop(["-b", "Intercept", "R", "slope standard error", 'Lambda E standard error (s)', "Lambda E (s)", ], axis=1)
     except KeyError:
         #print("Error in fitting csv")
         pass
@@ -135,6 +138,8 @@ def make_summary_dataframe(df: pd.DataFrame, sampleinfo_format: str, optional_se
             run_dataset = sample_dataset[(sample_dataset['run'] == run)]
             run_dataset = run_dataset.reset_index(drop=True)
             Dtc_D0 = run_dataset.loc[0, "Dtc/D0"]
+            if Dtc_D0 < start:
+                start = Dtc_D0
             try:
                 fitting_results_temp =  [*header_params.values(), *find_EC_slope(run_dataset, start, end),run, Dtc_D0]
                 fitting_results_list.append(fitting_results_temp)

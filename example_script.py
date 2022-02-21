@@ -14,7 +14,14 @@
 # This conditional is required for multiprocessing to work on windows
 # See https://stackoverflow.com/a/18205006 and similiar discussions
 if __name__ == '__main__':
-    import data_processing.integration as integration
+    # Imports libraries
+    import sys
+    # Adds dostools package location to the python path
+    sys.path.append('./src') # Replace './src' with the path to the folder
+    # containing the dostools package relative to this script if dostools was
+    #downloaded from repository. Omit this line if dostools is installed.
+
+    import dostools.data_processing.integration as integration
     import os
 
     ## User edittable settings ##

@@ -9,9 +9,9 @@ import skimage.filters
 from skimage.filters import (threshold_otsu, threshold_li)
 from skimage import exposure
 
-import image_processing.tiff_handling as th
-import image_processing.binary as binary
-import file_handling.folder as folder
+from dostools.image_processing import tiff_handling as th
+from dostools.image_processing import binary as binary
+from dostools.file_handling import folder as folder
 
 @pytest.fixture
 def fixtures_binary(fixtures_folder):

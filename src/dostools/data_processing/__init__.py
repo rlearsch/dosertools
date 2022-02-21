@@ -1,1 +1,1 @@
-__all__ = ["array","csv","extension","fitting","integration"]
+__all__ = ["array","csv","extension","figures","fitting","integration"]

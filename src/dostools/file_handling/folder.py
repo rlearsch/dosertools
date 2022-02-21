@@ -3,8 +3,8 @@ import typing
 import warnings
 import glob
 
-import file_handling.tags as tags
-import data_processing.integration as integration
+from . import tags as tags
+from ..data_processing import integration as integration
 
 def make_destination_folders(save_location: typing.Union[str, bytes, os.PathLike], optional_settings: dict = {}) -> typing.Tuple[bool,bool,bool]:
     """

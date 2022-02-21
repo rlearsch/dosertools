@@ -6,14 +6,13 @@ import multiprocessing.pool
 import numpy as np
 import pandas as pd
 
-import image_processing.tiff_handling as th
-import image_processing.binary as binary
-import file_handling.folder as folder
-import file_handling.tags as tags
-
-import data_processing.fitting as fitting
-import data_processing.csv as dpcsv
-import data_processing.figures as figures
+from ..image_processing import tiff_handling as th
+from ..image_processing import binary as binary
+from ..file_handling import folder as folder
+from ..file_handling import tags as tags
+from . import fitting as fitting
+from . import csv as dpcsv
+from . import figures as figures
 
 def set_defaults(optional_settings: dict = {}) -> dict:
     """
@@ -646,7 +645,7 @@ def csvs_to_summaries(csv_folder: typing.Union[str, bytes, os.PathLike],
     plot_normalized = True
     t_tc_layout = figures.layout_time_csvs(processed_df, plot_normalized)
     elongational_viscosity_layout = figures.layout_viscosity_csvs(processed_df)
-    figures.save_figure(t_tc_layout,'_tc_nomralized', summary_folder, optional_settings)
+    figures.save_figure(t_tc_layout,'_tc_normalized', summary_folder, optional_settings)
     figures.save_figure(elongational_viscosity_layout,'_elongational_viscosity',summary_folder, optional_settings)
     pass
 

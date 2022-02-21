@@ -5,8 +5,9 @@ import os
 import numpy as np
 from pathlib import Path
 
-import file_handling.tags as tags
-import data_processing.extension as extension
+from ..file_handling import tags as tags
+from . import extension as extension
+from . import integration as integration
 
 def get_csvs(csv_location : typing.Union[str, bytes, os.PathLike]) -> list:
     """
@@ -99,22 +100,32 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_form
     sampleinfo_format : str
         the format of the sampleinfo section of the fname
         separated by the deliminator specified by sample_split
-    fname_split : str, optional
-        the deliminator for splitting the name (default is "_")
-    sample_split : str, optional
-        the deliminator for splitting the sampleinfo section
-        of the fname (default is "-")
+    optional_settings: dict
+        A dictionary of optional settings.
 
     Returns
     -------
     generate_df : pd.DataFrame
         dataframe containing data from all csvs in csv_location
+
+    Optional Settings and Defaults
+    ------------------------------
+    verbose: bool
+        Determines whether processing functions print statements as they
+        progress through major steps. True to see print statements, False to
+        hide non-errors/warnings.
+        Default is False.
     """
+
+    settings = integration.set_defaults(optional_settings)
+    verbose = settings["verbose"]
 
     df_list = []
     csvs = get_csvs(csv_location)
     # Runs the processing for each csv in the folder.
     for csv in csvs:
+        if verbose:
+            print("Processing " + csv)
         sample_df = csv_to_dataframe(csv,fname_format,sampleinfo_format,optional_settings)
         # Truncates the data before the longest block of zeros.
         sample_df = extension.truncate_data(sample_df)

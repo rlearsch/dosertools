@@ -1,7 +1,7 @@
 import typing
 import warnings
 
-import data_processing.integration as integration
+from ..data_processing import integration as integration
 
 def parse_fname(fname: str, fname_format: str, sampleinfo_format: str, optional_settings: dict = {}) -> dict:
     """

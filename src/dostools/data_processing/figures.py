@@ -71,6 +71,7 @@ def layout_viscosity_csvs(df: pd.DataFrame) -> hv.Points:
     ).opts(logy=True,
            fontscale=2,
            aspect = 1.6,
+           ylim =(1E-2, 10*np.max(df["(e visc / surface tension) (s/m)"])),
     ).overlay("run"
     ).layout("sample"
     ).cols(2

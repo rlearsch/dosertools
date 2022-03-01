@@ -10,8 +10,8 @@ pipenv install
 ```
  in the terminal from your dostools directory.  
 
-# example_scripy.py
-Once this is set up, make your own copy of example_scripy.py and modify the values within. 
+# example_script.py
+Once this is set up, make your own copy of example_script.py and modify the values within. 
 
 The key variables are 
 1. videos_folder
@@ -21,10 +21,13 @@ The key variables are
 
 ### videos_folder:
 This is the path to a folder containing all of your dos videos you wish to process. You can give an explicit 
-path, eg, "C:\\Users\\rlearsch\\Documents\\Photron\\PFV4\\PCOD_Samples" or you can use the 
-os package in python. The same path could be constructed as 
+path, eg, 
 ```python
-os.path.join("C:\\", "Users","rlearsch","Documents","Photron","PFV4","PCOD_Samples")
+videos_folder = "C:\\Users\\rlearsch\\Documents\\Photron\\PFV4\\PCOD_Samples"
+```
+or you can use the os package in python. The same path could be constructed as 
+```python
+videos_folder = os.path.join("C:\\", "Users","rlearsch","Documents","Photron","PFV4","PCOD_Samples")
 ```
 
 ### optional_settings:

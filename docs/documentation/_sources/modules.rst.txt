@@ -1,7 +1,7 @@
-dostools
+dosertools
 ========
 
 .. toctree::
    :maxdepth: 4
 
-   dostools
+   dosertools

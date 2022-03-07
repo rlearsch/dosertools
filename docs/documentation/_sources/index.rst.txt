@@ -1,4 +1,4 @@
-Welcome to dostools's documentation!
+Welcome to dosertools's documentation!
 ====================================
 
 .. toctree::

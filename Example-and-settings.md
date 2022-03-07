@@ -1,5 +1,5 @@
 # First time setup
-dostools comes bundled with a pipfile which creates the python environment it needs to run. You will need to install
+dosertools comes bundled with a pipfile which creates the python environment it needs to run. You will need to install
 pipenv if your installation of python doesn't have it. You can do this by typing 
 ```bash
 pip install pipenv
@@ -8,7 +8,7 @@ in your terminal, followed by
 ```bash
 pipenv install
 ```
- in the terminal from your dostools directory.  
+ in the terminal from your dosertools directory.  
 
 # example_script.py
 Once this is set up, make your own copy of example_script.py and modify the values within. 
@@ -76,7 +76,7 @@ After you've modified the important variables, you can run the script. Do this b
 ```bash
 pipenv run python example_script.py 
 ```
-in the terminal from the dostools directory.
+in the terminal from the dosertools directory.
 # Optional settings
 ```python
 nozzle_row: int 

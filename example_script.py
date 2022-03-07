@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # containing the dostools package relative to this script if dostools was
     #downloaded from repository. Omit this line if dostools is installed.
 
-    import dostools.data_processing.integration as integration
+    import dosertools.data_processing.integration as integration
     import os
 
     ## User edittable settings ##

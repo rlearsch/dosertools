@@ -16,10 +16,10 @@
 if __name__ == '__main__':
     # Imports libraries
     import sys
-    # Adds dostools package location to the python path
+    # Adds dosertools package location to the python path
     sys.path.append('./src') # Replace './src' with the path to the folder
-    # containing the dostools package relative to this script if dostools was
-    #downloaded from repository. Omit this line if dostools is installed.
+    # containing the dosertools package relative to this script if dosertools was
+    #downloaded from repository. Omit this line if dosertools is installed.
 
     import dosertools.data_processing.integration as integration
     import os

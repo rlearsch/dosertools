@@ -49,15 +49,10 @@
   * Write up of under what circumstances msvc-runtime may need to be installed
 
 ## Documentation
-* Sphinx https://www.sphinx-doc.org/en/master/usage/quickstart.html
-  * Installation instructions
-  * Usage instructions
-    * Brainstorming use cases and writing instructions for each of those
-  * Function-level instructions can be automatically generated as part of documentation
-    * Descriptions and usage for each function in docstring
-    * Type hinting
-    * Examples where useful (i.e. select_video_folders)
-* License
+* Installation instructions
+* Usage instructions
+ * Brainstorming use cases and writing instructions for each of those
+
 
 ## Ideas to keep in mind
 * DRY : Don't Repeat Yourself

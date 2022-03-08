@@ -432,6 +432,11 @@ class TestGenerateDF:
                 else:
                     assert results[column][0] == datetime.today().strftime('%Y%m%d')
 
+    def test_error_if_no_csvs(self, tmp_path):
+        with pytest.raises(FileNotFoundError,match="No CSVs"):
+            dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)
+
+
 class TestTruncateData:
     """
     Tests truncate_data.

@@ -122,6 +122,9 @@ def generate_df(csv_location : typing.Union[str, bytes, os.PathLike], fname_form
 
     df_list = []
     csvs = get_csvs(csv_location)
+    if len(csvs) == 0:
+        raise FileNotFoundError("No CSVs found in csv_folder to process.")
+
     # Runs the processing for each csv in the folder.
     for csv in csvs:
         if verbose:

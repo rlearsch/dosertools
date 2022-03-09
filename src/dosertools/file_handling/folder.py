@@ -305,7 +305,7 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
 
         # Combines, sorts, then takes the 1st.
         bg_folders = bg_run_folders + bg_norun_folders
-        bg_folders = sorted(bg_folders)
+        bg_folders = list(dict.fromkeys(sorted(bg_folders)))
 
         if bg_folders == []:
             bg_folder = ''

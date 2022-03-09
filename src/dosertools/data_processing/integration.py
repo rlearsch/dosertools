@@ -502,6 +502,9 @@ def binaries_to_csvs(images_folder: typing.Union[str, bytes, os.PathLike],
 
     df_list = []
     csvs = dpcsv.get_csvs(csv_folder)
+    if len(csvs) == 0:
+        raise FileNotFoundError("No CSVs found in csv_folder to process (no binaries were processed.)")
+
     # Runs the processing for each csv in the folder.
     for csv in csvs:
         sample_df = dpcsv.csv_to_dataframe(csv,short_fname_format,sampleinfo_format,optional_settings)

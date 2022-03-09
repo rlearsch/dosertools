@@ -3,6 +3,7 @@ import os
 import typing
 
 import pandas as pd
+import numpy as np
 import holoviews as hv
 hv.extension('bokeh')
 

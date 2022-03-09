@@ -432,6 +432,11 @@ class TestGenerateDF:
                 else:
                     assert results[column][0] == datetime.today().strftime('%Y%m%d')
 
+    def test_error_if_no_csvs(self, tmp_path):
+        with pytest.raises(FileNotFoundError,match="No CSVs"):
+            dpcsv.generate_df(tmp_path,self.fname_format,self.sampleinfo_format)
+
+
 class TestTruncateData:
     """
     Tests truncate_data.
@@ -1147,10 +1152,19 @@ class TestBinariesToCSVs:
                                      optional_settings)
 
         out, err = capfd.readouterr()
-        print(out)
         assert "Processing 1 binary folder" in out
         assert "Finished processing binaries into csvs of D/D0 versus time." in out
 
+    def test_error_if_no_csvs(self,tmp_path,capfd,short_fname_format, sampleinfo_format):
+        csv_folder = tmp_path / "csv"
+        summary_folder = tmp_path / "summary"
+        binaries = tmp_path / "binary"
+        os.mkdir(csv_folder)
+        os.mkdir(summary_folder)
+        os.mkdir(binaries)
+
+        with pytest.raises(FileNotFoundError,match="No CSVs"):
+            integration.binaries_to_csvs(binaries, csv_folder, summary_folder, short_fname_format,sampleinfo_format)
 
 class TestVideosToCSVs:
     """

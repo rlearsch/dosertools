@@ -188,9 +188,7 @@ class TestRemoveBGDrop:
         Checks if remove_bg_drop returns the bg_median given with the
         background drop removed
     """
-
-    # TODO: docstring
-
+    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_returns_correct_shape_array(self,bg_median):
         # Fails if remove_bg_drop does not return an ndarray of the correct
         # shape
@@ -198,6 +196,7 @@ class TestRemoveBGDrop:
         assert type(bg_median_drop_removed) is np.ndarray
         assert bg_median_drop_removed.shape == bg_median.shape
 
+    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_returns_bg_with_drop_removed(self,bg_median,bg_drop_removed):
         # Fails if remove_bg_drop does not remove the bg_drop from the bottom
         # of the background

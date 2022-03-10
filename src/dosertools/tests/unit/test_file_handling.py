@@ -22,7 +22,7 @@ def example_name1_remove():
 def example_name2_remove():
     return "2021105_25k"
 
-
+@pytest.fixture
 def fnames(example_name1,example_name2):
     # Creates list of filenames.
     fnames = []

@@ -61,6 +61,22 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 -->
+## Testing
+dosertools comes with a collection of [tests](https://docs.pytest.org/en/7.0.x/) to help us write better code and 
+prevent unintented consequences when modifiying code. 
+
+If you are getting unexpected results, or you are modifying the code on your machine, you may want to 
+run tests to troubleshoot or verify you haven't unintentionally changed anything. 
+
+To do this, navigate to the src folder:
+```terminal
+..\dosertools> cd .\src\
+```
+and run pytest within the pipenv
+```terminal
+..\dosertools\src> pipenv run python -m pytest
+```
+
 ## License
 MIT License
 

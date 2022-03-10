@@ -185,11 +185,11 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
             # vtype.
             # First, create a format string without vtype for the case where
             # experimental videos lack an experimental tag.
-            exp_video_format = tags.remove_tag_from_fname(fname_format,fname_format,"vtype")
+            exp_video_format = tags.remove_tag_from_fname(fname_format,fname_format,"vtype",fname_split)
 
             # Then remove all "remove" tags from the fname
             if tags.check_fname_format_for_tag(exp_video_format,"remove",fname_split):
-                fname = tags.remove_tag_from_fname(folder,exp_video_format,"remove")
+                fname = tags.remove_tag_from_fname(folder,exp_video_format,"remove",fname_split)
             else:
                 # If no "remove" tags, then the folder name is the fname
                 fname = folder
@@ -203,12 +203,12 @@ def identify_experimental_video_folder(folder: str, fname_format: str, optional_
                 experiment_video = True
 
                 # Remove vtype from fname
-                new_fname = tags.remove_tag_from_fname(folder,fname_format,"vtype")
-                new_format = tags.remove_tag_from_fname(fname_format,fname_format,"vtype")
+                new_fname = tags.remove_tag_from_fname(folder,fname_format,"vtype",fname_split)
+                new_format = tags.remove_tag_from_fname(fname_format,fname_format,"vtype",fname_split)
 
                 # Remove all "remove" tags from the fname
                 if tags.check_fname_format_for_tag(new_format,"remove",fname_split):
-                    fname = tags.remove_tag_from_fname(new_fname,new_format,"remove")
+                    fname = tags.remove_tag_from_fname(new_fname,new_format,"remove",fname_split)
                 else:
                     # If no "remove" tags, then the folder name without the
                     # experiment tag is the fname
@@ -287,20 +287,23 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
         raise ValueError("fname_format must contain the tag 'vtype' (video type) to identify background vs. experimental videos.")
 
     # Starts by inserting background_tag in vtype location.
-    bg_fname = tags.insert_tag_in_fname(fname,fname_format,"vtype",background_tag)
-
+    if tags.check_fname_format_for_tag(fname_format,"remove",fname_split):
+        no_remove_format = tags.remove_tag_from_fname(fname_format,fname_format,"remove",fname_split)
+    else:
+        no_remove_format = fname_format
+    bg_fname = tags.insert_tag_in_fname(fname,no_remove_format,"vtype",background_tag,fname_split)
     # Then puts "*" where "remove" tags would exist.
-    bg_fname = tags.insert_tag_in_fname(bg_fname,fname_format,"remove","*")
+    bg_fname = tags.insert_tag_in_fname(bg_fname,fname_format,"remove","*",fname_split)
 
     if one_background:
         # If only one background, handles two cases: no run number or
         # still has a run number but we are using the first background for
         # every run.
 
-        bg_norun_fname = tags.remove_tag_from_fname(bg_fname,fname_format,"run")
+        bg_norun_fname = tags.remove_tag_from_fname(bg_fname,fname_format,"run",fname_split)
         bg_norun_folders = glob.glob(os.path.join(parent_folder,bg_norun_fname))
         # 2nd case, sub the run tag with *, then search.
-        bg_run_fname = tags.replace_tag_in_fname(bg_fname,fname_format,"run","*")
+        bg_run_fname = tags.replace_tag_in_fname(bg_fname,fname_format,"run","*",fname_split)
         bg_run_folders = glob.glob(os.path.join(parent_folder,bg_run_fname))
 
         # Combines, sorts, then takes the 1st.

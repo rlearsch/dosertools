@@ -15,6 +15,14 @@ def example_name2():
     return "2021105_4M-PEO-0p1_25k"
 
 @pytest.fixture
+def example_name1_remove():
+    return "2021103_25k"
+
+@pytest.fixture
+def example_name2_remove():
+    return "2021105_25k"
+
+@pytest.fixture
 def fnames(example_name1,example_name2):
     # Creates list of filenames.
     fnames = []
@@ -23,6 +31,19 @@ def fnames(example_name1,example_name2):
         fnames.append(fname)
     for i in range(1,6):
         fname = example_name2 + "_" + str(i)
+        fnames.append(fname)
+
+    return fnames
+
+@pytest.fixture
+def fnames_remove_tag(example_name1_remove,example_name2_remove):
+    # Creates list of filenames.
+    fnames = []
+    for i in range(1,6):
+        fname = example_name1_remove + "_" + str(i)
+        fnames.append(fname)
+    for i in range(1,6):
+        fname = example_name2_remove + "_" + str(i)
         fnames.append(fname)
 
     return fnames
@@ -1110,3 +1131,25 @@ class TestSelectVideoFolders:
         assert fnames == []
         assert exp_videos == []
         assert bg_videos == []
+
+    def test_internal_remove_tag(self,tmp_path,fnames_remove_tag,exp_tag_folders,bg_pair_folders):
+        # Fails if select_video_folders does not return paired background and
+        # experimental video folders when they are 1:1, with experiment tag.
+
+        fname_format = "date_remove_fps_run_vtype"
+
+        # Creates directories for experimental videos and backgrounds
+        for ef in exp_tag_folders:
+            os.mkdir(tmp_path / ef)
+        for bgf in bg_pair_folders:
+            os.mkdir(tmp_path / bgf)
+        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,fname_format)
+
+        # Checks that the folders found match the folders inputted.
+        for i in range(0,len(exp_tag_folders)):
+            ef = tmp_path / exp_tag_folders[i]
+            bg = tmp_path / bg_pair_folders[i]
+            assert str(ef) in exp_videos # experimental folder in output list
+            index = exp_videos.index(str(ef)) # find location of folder in list
+            assert str(bg) == bg_videos[index] # Check background folder paired
+            assert fnames_remove_tag[i] == fnames_out[index] # Check filename

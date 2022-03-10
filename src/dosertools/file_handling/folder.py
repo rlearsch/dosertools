@@ -287,7 +287,7 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
         raise ValueError("fname_format must contain the tag 'vtype' (video type) to identify background vs. experimental videos.")
 
     # Starts by inserting background_tag in vtype location.
-    if tags.check_fname_format_for_tag(exp_video_format,"remove",fname_split):
+    if tags.check_fname_format_for_tag(fname_format,"remove",fname_split):
         no_remove_format = tags.remove_tag_from_fname(fname_format,fname_format,"remove",fname_split)
     else:
         no_remove_format = fname_format

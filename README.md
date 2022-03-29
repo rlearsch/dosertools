@@ -13,18 +13,12 @@ rlearsch (at) caltech (dot) edu
 
 ## Installation
 
-dosertools comes bundled with a pipfile which creates the python environment it needs to run. 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pipenv. 
-You will need to install
-pipenv if your installation of python doesn't have it. You can do this by typing 
+dosertools is hosted as a package on [pypi](https://pypi.org/). You can use the package manager 
+[pip](https://pip.pypa.io/en/stable/) to install dosertools by typing
 ```bash
-pip install pipenv
-````
-in your terminal, followed by 
-```bash
-pipenv install
+pip install dosertools
 ```
- in the terminal from your dosertools directory. 
+in your terminal. 
 
 See the file named "example-and-settings.md" and "example_script.py" for more information 
 on how to use this package.
@@ -62,6 +56,19 @@ Please make sure to update tests as appropriate.
 
 -->
 ## Testing
+dosertools comes bundled with a pipfile which creates the python environment it needs to run. 
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pipenv. 
+You will need to install
+pipenv if your installation of python doesn't have it. You can do this by typing 
+```bash
+pip install pipenv
+````
+in your terminal, followed by 
+```bash
+pipenv install
+```
+ in the terminal from your dosertools directory. 
+
 dosertools comes with a collection of [tests](https://docs.pytest.org/en/7.0.x/) to help us write better code and 
 prevent unintented consequences when modifiying code. 
 

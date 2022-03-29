@@ -781,10 +781,12 @@ class TestIdentifyBackgroundVideoFolder:
         # and correct bg_folder for each fname in a generated
         # list where the folders have no timestamp and backgrounds are paired
         # 1:1 with experimental videos.
+        optional_settings={"one_background":False}
         for bgf in bg_pair_folders:
             os.mkdir(tmp_path / bgf)
         for i in range(0,len(fnames)):
-            matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format)
+            matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format,
+                                                                            optional_settings)
             assert bg_folder == bg_pair_folders[i]
             assert matched_bg
 
@@ -809,10 +811,13 @@ class TestIdentifyBackgroundVideoFolder:
         # and correct bg_folder for each fname in a generated
         # list where the folders have a timestamp and backgrounds are paired
         # 1:1 with experimental videos.
+        optional_settings={"one_background":False}
+
         for bgf in bg_pair_ts_folders:
             os.mkdir(tmp_path / bgf)
         for i in range(0,len(fnames)):
-            matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format_ts)
+            matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format_ts,
+                                                                            optional_settings)
             assert bg_folder == bg_pair_ts_folders[i]
             assert matched_bg
 
@@ -876,6 +881,8 @@ class TestIdentifyBackgroundVideoFolder:
         # list where the folders have no timestamp and there is supposed to be
         # one background for a group of ones and instead there are multiple
         # matching folders.
+        optional_settings = {"one_background":False}
+
         for bgf in bg_pair_ts_folders:
             destination = tmp_path / bgf
             if not os.path.isdir(destination):
@@ -886,15 +893,18 @@ class TestIdentifyBackgroundVideoFolder:
                 os.mkdir(destination)
         for i in range(0,len(fnames)):
             with pytest.warns(UserWarning, match="Multiple"):
-                matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format_ts)
+                matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,fnames[i],self.fname_format_ts,
+                                                                                optional_settings)
             assert bg_folder == bg_pair_ts_folders[i]
             assert matched_bg
 
     def test_returns_false_empty_if_no_folders(self,tmp_path):
         # Fails if identify_background_video_folder does not return False
         # and an empty string if there are no folders in the parent_folder.
+        optional_settings = {"one_background":False}
         nomatch_fname = "2021103_6M-PEO-0p01"
-        matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,nomatch_fname,self.fname_format)
+        matched_bg, bg_folder = folder.identify_background_video_folder(tmp_path,nomatch_fname,self.fname_format,
+                                                                        optional_settings)
         assert bg_folder == ''
         assert not matched_bg
 
@@ -969,13 +979,14 @@ class TestSelectVideoFolders:
     def test_pairs_matched_videos(self,tmp_path,fnames,exp_tag_folders,bg_pair_folders):
         # Fails if select_video_folders does not return paired background and
         # experimental video folders when they are 1:1, with experiment tag.
+        optional_settings = {"one_background":False}
 
         # Creates directories for experimental videos and backgrounds
         for ef in exp_tag_folders:
             os.mkdir(tmp_path / ef)
         for bgf in bg_pair_folders:
             os.mkdir(tmp_path / bgf)
-        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format)
+        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format,optional_settings)
 
         # Checks that the folders found match the folders inputted.
         for i in range(0,len(exp_tag_folders)):
@@ -991,11 +1002,12 @@ class TestSelectVideoFolders:
         # experimental video folders when they are 1:1, with no experiment tag.
 
         # Creates directories for experimental videos and backgrounds.
+
         for ef in exp_no_tag_folders:
             os.mkdir(tmp_path / ef)
         for bgf in bg_pair_folders:
             os.mkdir(tmp_path / bgf)
-        optional_settings = {"experiment_tag":''}
+        optional_settings = {"experiment_tag":'', "one_background":False}
         fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format,optional_settings)
 
         # Checks that the folders found match the folders inputted.
@@ -1037,11 +1049,13 @@ class TestSelectVideoFolders:
         # and timestamps.
 
         # Creates directories for experimental videos and backgrounds
+        optional_settings = {"one_background":False}
+
         for ef in exp_tag_ts_folders:
             os.mkdir(tmp_path / ef)
         for bgf in bg_pair_ts_folders:
             os.mkdir(tmp_path / bgf)
-        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts)
+        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts,optional_settings)
 
         # Checks that the folders found match the folders inputted.
         for i in range(0,len(exp_tag_ts_folders)):
@@ -1062,7 +1076,7 @@ class TestSelectVideoFolders:
             os.mkdir(tmp_path / ef)
         for bgf in bg_pair_ts_folders:
             os.mkdir(tmp_path / bgf)
-        optional_settings = {"experiment_tag":''}
+        optional_settings = {"experiment_tag":'', "one_background":False}
         fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,self.fname_format_ts,optional_settings)
 
         # Checks that the folders found match the folders inputted.
@@ -1137,13 +1151,14 @@ class TestSelectVideoFolders:
         # experimental video folders when they are 1:1, with experiment tag.
 
         fname_format = "date_remove_fps_run_vtype"
+        optional_settings = {"one_background":False}
 
         # Creates directories for experimental videos and backgrounds
         for ef in exp_tag_folders:
             os.mkdir(tmp_path / ef)
         for bgf in bg_pair_folders:
             os.mkdir(tmp_path / bgf)
-        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,fname_format)
+        fnames_out, exp_videos, bg_videos = folder.select_video_folders(tmp_path,fname_format,optional_settings)
 
         # Checks that the folders found match the folders inputted.
         for i in range(0,len(exp_tag_folders)):

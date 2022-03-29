@@ -63,7 +63,7 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is True.
+        Default is False.
     bg_drop_removal: bool
         True to remove the background drop from the background that is
         subtracted from the image before binarization. False to not alter
@@ -150,7 +150,7 @@ def set_defaults(optional_settings: dict = {}) -> dict:
     try:
         settings["one_background"] = optional_settings["one_background"]
     except KeyError:
-        settings["one_background"] = True
+        settings["one_background"] = False
     try:
         settings["bg_drop_removal"] = optional_settings["bg_drop_removal"]
     except KeyError:
@@ -247,7 +247,7 @@ def multiprocess_vid_to_bin(file_number: int, fnames: list, exp_videos: list, bg
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is True.
+        Default is False.
     save_crop: bool
         True to save intermediate cropped images (i.e. experimental video
         images cropped but not background-subtracted or binarized).
@@ -401,7 +401,7 @@ def videos_to_binaries(videos_folder: typing.Union[str, bytes, os.PathLike],
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is True.
+        Default is False.
     save_crop: bool
         True to save intermediate cropped images (i.e. experimental video
         images cropped but not background-subtracted or binarized).
@@ -563,7 +563,7 @@ def videos_to_csvs(videos_folder: typing.Union[str, bytes, os.PathLike],
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is True.
+        Default is False.
     save_crop: bool
         True to save intermediate cropped images (i.e. experimental video
         images cropped but not background-subtracted or binarized).

@@ -133,7 +133,7 @@ one_background: bool
 ```
  True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.\
-        Default is True.
+        Default is False.
     
 ```python
 save_crop: bool

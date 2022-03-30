@@ -256,7 +256,7 @@ def identify_background_video_folder(parent_folder: typing.Union[str, bytes, os.
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is False.
+        Default is True.
 
     Returns
     -------
@@ -371,7 +371,7 @@ def select_video_folders(parent_folder: typing.Union[str, bytes, os.PathLike], f
     one_background: bool
         True to use one background for a group of experiments only differing by
         run number. False to pair backgrounds and experiments 1:1.
-        Default is False.
+        Default is True.
 
     Returns
     -------

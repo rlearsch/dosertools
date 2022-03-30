@@ -47,7 +47,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">csv</span> <span class="k">as</span> <span class="n">dpcsv</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">figures</span> <span class="k">as</span> <span class="n">figures</span>
 
-<div class="viewcode-block" id="set_defaults"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.set_defaults">[docs]</a><span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="set_defaults"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.set_defaults">[docs]</a><span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets default values for unset kets in optional_settings.</span>
 
@@ -96,7 +96,7 @@
 <span class="sd">    one_background: bool</span>
 <span class="sd">        True to use one background for a group of experiments only differing by</span>
 <span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
-<span class="sd">        Default is False.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    bg_drop_removal: bool</span>
 <span class="sd">        True to remove the background drop from the background that is</span>
 <span class="sd">        subtracted from the image before binarization. False to not alter</span>
@@ -183,7 +183,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;one_background&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optional_settings</span><span class="p">[</span><span class="s2">&quot;one_background&quot;</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;one_background&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;one_background&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;bg_drop_removal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optional_settings</span><span class="p">[</span><span class="s2">&quot;bg_drop_removal&quot;</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -230,7 +230,7 @@
         <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;cpu_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">settings</span></div>
 
-<div class="viewcode-block" id="multiprocess_vid_to_bin"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.multiprocess_vid_to_bin">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_vid_to_bin</span><span class="p">(</span><span class="n">file_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fnames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">exp_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">bg_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+<div class="viewcode-block" id="multiprocess_vid_to_bin"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.multiprocess_vid_to_bin">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_vid_to_bin</span><span class="p">(</span><span class="n">file_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fnames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">exp_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">bg_videos</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                             <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="n">tic</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                             <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -280,7 +280,7 @@
 <span class="sd">    one_background: bool</span>
 <span class="sd">        True to use one background for a group of experiments only differing by</span>
 <span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
-<span class="sd">        Default is False.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    save_crop: bool</span>
 <span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
 <span class="sd">        images cropped but not background-subtracted or binarized).</span>
@@ -317,7 +317,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time elapsed (videos to binaries): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
     <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="multiprocess_binaries_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.multiprocess_binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_binaries_to_csvs</span><span class="p">(</span><span class="n">subfolder_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subfolders</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+<div class="viewcode-block" id="multiprocess_binaries_to_csvs"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.multiprocess_binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">multiprocess_binaries_to_csvs</span><span class="p">(</span><span class="n">subfolder_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subfolders</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                                   <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                                   <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                                   <span class="n">short_fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tic</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -385,7 +385,7 @@
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="videos_to_binaries"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.videos_to_binaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_binaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+<div class="viewcode-block" id="videos_to_binaries"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.videos_to_binaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_binaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                        <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                        <span class="n">fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -434,7 +434,7 @@
 <span class="sd">    one_background: bool</span>
 <span class="sd">        True to use one background for a group of experiments only differing by</span>
 <span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
-<span class="sd">        Default is False.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    save_crop: bool</span>
 <span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
 <span class="sd">        images cropped but not background-subtracted or binarized).</span>
@@ -473,7 +473,7 @@
 
     <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="binaries_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">binaries_to_csvs</span><span class="p">(</span><span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+<div class="viewcode-block" id="binaries_to_csvs"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.binaries_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">binaries_to_csvs</span><span class="p">(</span><span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                      <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                      <span class="n">summary_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                      <span class="n">short_fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampleinfo_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -535,6 +535,9 @@
 
     <span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">csvs</span> <span class="o">=</span> <span class="n">dpcsv</span><span class="o">.</span><span class="n">get_csvs</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">csvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;No CSVs found in csv_folder to process (no binaries were processed.)&quot;</span><span class="p">)</span>
+
     <span class="c1"># Runs the processing for each csv in the folder.</span>
     <span class="k">for</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="p">:</span>
         <span class="n">sample_df</span> <span class="o">=</span> <span class="n">dpcsv</span><span class="o">.</span><span class="n">csv_to_dataframe</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span><span class="n">short_fname_format</span><span class="p">,</span><span class="n">sampleinfo_format</span><span class="p">,</span><span class="n">optional_settings</span><span class="p">)</span>
@@ -546,7 +549,7 @@
     <span class="n">figures</span><span class="o">.</span><span class="n">save_figure</span><span class="p">(</span><span class="n">time_layout</span><span class="p">,</span><span class="s1">&#39;_raw&#39;</span><span class="p">,</span><span class="n">summary_folder</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">)</span>
     <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="videos_to_csvs"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.videos_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">videos_to_csvs</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+<div class="viewcode-block" id="videos_to_csvs"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.videos_to_csvs">[docs]</a><span class="k">def</span> <span class="nf">videos_to_csvs</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                    <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                    <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                    <span class="n">summary_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
@@ -593,7 +596,7 @@
 <span class="sd">    one_background: bool</span>
 <span class="sd">        True to use one background for a group of experiments only differing by</span>
 <span class="sd">        run number. False to pair backgrounds and experiments 1:1.</span>
-<span class="sd">        Default is False.</span>
+<span class="sd">        Default is True.</span>
 <span class="sd">    save_crop: bool</span>
 <span class="sd">        True to save intermediate cropped images (i.e. experimental video</span>
 <span class="sd">        images cropped but not background-subtracted or binarized).</span>
@@ -624,7 +627,7 @@
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="csvs_to_summaries"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.csvs_to_summaries">[docs]</a><span class="k">def</span> <span class="nf">csvs_to_summaries</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+<div class="viewcode-block" id="csvs_to_summaries"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.csvs_to_summaries">[docs]</a><span class="k">def</span> <span class="nf">csvs_to_summaries</span><span class="p">(</span><span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                       <span class="n">summary_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                       <span class="n">short_fname_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampleinfo_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optional_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -692,7 +695,7 @@
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="videos_to_summaries"><a class="viewcode-back" href="../../../dostools.data_processing.html#dosertools.data_processing.integration.videos_to_summaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_summaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+<div class="viewcode-block" id="videos_to_summaries"><a class="viewcode-back" href="../../../dosertools.data_processing.html#dosertools.data_processing.integration.videos_to_summaries">[docs]</a><span class="k">def</span> <span class="nf">videos_to_summaries</span><span class="p">(</span><span class="n">videos_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                         <span class="n">images_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                         <span class="n">csv_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
                         <span class="n">summary_folder</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>

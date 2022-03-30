@@ -1,15 +1,10 @@
 # First time setup
-dosertools comes bundled with a pipfile which creates the python environment it needs to run. You will need to install
-pipenv if your installation of python doesn't have it. You can do this by typing 
+dosertools is hosted as a package on [pypi](https://pypi.org/). You can use the package manager 
+[pip](https://pip.pypa.io/en/stable/) to install dosertools by typing
 ```bash
-pip install pipenv
-````
-in your terminal, followed by 
-```bash
-pipenv install
+pip install dosertools
 ```
- in the terminal from your dosertools directory.  
-
+in your terminal. 
 # example_script.py
 Once this is set up, make your own copy of example_script.py and modify the values within. 
 

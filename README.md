@@ -42,7 +42,9 @@ contains a drop from old videos). You can try to remove it algorithmcially by se
 If you have highly variable lighting or experimental conditions between samples, you
 may want to supply a background video paired to each experimental video. 
 
-Please reference the information in Examples-and-settings.md for more information. 
+Please reference the information in 
+[Examples-and-settings.md](https://github.com/rlearsch/dosertools/blob/main/Example-and-settings.md) 
+for more information. 
 
 dosertools is written for DoSER videos of viscoelastic fluids. It can perform background 
 subtraction and image processing on videos of any type. However, the data processing 

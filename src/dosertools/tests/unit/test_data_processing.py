@@ -968,9 +968,9 @@ class TestSetDefaults:
 
     def test_keeps_optional(self):
         # Fails if set_defaults overwrites the value in optional_settings.
-        optional_settings = {"one_background" : True}
+        optional_settings = {"one_background" : False}
         settings = integration.set_defaults(optional_settings)
-        assert settings["one_background"]
+        assert not settings["one_background"]
 
     def test_sets_default(self):
         # Fails if set_defaults does not set a default for a value not

@@ -23,10 +23,26 @@ in your terminal.
 See the file named "example-and-settings.md" and "example_script.py" for more information 
 on how to use this package.
 ## Usage
-dosertools is expecting experiments that contain a pair of videos - one "experimental" video that contains 
-the fluid transitioning from needle to substrate, and one "background" video that contains only the
+dosertools is expecting experiments and backgrounds as videos. The "experiment" video contains 
+the fluid transitioning from needle to substrate, and the "background" video that contains only the
 needle and the literal background of the camera's view. In our testing, we found a background video 
 of 100 frames gives plenty of data to overcome any noise that would be found in a single frame. 
+
+Here are examples of a background image with and without a drop: 
+
+<img src="https://user-images.githubusercontent.com/66884317/160924210-dcc02af0-61e7-4759-abdf-532405069a2e.png" width="200" height="400"> and <img src="https://user-images.githubusercontent.com/66884317/160924320-0e1f3157-0de3-40d1-a600-8dbfdccd271f.png" width="200" height="400">. 
+ 
+ Here is a single image from the corresponding experimental video: 
+ 
+ <img src="https://user-images.githubusercontent.com/66884317/160925518-2d72b26b-6d8b-4f0b-9f28-95eca0f20c43.png" width="200" height="400">
+
+Either type of background video is acceptable (it may be easier to harvest a background that 
+contains a drop from old videos). You can try to remove it algorithmcially by setting the 
+"bg_drop_removal" to True in optional_settings. Another key setting is "one_background".
+If you have highly variable lighting or experimental conditions between samples, you
+may want to supply a background video paired to each experimental video. 
+
+Please reference the information in Examples-and-settings.md for more information. 
 
 dosertools is written for DoSER videos of viscoelastic fluids. It can perform background 
 subtraction and image processing on videos of any type. However, the data processing 
@@ -48,13 +64,13 @@ foobar.pluralize('goose')
 # returns 'phenomenon'
 foobar.singularize('phenomena')
 ```
-
+-->
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
--->
+
 ## Testing
 dosertools comes bundled with a pipfile which creates the python environment it needs to run. 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pipenv. 

@@ -23,10 +23,40 @@ in your terminal.
 See the file named "example-and-settings.md" and "example_script.py" for more information 
 on how to use this package.
 ## Usage
-dosertools is expecting experiments and backgrounds as videos. The "experiment" video contains 
-the fluid transitioning from needle to substrate, and the "background" video that contains only the
+### Folder Structure  
+dosertools operates on an entire folder at once. Within that folder, there should be folders for each experimental video
+and background video you intend to process. *Those* folders should contain your video decomposed into a series of images
+(we prefer .tif but it should work with any image file format).\
+If we are operating on a folder named "PCOD_Samples_subset_multi" (the folder used in example_script.py),
+with 3 experiment videos and 1 background video, 
+the structure should look like this: 
+```commandline
+├── PCOD_Samples_subset_multi
+|   ├── experiment_1
+|   |   ├── frame001.tif
+|   |   ├── frame002.tif
+|   |   ├── ...
+|   |   ├── frame300.tif
+|   ├── experiment_2
+|   |   ├── frame001.tif
+|   |   ├── frame002.tif
+|   |   ├── ...
+|   |   ├── frame420.tif
+|   ├── experiment_3
+|   |   ├── frame001.tif
+|   |   ├── frame002.tif
+|   |   ├── ...
+|   |   ├── frame334.tif
+|   ├── background
+|   |   ├── frame001.tif
+|   |   ├── frame002.tif
+|   |   ├── ...
+|   |   ├── frame100.tif
+```
+### Types of videos
+The "experiment" video contains the actual experiment, where the fluid transitions from needle to substrate, and the "background" video that contains only the
 needle and the literal background of the camera's view. In our testing, we found a background video 
-of 100 frames gives plenty of data to overcome any noise that would be found in a single frame. 
+of 100 frames gives plenty of data to overcome any noise that would be found in a single frame.
 
 Here are examples of a background image with and without a drop: 
 
@@ -37,10 +67,12 @@ Here are examples of a background image with and without a drop:
  <img src="https://user-images.githubusercontent.com/66884317/160925518-2d72b26b-6d8b-4f0b-9f28-95eca0f20c43.png" width="200" height="400">
 
 Either type of background video is acceptable (it may be easier to harvest a background that 
-contains a drop from old videos). You can try to remove it algorithmcially by setting the 
-"bg_drop_removal" to True in optional_settings. Another key setting is "one_background".
+contains a drop from old videos). You can try to remove it algorithmically by setting the 
+`bg_drop_removal` to True in optional_settings. Another key setting is `one_background`.\
+Our method is to use a single background video for each sample because changing the needle/syringe can
+reposition the needle in the frame. This is reflected in `one_background` defaulting to `True`
 If you have highly variable lighting or experimental conditions between samples, you
-may want to supply a background video paired to each experimental video. 
+may want to supply a background video paired to each experimental video and set `one_background` to `False`
 
 Please reference the information in 
 [Examples-and-settings.md](https://github.com/rlearsch/dosertools/blob/main/Example-and-settings.md) 
@@ -52,21 +84,8 @@ subtraction and image processing on videos of any type. However, the data proces
 are only true for fluids that exhibit elastocapillary behavior. 
 
 dosertools calculates values with machine precision. It is up to the user to decide where to truncate the 
-data produced, based on the specifics of their own experimental setup. 
-<!--
-```python
-import foobar
+data produced, based on the specifics of their own experimental setup.
 
-# returns 'words'
-foobar.pluralize('word')
-
-# returns 'geese'
-foobar.pluralize('goose')
-
-# returns 'phenomenon'
-foobar.singularize('phenomena')
-```
--->
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
@@ -88,7 +107,7 @@ pipenv install
  in the terminal from your dosertools directory. 
 
 dosertools comes with a collection of [tests](https://docs.pytest.org/en/7.0.x/) to help us write better code and 
-prevent unintented consequences when modifiying code. 
+prevent unintended consequences when modifying code. 
 
 If you are getting unexpected results, or you are modifying the code on your machine, you may want to 
 run tests to troubleshoot or verify you haven't unintentionally changed anything. 
@@ -101,7 +120,11 @@ and run pytest within the pipenv
 ```terminal
 ..\dosertools\src> pipenv run python -m pytest
 ```
-
+## Changelog
+### 2022-06-13
+1. Fixed [issue #11](https://github.com/rlearsch/dosertools/issues/11), where a background image exactly 
+matching an experimental would cause an error and halt processing.
+2. Updated use and expectations in the readme file. 
 ## License
 MIT License
 

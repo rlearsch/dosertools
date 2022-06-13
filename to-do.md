@@ -2,7 +2,7 @@
 
 ## Next Steps
 * **Video selector**
-    * Let user specify what file type to look for (needs testing with non tiff files)
+    * Let user specify what file type to look for (needs testing with non tif files)
 * **Integrating into a single script**
     * Different start/end points (what additional start/end do we need?)
 * **Error Handling**
@@ -31,9 +31,6 @@
     * tests
     * docstrings
     * Check for remaining TODO items
-* Integration tests
-* check for file sorting issues when images exceed 999
-  * Write a test that checks this
 * **Tests**
   * Image format
   * Images in non-grayscale

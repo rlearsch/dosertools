@@ -359,6 +359,7 @@ def subtract_background_single_image(cropped_image: np.ndarray, bg_median: np.nd
     """
 
     background_subtracted_image_org = np.int32(cropped_image) - np.int32(bg_median)
+    background_subtracted_image=background_subtracted_image_org
     if np.any(background_subtracted_image_org < 0):
         #this means image is darker than background
         background_subtracted_image = np.abs((background_subtracted_image_org < 0)*background_subtracted_image_org)

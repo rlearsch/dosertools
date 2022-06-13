@@ -71,7 +71,7 @@ contains a drop from old videos). You can try to remove it algorithmically by se
 `bg_drop_removal` to True in optional_settings. Another key setting is `one_background`.\
 Our method is to use a single background video for each sample because changing the needle/syringe can
 reposition the needle in the frame. This is reflected in `one_background` defaulting to `True`
-If you have highly variable lighting or experimental conditions between samples, you
+If you have highly variable lighting or experimental conditions between experimental runs of the same sample, you
 may want to supply a background video paired to each experimental video and set `one_background` to `False`
 
 Please reference the information in 

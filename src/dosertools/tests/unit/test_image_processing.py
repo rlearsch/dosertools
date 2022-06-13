@@ -288,6 +288,12 @@ class TestBackgroundSubtraction:
         assert np.all(darker_image_subtract == 0)
         # assert np.all(darker_bg_subtract != 65535)
 
+    def test_identical_image(self):
+        test_bg_image = np.zeros([4,4])+100
+        identical_image_result = th.subtract_background_single_image(test_bg_image, test_bg_image)
+        assert identical_image_result == np.zeros([4,4])
+
+
     def test_mixed_background(self):
         test_mixed = [
             [1027., 994., 1036., 1020.],

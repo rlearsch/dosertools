@@ -131,7 +131,9 @@ def add_strain_rate(dataset : pd.DataFrame) -> pd.DataFrame:
     # Calculates the strain rate as -2*(d(D/D0)/dt)/(D/D0).
     dataset['strain rate (1/s)'] = -2*(np.gradient(dataset["D/D0"],dataset['time (s)']))/(dataset["D/D0"])
     # Replaces infinities with NaN.
-    dataset['strain rate (1/s)'].replace([np.inf,-np.inf], np.nan, inplace=True)
+    #dataset['strain rate (1/s)'].replace([np.inf,-np.inf], np.nan, inplace=True)
+    dataset.replace({'strain rate (1/s)':[np.inf,-np.inf]}, np.nan, inplace=True)
+
      # Drops NaNs from dataset.
     dataset = dataset.dropna()
     dataset = dataset.reset_index(drop=True)

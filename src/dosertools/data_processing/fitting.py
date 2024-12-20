@@ -216,7 +216,7 @@ def calculate_elongational_visc(df: pd.DataFrame, summary_df: pd.DataFrame, opti
     needle_diameter_mm = settings["needle_diameter_mm"]
 
     df_w_visc_list = []
-    mean_summary_df = summary_df.groupby("sample").mean()
+    mean_summary_df = summary_df.groupby("sample").mean(numeric_only=True)
     for sample in summary_df["sample"].unique():
         #subset_sample = summary_df[summary_df["sample"] == str(sample)]
         Dtc_D0_mean = mean_summary_df.loc[sample, "Dtc/D0"]
